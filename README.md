@@ -30,7 +30,7 @@ cp .env.example .env   # następnie ustaw własne hasła w .env
 docker compose up --build -d
 ```
 
-Bez pliku `.env` Docker Compose zatrzyma się z komunikatem, której zmiennej brakuje.
+Bez pliku `.env` zmienne `POSTGRES_*` i `PGADMIN_*` są puste (Docker Compose pokazuje tylko ostrzeżenia), więc baza i pgAdmin nie wystartują.
 
 ## Usługi
 
@@ -38,18 +38,18 @@ Bez pliku `.env` Docker Compose zatrzyma się z komunikatem, której zmiennej br
 |---|---|---|---|
 | `server` (Nginx) | http://localhost:8080 | `server:80` | Aplikacja |
 | `php` (PHP-FPM) | — | `php:9000` | Wykonuje kod PHP przekazany przez Nginx |
-| `db` (PostgreSQL) | `localhost:5433` | `db:5432` | Baza danych, dane w wolumenie `pg-data` |
+| `db` (PostgreSQL) | `localhost:5433` | `db:5432` | Baza danych |
 | `pgadmin-wdpai` | http://localhost:5050 | — | Przeglądanie bazy |
 | `mailpit` | http://localhost:8025 | SMTP: `mailpit:1025` | Skrzynka przechwytująca maile z aplikacji |
 | `ollama` | http://localhost:11434 | `ollama:11434` | API lokalnych modeli językowych |
 
-Porty po stronie komputera można zmienić w `.env` (`APP_PORT`, `POSTGRES_PORT`, `PGADMIN_PORT`, `MAILPIT_PORT`, `OLLAMA_PORT`).
+Porty po stronie komputera można zmienić w `.env` (`APP_PORT`, `POSTGRES_PORT`, `PGADMIN_PORT`, `MAILPIT_PORT`).
 
 **pgAdmin** — zaloguj się danymi `PGADMIN_DEFAULT_EMAIL` / `PGADMIN_DEFAULT_PASSWORD` z `.env`, a następnie dodaj serwer: host `db`, port `5432` (port wewnątrz sieci Dockera, nie 5433), baza, użytkownik i hasło z `POSTGRES_*`.
 
-**Skrypty startowe bazy** — pliki `*.sql` i `*.sh` z `docker/db/` są wykonywane tylko przy pierwszym uruchomieniu, gdy wolumen bazy jest pusty. Aby wykonać je ponownie, usuń dane: `docker compose down -v` (kasuje całą zawartość bazy).
+**Skrypty startowe bazy** — pliki `*.sql` i `*.sh` z `docker/db/` są wykonywane przy starcie kontenera z pustą bazą.
 
-**Ollama** — Docker Desktop na macOS nie udostępnia kontenerom GPU, więc modele działają na CPU. Na Linux/Windows z kartą NVIDIA można dodać `gpus: all` do usługi `ollama`. Jeśli lokalnie działa też aplikacja Ollama, zajmuje port 11434 — zmień `OLLAMA_PORT` albo ją wyłącz.
+**Ollama** — Docker Desktop na macOS nie udostępnia kontenerom GPU, więc modele działają na CPU. Na Linux/Windows z kartą NVIDIA można przywrócić `gpus: all` w usłudze `ollama`. Jeśli lokalnie działa też aplikacja Ollama, zajmuje port 11434 — wyłącz ją przed uruchomieniem kontenerów.
 
 Przydatne polecenia:
 
@@ -60,11 +60,27 @@ Przydatne polecenia:
 | `docker compose exec php php -v` | Wersja PHP w kontenerze |
 | `docker compose exec php php -m` | Lista modułów PHP |
 | `docker compose build --no-cache` | Przebudowa obrazów bez cache |
-| `docker compose down` | Zatrzymanie i usunięcie kontenerów oraz sieci (dane w wolumenach zostają) |
+| `docker compose down` | Zatrzymanie i usunięcie kontenerów oraz sieci (po ponownym `up` baza startuje pusta) |
 
 ## Konfiguracja PHP
 
-Obraz PHP zawiera moduły `pdo_pgsql`, `pgsql`, `gd` (z JPEG), `zip`, `bcmath`, `opcache` oraz Composer 2. Limity uploadu: `upload_max_filesize` i `post_max_size` = 512M, `max_file_uploads` = 20; Nginx ma ten sam limit (`client_max_body_size 512M`).
+Obraz PHP zawiera moduły `pdo_pgsql`, `pgsql`, `gd` (z JPEG), `zip`, `bcmath`, `opcache` oraz Composer 2. Limity uploadu w PHP: `upload_max_filesize` i `post_max_size` = 512M, `max_file_uploads` = 20 (plik `conf.d/mealplanner.ini`).
+
+## Różnice względem konfiguracji z laboratorium
+
+Pliki `docker-compose.yaml`, `docker/php/Dockerfile` i `docker/nginx/*` są zgodne z instrukcjami z laboratorium. Jedyna zmiana: z usługi `ollama` usunięto `gpus: all`, bo Docker Desktop na macOS zwraca błąd `could not select device driver "" with capabilities: [[gpu]]` i kontener nie startuje.
+
+`docker/db/Dockerfile` (`FROM postgres:17-alpine`) jest wymagany przez `docker-compose.yaml`, ale instrukcja nie podaje jego treści.
+
+## Znane ograniczenia
+
+Wynikają z konfiguracji z laboratorium, do rozwiązania w kolejnych etapach:
+
+| Ograniczenie | Skutek | Rozwiązanie |
+|---|---|---|
+| Wolumen `pg-data` jest zadeklarowany, ale nie jest podpięty do usługi `db` | Po `docker compose down` i `up` baza jest pusta | Dodać `- pg-data:/var/lib/postgresql/data` do `volumes` usługi `db` |
+| Nginx ma domyślny limit 1 MB na żądanie | Upload większego pliku kończy się błędem 413, mimo limitu 512M w PHP | Dodać `client_max_body_size 512M;` w `nginx.conf` |
+| Brak `.dockerignore` | `COPY . .` kopiuje `.env` i `.git` do obrazu PHP | Dodać `.dockerignore` przed publikacją obrazu (np. przy deployu) |
 
 ## Struktura projektu
 
