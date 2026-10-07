@@ -16,7 +16,6 @@ Projekt na przedmiot *Wstęp do Projektowania Aplikacji Internetowych* (Politech
 | Baza danych | PostgreSQL 17, pgAdmin 4 |
 | Serwer HTTP | Nginx |
 | Poczta (dev) | Mailpit |
-| AI | Ollama |
 | Konteneryzacja | Docker Compose |
 
 ## Szybki start
@@ -41,7 +40,6 @@ Bez pliku `.env` zmienne `POSTGRES_*` i `PGADMIN_*` są puste (Docker Compose po
 | `db` (PostgreSQL) | `localhost:5433` | `db:5432` | Baza danych |
 | `pgadmin-wdpai` | http://localhost:5050 | – | Przeglądanie bazy |
 | `mailpit` | http://localhost:8025 | SMTP: `mailpit:1025` | Skrzynka przechwytująca maile z aplikacji |
-| `ollama` | http://localhost:11434 | `ollama:11434` | API lokalnych modeli językowych |
 
 Porty po stronie komputera można zmienić w `.env` (`APP_PORT`, `POSTGRES_PORT`, `PGADMIN_PORT`, `MAILPIT_PORT`).
 
@@ -49,7 +47,7 @@ Porty po stronie komputera można zmienić w `.env` (`APP_PORT`, `POSTGRES_PORT`
 
 **Skrypty startowe bazy** – pliki `*.sql` i `*.sh` z `docker/db/` są wykonywane przy starcie kontenera z pustą bazą.
 
-**Ollama** – Docker Desktop na macOS nie udostępnia kontenerom GPU, więc modele działają na CPU. Na Linux/Windows z kartą NVIDIA można przywrócić `gpus: all` w usłudze `ollama`. Jeśli lokalnie działa też aplikacja Ollama, zajmuje port 11434 – wyłącz ją przed uruchomieniem kontenerów.
+**Ollama** – usługa jest zakomentowana w `docker-compose.yaml` (patrz „Różnice względem konfiguracji z laboratorium”). Aby ją włączyć, usuń znaki `#` z bloku `ollama` i z wolumenu `ollama_data`, a następnie uruchom `docker compose up -d`. API będzie dostępne pod http://localhost:11434. Docker Desktop na macOS nie udostępnia kontenerom GPU, więc modele działają na CPU; na Linux/Windows z kartą NVIDIA można dodać `gpus: all`.
 
 Przydatne polecenia:
 
@@ -68,7 +66,10 @@ Obraz PHP zawiera moduły `pdo_pgsql`, `pgsql`, `gd` (z JPEG), `zip`, `bcmath`, 
 
 ## Różnice względem konfiguracji z laboratorium
 
-Pliki `docker-compose.yaml`, `docker/php/Dockerfile` i `docker/nginx/*` są zgodne z instrukcjami z laboratorium. Jedyna zmiana: z usługi `ollama` usunięto `gpus: all`, bo Docker Desktop na macOS zwraca błąd `could not select device driver "" with capabilities: [[gpu]]` i kontener nie startuje.
+Pliki `docker-compose.yaml`, `docker/php/Dockerfile` i `docker/nginx/*` są zgodne z instrukcjami z laboratorium, z dwoma wyjątkami:
+
+- z usługi `ollama` usunięto `gpus: all`, bo Docker Desktop na macOS zwraca błąd `could not select device driver "" with capabilities: [[gpu]]` i kontener nie startuje;
+- usługa `ollama` i wolumen `ollama_data` są zakomentowane – uruchamianie modeli językowych w kontenerze (na CPU) wymaga kilku GB pamięci RAM, a Docker ma na tym komputerze do dyspozycji 7,7 GB. Usługa została dodana i uruchomiona zgodnie z zadaniem, a następnie wyłączona.
 
 `docker/db/Dockerfile` (`FROM postgres:17-alpine`) jest wymagany przez `docker-compose.yaml`, ale instrukcja nie podaje jego treści.
 
