@@ -37,6 +37,13 @@ services:
     networks:
       - pg-network
 
+  mailpit:
+    image: axllent/mailpit:latest
+    ports:
+      - "${MAILPIT_PORT:-8025}:8025"
+    networks:
+      - pg-network
+
 networks:
   pg-network:
 
