@@ -37,6 +37,17 @@ services:
     networks:
       - pg-network
 
+  ollama:
+    image: ollama/ollama:latest
+    # Docker Desktop na macOS nie udostępnia GPU kontenerom, więc model działa na CPU.
+    # Na Linux/Windows z kartą NVIDIA można dodać: gpus: all
+    ports:
+      - "${OLLAMA_PORT:-11434}:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    networks:
+      - pg-network
+
   mailpit:
     image: axllent/mailpit:latest
     ports:
@@ -65,3 +76,4 @@ networks:
 volumes:
   pg-data:
   pgadmin-data:
+  ollama_data:
