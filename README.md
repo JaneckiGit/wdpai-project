@@ -1,6 +1,6 @@
 # WDPAI Project
 
-Projekt na przedmiot *Wstęp do Projektowania Aplikacji Internetowych* (Politechnika Krakowska). Temat aplikacji — do ustalenia: jaki problem rozwiązujemy, dla kogo i w jaki sposób.
+Projekt na przedmiot *Wstęp do Projektowania Aplikacji Internetowych* (Politechnika Krakowska). Temat aplikacji – do ustalenia: jaki problem rozwiązujemy, dla kogo i w jaki sposób.
 
 ## Funkcje
 
@@ -37,19 +37,19 @@ Bez pliku `.env` zmienne `POSTGRES_*` i `PGADMIN_*` są puste (Docker Compose po
 | Usługa | Adres na komputerze | Adres w sieci Dockera | Opis |
 |---|---|---|---|
 | `server` (Nginx) | http://localhost:8080 | `server:80` | Aplikacja |
-| `php` (PHP-FPM) | — | `php:9000` | Wykonuje kod PHP przekazany przez Nginx |
+| `php` (PHP-FPM) | – | `php:9000` | Wykonuje kod PHP przekazany przez Nginx |
 | `db` (PostgreSQL) | `localhost:5433` | `db:5432` | Baza danych |
-| `pgadmin-wdpai` | http://localhost:5050 | — | Przeglądanie bazy |
+| `pgadmin-wdpai` | http://localhost:5050 | – | Przeglądanie bazy |
 | `mailpit` | http://localhost:8025 | SMTP: `mailpit:1025` | Skrzynka przechwytująca maile z aplikacji |
 | `ollama` | http://localhost:11434 | `ollama:11434` | API lokalnych modeli językowych |
 
 Porty po stronie komputera można zmienić w `.env` (`APP_PORT`, `POSTGRES_PORT`, `PGADMIN_PORT`, `MAILPIT_PORT`).
 
-**pgAdmin** — zaloguj się danymi `PGADMIN_DEFAULT_EMAIL` / `PGADMIN_DEFAULT_PASSWORD` z `.env`, a następnie dodaj serwer: host `db`, port `5432` (port wewnątrz sieci Dockera, nie 5433), baza, użytkownik i hasło z `POSTGRES_*`.
+**pgAdmin** – zaloguj się danymi `PGADMIN_DEFAULT_EMAIL` / `PGADMIN_DEFAULT_PASSWORD` z `.env`, a następnie dodaj serwer: host `db`, port `5432` (port wewnątrz sieci Dockera, nie 5433), baza, użytkownik i hasło z `POSTGRES_*`.
 
-**Skrypty startowe bazy** — pliki `*.sql` i `*.sh` z `docker/db/` są wykonywane przy starcie kontenera z pustą bazą.
+**Skrypty startowe bazy** – pliki `*.sql` i `*.sh` z `docker/db/` są wykonywane przy starcie kontenera z pustą bazą.
 
-**Ollama** — Docker Desktop na macOS nie udostępnia kontenerom GPU, więc modele działają na CPU. Na Linux/Windows z kartą NVIDIA można przywrócić `gpus: all` w usłudze `ollama`. Jeśli lokalnie działa też aplikacja Ollama, zajmuje port 11434 — wyłącz ją przed uruchomieniem kontenerów.
+**Ollama** – Docker Desktop na macOS nie udostępnia kontenerom GPU, więc modele działają na CPU. Na Linux/Windows z kartą NVIDIA można przywrócić `gpus: all` w usłudze `ollama`. Jeśli lokalnie działa też aplikacja Ollama, zajmuje port 11434 – wyłącz ją przed uruchomieniem kontenerów.
 
 Przydatne polecenia:
 
@@ -103,8 +103,8 @@ Przepływ żądania: przeglądarka → `localhost:8080` → kontener `server` (N
 - Branch dla każdej funkcji (`feature/...`, `fix/...`, `docs/...`).
 - Małe, logiczne commity w konwencji `feat:`, `fix:`, `docs:`, `refactor:`, `test:`, `chore:`.
 - Zmiany trafiają do `main` przez Pull Request z opcją *Create a merge commit* (bez squashowania).
-- Sekrety wyłącznie w `.env` — nigdy w repozytorium.
+- Sekrety wyłącznie w `.env` – nigdy w repozytorium.
 
 ## Autorzy
 
-- Mateusz Janecki — całość projektu
+- Mateusz Janecki – całość projektu
