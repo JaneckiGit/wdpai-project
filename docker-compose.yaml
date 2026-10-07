@@ -4,13 +4,13 @@ services:
       context: .
       dockerfile: docker/nginx/Dockerfile
     ports:
-      - "8080:80"
+      - "${APP_PORT:-8080}:80"
     volumes:
       - .:/app
     depends_on:
       - php
     networks:
-      - app-network
+      - pg-network
 
   php:
     build:
@@ -19,7 +19,61 @@ services:
     volumes:
       - .:/app
     networks:
-      - app-network
+      - pg-network
+
+  db:
+    build:
+      context: .
+      dockerfile: docker/db/Dockerfile
+    ports:
+      - "${POSTGRES_PORT:-5433}:5432"
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:?Set POSTGRES_DB in .env}
+      POSTGRES_USER: ${POSTGRES_USER:?Set POSTGRES_USER in .env}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+    volumes:
+      - pg-data:/var/lib/postgresql/data
+      - ./docker/db:/docker-entrypoint-initdb.d
+    networks:
+      - pg-network
+
+  ollama:
+    image: ollama/ollama:latest
+    # Docker Desktop na macOS nie udostępnia GPU kontenerom, więc model działa na CPU.
+    # Na Linux/Windows z kartą NVIDIA można dodać: gpus: all
+    ports:
+      - "${OLLAMA_PORT:-11434}:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    networks:
+      - pg-network
+
+  mailpit:
+    image: axllent/mailpit:latest
+    ports:
+      - "${MAILPIT_PORT:-8025}:8025"
+    networks:
+      - pg-network
+
+  pgadmin-wdpai:
+    image: dpage/pgadmin4:latest
+    container_name: ${PGADMIN_CONTAINER_NAME:-pg-admin}
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:?Set PGADMIN_DEFAULT_EMAIL in .env}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:?Set PGADMIN_DEFAULT_PASSWORD in .env}
+    ports:
+      - "${PGADMIN_PORT:-5050}:80"
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin
+    depends_on:
+      - db
+    networks:
+      - pg-network
 
 networks:
-  app-network:
+  pg-network:
+
+volumes:
+  pg-data:
+  pgadmin-data:
+  ollama_data:
