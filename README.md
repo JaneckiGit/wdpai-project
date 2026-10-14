@@ -29,7 +29,10 @@ git clone https://github.com/JaneckiGit/wdpai-project.git
 cd wdpai-project
 cp .env.example .env   # następnie ustaw własne hasła w .env
 docker compose up --build -d
+docker compose exec php composer dump-autoload   # generuje vendor/autoload.php
 ```
+
+Katalog `vendor/` nie jest w repozytorium, więc bez `composer dump-autoload` aplikacja kończy się błędem `Fatal error` (brak `vendor/autoload.php`).
 
 Bez pliku `.env` zmienne `POSTGRES_*` i `PGADMIN_*` są puste (Docker Compose pokazuje tylko ostrzeżenia), więc baza i pgAdmin nie wystartują.
 
@@ -59,6 +62,7 @@ Przydatne polecenia:
 | `docker compose logs -f` | Logi wszystkich kontenerów na żywo |
 | `docker compose exec php php -v` | Wersja PHP w kontenerze |
 | `docker compose exec php php -m` | Lista modułów PHP |
+| `docker compose exec php composer dump-autoload` | Generuje autoloader Composera – po sklonowaniu repo i po zmianie sekcji `autoload` w `composer.json` |
 | `docker compose build --no-cache` | Przebudowa obrazów bez cache |
 | `docker compose down` | Zatrzymanie i usunięcie kontenerów oraz sieci (po ponownym `up` baza startuje pusta) |
 
@@ -74,13 +78,23 @@ Przepływ żądania:
 4. Kontroler wywołuje odziedziczoną z `AppController` metodę `render()`, która udostępnia dane widokowi jako zmienne (`extract()`) i dołącza szablon z `public/views/`.
 5. Gdy żadna trasa nie pasuje, `index.php` ustawia status 404 i wyświetla widok `not-found`.
 
+Klasy nie są ładowane ręcznie przez `require_once`. `index.php` wczytuje tylko `vendor/autoload.php`, a autoloader Composera odnajduje plik klasy przy jej pierwszym użyciu, według reguł PSR-4 z `composer.json`:
+
+| Namespace | Katalog | Przykład |
+|---|---|---|
+| `App\Controller\` | `src/controllers/` | `App\Controller\ProjectController` → `src/controllers/ProjectController.php` |
+| `App\` | `src/` | `App\Routing` → `src/Routing.php` |
+
+Bardziej szczegółowa reguła (`App\Controller\`) ma pierwszeństwo. Nowa klasa jest odnajdywana bez zmian w `index.php`, jeśli jej namespace i nazwa pliku odpowiadają tym regułom.
+
 | Element | Plik | Odpowiedzialność |
 |---|---|---|
 | Front Controller | `public/index.php` | Rejestracja tras, uruchomienie routera, obsługa 404 |
-| Router | `Routing.php` | Dopasowanie metody i adresu do kontrolera i akcji |
+| Router | `src/Routing.php` | Dopasowanie metody i adresu do kontrolera i akcji |
 | Kontroler bazowy | `src/controllers/AppController.php` | Wspólne renderowanie widoków |
 | Kontrolery | `src/controllers/*Controller.php` | Wybór widoku i danych dla danej trasy |
 | Widoki | `public/views/*.html.php` | Semantyczny HTML z danymi od kontrolera |
+| Autoloader | `composer.json`, `vendor/autoload.php` | Wczytywanie plików klas na podstawie namespace |
 
 ## Routing
 
@@ -110,7 +124,7 @@ Pliki `docker-compose.yaml`, `docker/php/Dockerfile` i `docker/nginx/*` są zgod
 
 `docker/db/Dockerfile` (`FROM postgres:17-alpine`) jest wymagany przez `docker-compose.yaml`, ale instrukcja nie podaje jego treści.
 
-Szkielet MVC (`Routing.php`, `src/controllers/`, `public/views/`, `public/index.php`) jest zgodny 1:1 z instrukcją z Laboratorium 2.
+Szkielet MVC (`src/Routing.php`, `src/controllers/`, `public/views/`, `public/index.php`) i `composer.json` są zgodne 1:1 z instrukcjami z Laboratorium 2. Composer jest w obrazie PHP od Laboratorium 1, a `.gitignore` już zawierał wpis `vendor/`, który obejmuje `/vendor/` z instrukcji.
 
 ## Znane ograniczenia
 
@@ -121,6 +135,7 @@ Wynikają z konfiguracji z laboratorium, do rozwiązania w kolejnych etapach:
 | Wolumen `pg-data` jest zadeklarowany, ale nie jest podpięty do usługi `db` | Po `docker compose down` i `up` baza jest pusta | Dodać `- pg-data:/var/lib/postgresql/data` do `volumes` usługi `db` |
 | Nginx ma domyślny limit 1 MB na żądanie | Upload większego pliku kończy się błędem 413, mimo limitu 512M w PHP | Dodać `client_max_body_size 512M;` w `nginx.conf` |
 | Brak `.dockerignore` | `COPY . .` kopiuje `.env` i `.git` do obrazu PHP | Dodać `.dockerignore` przed publikacją obrazu (np. przy deployu) |
+| Katalog `vendor/` nie jest w repozytorium i nie jest generowany przy starcie kontenera | Po sklonowaniu repo i `docker compose up` aplikacja zwraca `Fatal error`, dopóki nie uruchomi się `composer dump-autoload` | Uruchamiać `composer dump-autoload` przy starcie kontenera `php` (np. w `command` w `docker-compose.yaml`) |
 | Widoki leżą w katalogu publicznym `public/views/` | Szablon można otworzyć bezpośrednio, np. `/views/project.html.php` – PHP wyświetla wtedy ostrzeżenia o brakujących zmiennych razem ze ścieżką pliku | Przenieść widoki poza `public/` (np. do `src/views/`) albo zablokować `/views/` w `nginx.conf` |
 
 ## Struktura projektu
@@ -129,7 +144,7 @@ Wynikają z konfiguracji z laboratorium, do rozwiązania w kolejnych etapach:
 .
 ├── docker-compose.yaml   # definicja usług
 ├── .env.example          # wzór zmiennych środowiskowych
-├── Routing.php           # router: trasy i dopasowanie adresów
+├── composer.json         # reguły autoloadingu PSR-4
 ├── docker/
 │   ├── db/               # obraz PostgreSQL i skrypty startowe bazy
 │   ├── nginx/            # obraz i konfiguracja Nginx
@@ -137,8 +152,10 @@ Wynikają z konfiguracji z laboratorium, do rozwiązania w kolejnych etapach:
 ├── public/               # katalog publiczny (document root Nginx)
 │   ├── index.php         # Front Controller – jedyny punkt wejścia
 │   └── views/            # szablony HTML (*.html.php)
-└── src/
-    └── controllers/      # AppController i kontrolery aplikacji
+├── src/
+│   ├── Routing.php       # router: trasy i dopasowanie adresów (App\Routing)
+│   └── controllers/      # AppController i kontrolery aplikacji (App\Controller)
+└── vendor/               # autoloader Composera (generowany, poza repozytorium)
 ```
 
 Przepływ żądania: przeglądarka → `localhost:8080` → kontener `server` (Nginx, port 80) → `public/index.php` przekazany przez FastCGI do `php:9000` (PHP-FPM) → router → kontroler → widok → wygenerowany HTML wraca przez Nginx do przeglądarki.
