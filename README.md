@@ -6,7 +6,9 @@ Projekt na przedmiot *Wstęp do Projektowania Aplikacji Internetowych* (Politech
 
 | Obszar | Co robi |
 |---|---|
-| Strona startowa | Wyświetla powitanie wygenerowane przez PHP |
+| Strona główna | Widok startowy z linkiem do listy projektów |
+| Projekty | Lista projektów i widok szczegółów projektu o podanym id (na razie bez bazy danych) |
+| Obsługa błędów | Nieznany adres zwraca widok 404 i status HTTP 404 |
 
 ## Tech stack
 
@@ -60,6 +62,41 @@ Przydatne polecenia:
 | `docker compose build --no-cache` | Przebudowa obrazów bez cache |
 | `docker compose down` | Zatrzymanie i usunięcie kontenerów oraz sieci (po ponownym `up` baza startuje pusta) |
 
+## Architektura (MVC)
+
+Aplikacja ma jeden punkt wejścia – `public/index.php` (Front Controller). Nginx przekazuje do niego każdy adres, który nie jest istniejącym plikiem (`try_files $uri $uri/ /index.php?$query_string`).
+
+Przepływ żądania:
+
+1. `public/index.php` rejestruje trasy w obiekcie `Routing` i przekazuje mu metodę HTTP oraz adres żądania.
+2. `Routing::dispatch()` porównuje adres z listą tras (białą listą). Ścieżka trasy jest zamieniana na wyrażenie regularne, np. `/projects/{id}` → `~^/projects/(?P<id>\d+)$~`, więc `{id}` przyjmuje tylko cyfry.
+3. Dla pierwszej pasującej trasy router tworzy obiekt kontrolera i wywołuje jego akcję, przekazując parametry z adresu (`/projects/12` → `ProjectController::show(12)`).
+4. Kontroler wywołuje odziedziczoną z `AppController` metodę `render()`, która udostępnia dane widokowi jako zmienne (`extract()`) i dołącza szablon z `public/views/`.
+5. Gdy żadna trasa nie pasuje, `index.php` ustawia status 404 i wyświetla widok `not-found`.
+
+| Element | Plik | Odpowiedzialność |
+|---|---|---|
+| Front Controller | `public/index.php` | Rejestracja tras, uruchomienie routera, obsługa 404 |
+| Router | `Routing.php` | Dopasowanie metody i adresu do kontrolera i akcji |
+| Kontroler bazowy | `src/controllers/AppController.php` | Wspólne renderowanie widoków |
+| Kontrolery | `src/controllers/*Controller.php` | Wybór widoku i danych dla danej trasy |
+| Widoki | `public/views/*.html.php` | Semantyczny HTML z danymi od kontrolera |
+
+## Routing
+
+| Metoda | Adres | Kontroler i akcja | Widok |
+|---|---|---|---|
+| GET | `/` | `DefaultController::index` | `home` |
+| GET | `/projects` | `ProjectController::index` | `projects` |
+| GET | `/projects/{id}` (`id` – tylko cyfry) | `ProjectController::show` | `project` |
+| – | każdy inny adres lub metoda | `DefaultController::notFound` (status 404) | `not-found` |
+
+Sprawdzenie z terminala:
+
+```bash
+curl -i http://localhost:8080/projects/abc
+```
+
 ## Konfiguracja PHP
 
 Obraz PHP zawiera moduły `pdo_pgsql`, `pgsql`, `gd` (z JPEG), `zip`, `bcmath`, `opcache` oraz Composer 2. Limity uploadu w PHP: `upload_max_filesize` i `post_max_size` = 512M, `max_file_uploads` = 20 (plik `conf.d/mealplanner.ini`).
@@ -73,6 +110,8 @@ Pliki `docker-compose.yaml`, `docker/php/Dockerfile` i `docker/nginx/*` są zgod
 
 `docker/db/Dockerfile` (`FROM postgres:17-alpine`) jest wymagany przez `docker-compose.yaml`, ale instrukcja nie podaje jego treści.
 
+Szkielet MVC (`Routing.php`, `src/controllers/`, `public/views/`, `public/index.php`) jest zgodny 1:1 z instrukcją z Laboratorium 2.
+
 ## Znane ograniczenia
 
 Wynikają z konfiguracji z laboratorium, do rozwiązania w kolejnych etapach:
@@ -82,6 +121,7 @@ Wynikają z konfiguracji z laboratorium, do rozwiązania w kolejnych etapach:
 | Wolumen `pg-data` jest zadeklarowany, ale nie jest podpięty do usługi `db` | Po `docker compose down` i `up` baza jest pusta | Dodać `- pg-data:/var/lib/postgresql/data` do `volumes` usługi `db` |
 | Nginx ma domyślny limit 1 MB na żądanie | Upload większego pliku kończy się błędem 413, mimo limitu 512M w PHP | Dodać `client_max_body_size 512M;` w `nginx.conf` |
 | Brak `.dockerignore` | `COPY . .` kopiuje `.env` i `.git` do obrazu PHP | Dodać `.dockerignore` przed publikacją obrazu (np. przy deployu) |
+| Widoki leżą w katalogu publicznym `public/views/` | Szablon można otworzyć bezpośrednio, np. `/views/project.html.php` – PHP wyświetla wtedy ostrzeżenia o brakujących zmiennych razem ze ścieżką pliku | Przenieść widoki poza `public/` (np. do `src/views/`) albo zablokować `/views/` w `nginx.conf` |
 
 ## Struktura projektu
 
@@ -89,15 +129,19 @@ Wynikają z konfiguracji z laboratorium, do rozwiązania w kolejnych etapach:
 .
 ├── docker-compose.yaml   # definicja usług
 ├── .env.example          # wzór zmiennych środowiskowych
+├── Routing.php           # router: trasy i dopasowanie adresów
 ├── docker/
 │   ├── db/               # obraz PostgreSQL i skrypty startowe bazy
 │   ├── nginx/            # obraz i konfiguracja Nginx
 │   └── php/              # obraz PHP-FPM z rozszerzeniami
-└── public/               # katalog publiczny (document root Nginx)
-    └── index.php
+├── public/               # katalog publiczny (document root Nginx)
+│   ├── index.php         # Front Controller – jedyny punkt wejścia
+│   └── views/            # szablony HTML (*.html.php)
+└── src/
+    └── controllers/      # AppController i kontrolery aplikacji
 ```
 
-Przepływ żądania: przeglądarka → `localhost:8080` → kontener `server` (Nginx, port 80) → pliki `.php` przekazywane przez FastCGI do `php:9000` (PHP-FPM) → wygenerowany HTML wraca przez Nginx do przeglądarki.
+Przepływ żądania: przeglądarka → `localhost:8080` → kontener `server` (Nginx, port 80) → `public/index.php` przekazany przez FastCGI do `php:9000` (PHP-FPM) → router → kontroler → widok → wygenerowany HTML wraca przez Nginx do przeglądarki.
 
 ## Zasady developmentu
 
