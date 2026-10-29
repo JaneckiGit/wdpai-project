@@ -1,0 +1,340 @@
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+:root {
+    --color-brand: #b4532a;
+    --color-brand-hover: #8f4122;
+    --color-on-brand: #ffffff;
+    --color-link: #8f4122;
+    --color-link-hover: #6e3018;
+    --color-text: #1c1917;
+    --color-muted: #57534e;
+    --color-surface: #ffffff;
+    --color-surface-muted: #fbf8f4;
+    --color-surface-selected: #fcf3ee;
+    --color-chip: #ece6df;
+    --color-border: #ddd5cc;
+    --color-border-strong: #8a837c;
+    --color-background: #f4efe9;
+    --color-dark: #1c1917;
+    --color-on-dark: #ffffff;
+    --color-on-dark-muted: #e7e1d9;
+    --font-body: Inter, system-ui, sans-serif;
+    --font-heading: Newsreader, Georgia, serif;
+    --space-1: 0.5rem;
+    --space-2: 1rem;
+    --space-3: 1.5rem;
+    --space-4: 2rem;
+    --space-5: 3.5rem;
+    --radius-sm: 0.75rem;
+    --radius: 1rem;
+    --radius-pill: 999px;
+    --shadow-selected: 0 6px 18px rgb(180 83 42 / 12%);
+}
+
+body {
+    margin: 0;
+    color: var(--color-text);
+    background: var(--color-background);
+    font-family: var(--font-body);
+    line-height: 1.6;
+}
+
+h1,
+h2,
+h3 {
+    margin: 0;
+    font-family: var(--font-heading);
+    font-weight: 500;
+    line-height: 1.05;
+    letter-spacing: -0.015em;
+}
+
+h1 {
+    font-size: clamp(2rem, 4vw, 3.125rem);
+}
+
+a {
+    color: var(--color-link);
+    text-decoration-thickness: 0.12em;
+    text-underline-offset: 0.2em;
+}
+
+a:hover {
+    color: var(--color-link-hover);
+}
+
+button,
+input,
+select,
+textarea {
+    font: inherit;
+    color: inherit;
+}
+
+/* Pełny kolor marki zamiast color-mix z bielą: jaśniejszy obrys miał kontrast tylko 1,7:1 z kremowym tłem. */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible {
+    outline: 3px solid var(--color-brand);
+    outline-offset: 3px;
+}
+
+.brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.625rem;
+    color: inherit;
+    font-family: var(--font-heading);
+    font-size: 1.375rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    text-decoration: none;
+}
+
+.brand:hover {
+    color: inherit;
+}
+
+.brand__mark {
+    width: 1.75rem;
+    height: 1.75rem;
+}
+
+.brand__mark circle {
+    fill: var(--color-brand);
+}
+
+.brand__mark path {
+    fill: none;
+    stroke: var(--color-surface-muted);
+    stroke-width: 2.6;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.icon {
+    flex: none;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 3.375rem;
+    padding: 0 var(--space-3);
+    border: 0;
+    border-radius: var(--radius-sm);
+    background: var(--color-brand);
+    color: var(--color-on-brand);
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.button:hover {
+    background: var(--color-brand-hover);
+}
+
+.field {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+}
+
+.field label {
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+.field__row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.25rem 0.75rem;
+    font-size: 0.875rem;
+}
+
+.field__row a {
+    font-weight: 500;
+}
+
+input[type="email"],
+input[type="password"] {
+    width: 100%;
+    height: 3.25rem;
+    padding: 0 var(--space-2);
+    border: 1.5px solid var(--color-border-strong);
+    border-radius: var(--radius-sm);
+    background: var(--color-surface);
+}
+
+input[type="email"]:hover,
+input[type="password"]:hover {
+    border-color: var(--color-text);
+}
+
+.choice-group {
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+}
+
+.choice-group legend {
+    margin-bottom: 0.625rem;
+    padding: 0;
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+.choice-group__options {
+    display: grid;
+    gap: 0.75rem;
+}
+
+/* Na telefonie ikona stoi po lewej, a tytuł i opis obok niej. */
+.choice-card {
+    position: relative;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 0.25rem 0.875rem;
+    align-items: start;
+    padding: var(--space-2) 3rem var(--space-2) var(--space-2);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    background: var(--color-surface-muted);
+    cursor: pointer;
+}
+
+/* Pole radio jest niewidoczne, ale nadal działa z klawiatury i czytnikiem ekranu – wygląd przejmuje karta. */
+.choice-card input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.choice-card:hover {
+    border-color: var(--color-brand);
+}
+
+/* Cień wewnętrzny pogrubia ramkę do 2 px bez przesuwania zawartości karty. */
+.choice-card:has(input:checked) {
+    border-color: var(--color-brand);
+    background: var(--color-surface-selected);
+    box-shadow: inset 0 0 0 1px var(--color-brand), var(--shadow-selected);
+}
+
+/* Zapis "✓" / "" pokazuje znak, ale ukrywa go przed czytnikiem ekranu – zaznaczenie ogłasza samo pole radio. */
+.choice-card:has(input:checked)::after {
+    content: "✓";
+    content: "✓" / "";
+    position: absolute;
+    top: 0.875rem;
+    right: 0.875rem;
+    display: grid;
+    place-items: center;
+    width: 1.625rem;
+    height: 1.625rem;
+    border-radius: 50%;
+    background: var(--color-brand);
+    color: var(--color-on-brand);
+    font-size: 0.875rem;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.choice-card:has(input:focus-visible) {
+    outline: 3px solid var(--color-brand);
+    outline-offset: 3px;
+}
+
+.choice-card__icon {
+    grid-row: span 2;
+    display: grid;
+    place-items: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    border-radius: var(--radius-sm);
+    background: var(--color-chip);
+    color: var(--color-muted);
+}
+
+.choice-card:has(input:checked) .choice-card__icon {
+    background: var(--color-brand);
+    color: var(--color-on-brand);
+}
+
+.choice-card__title {
+    font-weight: 600;
+    line-height: 1.4;
+}
+
+.choice-card__text {
+    color: var(--color-muted);
+    font-size: 0.875rem;
+    line-height: 1.45;
+}
+
+.site-footer {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.25rem var(--space-1);
+    color: var(--color-muted);
+    font-size: 0.8125rem;
+}
+
+.site-footer p {
+    margin: 0;
+}
+
+.site-footer ul {
+    display: flex;
+    gap: var(--space-1);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.site-footer li::before {
+    content: "·";
+    content: "·" / "";
+    margin-right: var(--space-1);
+}
+
+.site-footer a {
+    color: inherit;
+}
+
+@media (min-width: 48rem) {
+    .choice-group__options {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0.875rem;
+    }
+
+    .choice-card {
+        grid-template-columns: 1fr;
+        gap: 0.625rem;
+        padding: 1.25rem;
+    }
+
+    .choice-card__icon {
+        grid-row: auto;
+        width: 3rem;
+        height: 3rem;
+        border-radius: 0.875rem;
+    }
+
+    .choice-card__title {
+        font-size: 1.0625rem;
+    }
+}

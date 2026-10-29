@@ -61,7 +61,7 @@ Gotowy jest szkielet MVC z laboratoriów oraz szablony HTML pięciu widoków z p
 | Dodaj lokal | Formularz w sześciu krokach, z uploadem zdjęć i rolki oraz oknem dostępności |
 | Obsługa błędów | Nieznany adres zwraca widok 404 i status HTTP 404 |
 
-Widoki to na razie surowy, semantyczny HTML bez stylów (CSS – Laboratorium 3). Dane w widokach są przykładowe, wzięte z prototypu – listy oznaczone komentarzem `TODO` będą wyświetlane w pętli z danych z bazy. Formularze nie są jeszcze obsługiwane: trasy `POST` i walidacja powstaną na kolejnych laboratoriach, więc wysłanie formularza kończy się na razie odpowiedzią 404. Tak samo kończą się linki do zaplanowanych, jeszcze nieistniejących stron (np. `/register`, `/reservations`, `/host/requests`, `/terms`). Przełącznik motywu (Laboratorium 5) i języka nie są jeszcze dodane.
+Widoki to semantyczny HTML. Ostylowany jest na razie widok Logowanie (Laboratorium 3, opis w sekcji „Style CSS”), pozostałe widoki nie mają jeszcze stylów. Dane w widokach są przykładowe, wzięte z prototypu – listy oznaczone komentarzem `TODO` będą wyświetlane w pętli z danych z bazy. Formularze nie są jeszcze obsługiwane: trasy `POST` i walidacja powstaną na kolejnych laboratoriach, więc wysłanie formularza kończy się na razie odpowiedzią 404. Tak samo kończą się linki do zaplanowanych, jeszcze nieistniejących stron (np. `/register`, `/reservations`, `/host/requests`, `/terms`). Przełącznik motywu (Laboratorium 5) i języka nie są jeszcze dodane.
 
 ## Tech stack
 
@@ -176,6 +176,28 @@ curl -i http://localhost:8080/venues/abc
 
 Pierwszy i trzeci adres zwracają 404, bo `{id}` przyjmuje tylko cyfry. Drugi wyświetla widok lokalu, a formularz rezerwacji wysyła dane na `/venues/2/reservations`.
 
+## Style CSS
+
+| Plik | Zawartość |
+|---|---|
+| `public/css/style.css` | Zmienne CSS (tokeny projektu), `box-sizing`, typografia, linki, fokus oraz wspólne komponenty: logo, przycisk, pola formularza, karty wyboru typu konta, stopka |
+| `public/css/login.css` | Układ widoku Logowanie |
+| `public/images/login-hero.svg` | Ilustracja z prototypu w lewej kolumnie logowania |
+
+Kolory, fonty, odstępy i zaokrąglenia są zapisane raz w `:root` jako zmienne nazwane według roli (np. `--color-brand`, `--color-muted`, `--space-2`, `--radius`), a reguły odwołują się do nich przez `var()`. Wartości pochodzą z prototypu: kolor marki `#B4532A`, tekst `#1C1917`, tło `#F4EFE9`, nagłówki w kroju Newsreader, tekst w Inter (oba z Google Fonts).
+
+Widok Logowanie jest zbudowany mobile first – reguły bez media query opisują telefon, a szersze ekrany je rozszerzają:
+
+| Szerokość | Układ |
+|---|---|
+| poniżej 48rem (768 px) | Jedna kolumna: ilustracja jako baner z hasłem, pod nią formularz; karty typu konta jedna pod drugą, ikona obok tekstu |
+| od 48rem | Karty typu konta obok siebie (Grid, dwie kolumny), ikona nad tytułem |
+| od 64rem (1024 px) | Dwie kolumny strony (Grid z `grid-template-areas`): ilustracja z hasłem, opisem i celami po lewej, formularz i stopka po prawej |
+
+Stany interfejsu: `:hover` dla linków, przycisku, pól i kart; `:focus-visible` z obrysem 3 px w kolorze marki dla linków, przycisków i pól. Karty typu konta to etykiety z ukrytymi polami `radio` – zaznaczenie i fokus pokazuje karta dzięki `:has(input:checked)` i `:has(input:focus-visible)`, a wybór działa myszą i strzałkami.
+
+Sprawdzone w przeglądarce na szerokościach 360, 768 i 1440 px – bez poziomego przewijania.
+
 ## Konfiguracja PHP
 
 Obraz PHP zawiera moduły `pdo_pgsql`, `pgsql`, `gd` (z JPEG), `zip`, `bcmath`, `opcache` oraz Composer 2. Limity uploadu w PHP: `upload_max_filesize` i `post_max_size` = 512M, `max_file_uploads` = 20 (plik `conf.d/mealplanner.ini`).
@@ -192,6 +214,14 @@ Pliki `docker-compose.yaml`, `docker/php/Dockerfile` i `docker/nginx/*` są zgod
 Szkielet MVC (`src/Routing.php`, `src/controllers/`, `public/views/`, `public/index.php`) i `composer.json` są zgodne 1:1 z instrukcjami z Laboratorium 2. Composer jest w obrazie PHP od Laboratorium 1, a `.gitignore` już zawierał wpis `vendor/`, który obejmuje `/vendor/` z instrukcji.
 
 Kontrolery `SecurityController`, `VenueController` i `HostController`, widoki PoGodzinach i katalog `public/views/partials/` powstały w ramach zadań 2 i 3 z Laboratorium 2 (własny kontroler, trasy, szablony widoków z prototypu). Pliki z instrukcji nie zostały zmienione – w `public/index.php` doszły tylko nowe trasy i instrukcje `use`. Nazwy `SecurityController` i `login.html.php` są takie same jak w Laboratorium 9, w którym powstaje logowanie.
+
+Style z Laboratorium 3 korzystają z przykładów z instrukcji (zmienne w `:root`, `box-sizing`, typografia, linki, `:focus-visible`, Flexbox i Grid, `min()`, `clamp()`, media query `min-width: 48rem`) z wartościami z prototypu. Świadome różnice:
+
+- obrys fokusu ma pełny kolor marki zamiast `color-mix(in srgb, var(--color-brand) 45%, white)` – jaśniejszy kolor miał na kremowym tle kontrast tylko 1,7:1, a pełny ma 4,4:1;
+- linki po najechaniu zmieniają kolor na ciemniejszy (jak w prototypie) zamiast `opacity: 0.8`;
+- ramki pól formularza są ciemniejsze niż w prototypie (`#8A837C`), żeby pole było widoczne na tle z kontrastem co najmniej 3:1;
+- blok `[data-theme="dark"]` z kroku 1 nie jest jeszcze dodany – ciemny motyw powstaje w Laboratorium 5;
+- oprócz breakpointu 48rem jest drugi, 64rem, bo dwie kolumny logowania potrzebują więcej miejsca.
 
 ## Znane ograniczenia
 
@@ -218,6 +248,8 @@ Wynikają z konfiguracji z laboratorium, do rozwiązania w kolejnych etapach:
 │   └── php/              # obraz PHP-FPM z rozszerzeniami
 ├── public/               # katalog publiczny (document root Nginx)
 │   ├── index.php         # Front Controller – jedyny punkt wejścia
+│   ├── css/              # arkusze stylów (style.css – wspólny, login.css – logowanie)
+│   ├── images/           # obrazy używane w stylach
 │   └── views/            # szablony HTML (*.html.php)
 │       └── partials/     # wspólny nagłówek i stopka
 ├── src/
