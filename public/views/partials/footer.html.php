@@ -1,4 +1,4 @@
-<footer>
+<footer class="site-footer">
     <p>&copy; 2026 PoGodzinach</p>
     <nav aria-label="Informacje">
         <ul>
