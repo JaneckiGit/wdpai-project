@@ -13,4 +13,12 @@ final class HostController extends AppController
             'activeNav' => 'host',
         ]);
     }
+
+    public function addVenue(): void
+    {
+        $this->render('add-venue', [
+            'pageTitle' => 'Dodaj lokal – PoGodzinach',
+            'activeNav' => 'host',
+        ]);
+    }
 }

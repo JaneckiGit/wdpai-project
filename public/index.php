@@ -20,6 +20,7 @@ $routing->get('/login', SecurityController::class, 'login');
 $routing->get('/venues', VenueController::class, 'index');
 $routing->get('/venues/{id}', VenueController::class, 'show');
 $routing->get('/host', HostController::class, 'dashboard');
+$routing->get('/host/venues/new', HostController::class, 'addVenue');
 
 $routeFound = $routing->dispatch(
     $_SERVER['REQUEST_METHOD'],
