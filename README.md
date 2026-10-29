@@ -32,6 +32,20 @@ Typ konta (najemca albo gospodarz) wybiera się przy rejestracji i jest zapisany
 
 Płatności są symulowane – aplikacja wylicza kwotę rezerwacji, ale nie obsługuje płatności online.
 
+## Prototyp
+
+Klikalny prototyp w Figmie: [PoGodzinach – prototyp](https://www.figma.com/design/6hGVw8Jx7AhhGAp2oGK4uL) (podgląd interakcji: przycisk *Present*).
+
+Pięć widoków, każdy w wersji na komputer (1440 px) i na telefon (390 px):
+
+| Widok | Zawartość |
+|---|---|
+| Logowanie | Wybór typu konta („Szukam przestrzeni” / „Udostępniam lokal”), formularz z komunikatem błędu |
+| Odkrywaj | Rolki lokali i mapa z cenami, filtry celu, terminu, liczby osób i ceny |
+| Lokal i rezerwacja | Opis lokalu, dozwolone cele, oferta, opinie i formularz prośby o rezerwację z podsumowaniem kwoty |
+| Panel gospodarza | Statystyki, prośby o rezerwację do akceptacji, kalendarz tygodnia |
+| Dodaj lokal | Formularz w krokach: dane, cele, zdjęcia, rolka, okna dostępności z walidacją nakładania się, wejście do lokalu |
+
 ## Stan implementacji
 
 Na razie gotowy jest szkielet MVC z laboratoriów:
