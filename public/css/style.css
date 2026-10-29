@@ -40,6 +40,26 @@
     --shadow-selected: 0 6px 18px rgb(180 83 42 / 12%);
 }
 
+/* Kolor marki, przycisków i tekstu na ilustracji jest wspólny dla obu motywów, więc nie jest tu nadpisywany. */
+html[data-theme="dark"] {
+    color-scheme: dark;
+    --color-link: #e8916a;
+    --color-link-hover: #f2b08f;
+    --color-text: #f4efe9;
+    --color-muted: #b8afa6;
+    --color-surface: #201c19;
+    --color-surface-muted: #24201c;
+    --color-surface-selected: #3a2417;
+    --color-chip: #2e2925;
+    --color-border: #3d3631;
+    --color-bg: #161311;
+    --color-focus: #e8916a;
+    --color-danger-bg: #3f1515;
+    --color-danger-text: #fca5a5;
+    --shadow-soft: 0 18px 45px rgb(0 0 0 / 40%);
+    --shadow-selected: 0 6px 18px rgb(0 0 0 / 35%);
+}
+
 html {
     background: var(--color-bg);
 }
@@ -118,9 +138,10 @@ input:focus-visible {
     fill: var(--color-primary);
 }
 
+/* Logo ma stałe kolory w obu motywach. */
 .brand__mark path {
     fill: none;
-    stroke: var(--color-surface-muted);
+    stroke: #fbf8f4;
     stroke-width: 2.6;
     stroke-linecap: round;
     stroke-linejoin: round;
