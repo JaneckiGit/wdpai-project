@@ -13,4 +13,13 @@ final class VenueController extends AppController
             'activeNav' => 'venues',
         ]);
     }
+
+    public function show(int $id): void
+    {
+        $this->render('venue', [
+            'pageTitle' => 'Lokal i rezerwacja – PoGodzinach',
+            'activeNav' => 'venues',
+            'venueId' => $id,
+        ]);
+    }
 }
