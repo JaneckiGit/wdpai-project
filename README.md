@@ -1,8 +1,54 @@
-# WDPAI Project
+# PoGodzinach
 
-Projekt na przedmiot *Wstęp do Projektowania Aplikacji Internetowych* (Politechnika Krakowska). Temat aplikacji – do ustalenia: jaki problem rozwiązujemy, dla kogo i w jaki sposób.
+**PoGodzinach** to aplikacja webowa do wynajmu lokali na godziny w czasie, gdy stoją puste albo są zamknięte – kawiarni, barów, restauracji i pracowni. Projekt na przedmiot *Wstęp do Projektowania Aplikacji Internetowych* (Politechnika Krakowska).
 
-## Funkcje
+## Opis problemu
+
+Wiele lokali przez dużą część dnia stoi pustych: bar rano, kawiarnia wieczorem, pracownia w dni wolne. Właściciel płaci za tę przestrzeń, ale w tych godzinach nic na niej nie zarabia. Jednocześnie wiele osób szuka miejsca na kilka godzin – do pracy zdalnej, na spotkanie lub szkolenie, sesję zdjęciową lub nagranie albo kameralne wydarzenie – a coworkingi i sale konferencyjne są drogie, mało klimatyczne albo wynajmowane na cały dzień.
+
+PoGodzinach łączy obie strony: gospodarz udostępnia lokal w wybranych godzinach, a najemca rezerwuje go na tyle, ile potrzebuje.
+
+## Role
+
+| Rola | Możliwości |
+|---|---|
+| Najemca | Przegląda lokale w formie rolek i na mapie, filtruje je po celu, terminie i cenie, wysyła prośbę o rezerwację, po wizycie dodaje rolkę „Nagrane tutaj” |
+| Gospodarz | Dodaje lokale, ustala okna dostępności, tryby i ceny, minimalny czas rezerwacji i sposób wejścia, akceptuje lub odrzuca prośby o rezerwację |
+| Administrator | Moderuje rolki dodane przez gospodarzy i najemców |
+
+Typ konta (najemca albo gospodarz) wybiera się przy rejestracji i jest zapisany w bazie. Przy logowaniu uprawnienia zawsze wynikają z roli zapisanej w bazie.
+
+## Planowane funkcje
+
+| Obszar | Opis |
+|---|---|
+| Odkrywanie | Pionowe rolki lokali zsynchronizowane z mapą, na której pinezki pokazują ceny; lokale z rolką są wyżej w wynikach |
+| Tryby rezerwacji | Gospodarz ustala dla każdego okna dostępności tryb: „Na wyłączność” (cały lokal, stawka za godzinę) albo „Miejsca do pracy” (N miejsc, cena za miejsce za godzinę) |
+| Cele | Praca, spotkania i szkolenia, sesje foto i wideo, kameralne wydarzenia – gospodarz zaznacza, na co pozwala, a najemca wybiera cel rezerwacji |
+| Okna dostępności | Dni, godziny, tryb, liczba miejsc i cena; okna tego samego lokalu nie mogą się nakładać; minimalny czas rezerwacji ustala gospodarz (domyślnie 2 h) |
+| Rezerwacja | Każda rezerwacja, także pojedynczego miejsca, jest prośbą, którą gospodarz akceptuje w ciągu 24 h; do tego czasu termin jest zablokowany, a nieprzyjęte prośby automatycznie anuluje zadanie CRON |
+| Wejście do lokalu | Gospodarz wybiera dla lokalu: pracownik na miejscu albo przekazanie klucza z instrukcją widoczną po akceptacji |
+| Interfejs | Wersje na telefon, tablet i komputer, tryb jasny i ciemny, język polski i angielski |
+
+Płatności są symulowane – aplikacja wylicza kwotę rezerwacji, ale nie obsługuje płatności online.
+
+## Prototyp
+
+Klikalny prototyp w Figmie: [PoGodzinach – prototyp](https://www.figma.com/design/6hGVw8Jx7AhhGAp2oGK4uL) (podgląd interakcji: przycisk *Present*).
+
+Pięć widoków, każdy w wersji na komputer (1440 px) i na telefon (390 px):
+
+| Widok | Zawartość |
+|---|---|
+| Logowanie | Wybór typu konta („Szukam przestrzeni” / „Udostępniam lokal”), formularz z komunikatem błędu |
+| Odkrywaj | Rolki lokali i mapa z cenami, filtry celu, terminu, liczby osób i ceny |
+| Lokal i rezerwacja | Opis lokalu, dozwolone cele, oferta, opinie i formularz prośby o rezerwację z podsumowaniem kwoty |
+| Panel gospodarza | Statystyki, prośby o rezerwację do akceptacji, kalendarz tygodnia |
+| Dodaj lokal | Formularz w krokach: dane, cele, zdjęcia, rolka, okna dostępności z walidacją nakładania się, wejście do lokalu |
+
+## Stan implementacji
+
+Na razie gotowy jest szkielet MVC z laboratoriów:
 
 | Obszar | Co robi |
 |---|---|
