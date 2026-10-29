@@ -61,7 +61,7 @@ Gotowy jest szkielet MVC z laboratoriów oraz szablony HTML pięciu widoków z p
 | Dodaj lokal | Formularz w sześciu krokach, z uploadem zdjęć i rolki oraz oknem dostępności |
 | Obsługa błędów | Nieznany adres zwraca widok 404 i status HTTP 404 |
 
-Widoki to semantyczny HTML. Ostylowany jest na razie widok Logowanie (Laboratorium 3, opis w sekcji „Style CSS”), pozostałe widoki nie mają jeszcze stylów. Dane w widokach są przykładowe, wzięte z prototypu – listy oznaczone komentarzem `TODO` będą wyświetlane w pętli z danych z bazy. Formularze nie są jeszcze obsługiwane: trasy `POST` i walidacja powstaną na kolejnych laboratoriach, więc wysłanie formularza kończy się na razie odpowiedzią 404. Tak samo kończą się linki do zaplanowanych, jeszcze nieistniejących stron (np. `/register`, `/reservations`, `/host/requests`, `/terms`). Przełącznik motywu (Laboratorium 5) i języka nie są jeszcze dodane.
+Widoki to semantyczny HTML. W pełni ostylowany jest na razie widok Logowanie (Laboratorium 3, opis w sekcji „Style CSS”), pozostałe widoki mają tylko style bazowe (kolory, fonty, linki, fokus). Na każdej stronie działa motyw jasny i ciemny (Laboratorium 5, sekcja „Motyw jasny i ciemny”). Dane w widokach są przykładowe, wzięte z prototypu – listy oznaczone komentarzem `TODO` będą wyświetlane w pętli z danych z bazy. Formularze nie są jeszcze obsługiwane: trasy `POST` i walidacja powstaną na kolejnych laboratoriach, więc wysłanie formularza kończy się na razie odpowiedzią 404. Tak samo kończą się linki do zaplanowanych, jeszcze nieistniejących stron (np. `/register`, `/reservations`, `/host/requests`, `/terms`). Przełącznika języka jeszcze nie ma.
 
 ## Tech stack
 
@@ -128,7 +128,7 @@ Przepływ żądania:
 1. `public/index.php` rejestruje trasy w obiekcie `Routing` i przekazuje mu metodę HTTP oraz adres żądania.
 2. `Routing::dispatch()` porównuje adres z listą tras (białą listą). Ścieżka trasy jest zamieniana na wyrażenie regularne, np. `/projects/{id}` → `~^/projects/(?P<id>\d+)$~`, więc `{id}` przyjmuje tylko cyfry.
 3. Dla pierwszej pasującej trasy router tworzy obiekt kontrolera i wywołuje jego akcję, przekazując parametry z adresu (`/projects/12` → `ProjectController::show(12)`).
-4. Kontroler wywołuje odziedziczoną z `AppController` metodę `render()`, która udostępnia dane widokowi jako zmienne (`extract()`) i dołącza szablon z `public/views/`.
+4. Kontroler wywołuje odziedziczoną z `AppController` metodę `render()`, która udostępnia dane widokowi jako zmienne (`extract()`), wykonuje szablon z `public/views/` do bufora (`ob_start()` / `ob_get_clean()`) i wstawia wynik jako `$content` do wspólnego dokumentu `public/views/layout.html.php`. Layout zawiera `<head>`, arkusze stylów, przełącznik motywu i skrypty, więc widoki opisują już tylko treść strony.
 5. Gdy żadna trasa nie pasuje, `index.php` ustawia status 404 i wyświetla widok `not-found`.
 
 Klasy nie są ładowane ręcznie przez `require_once`. `index.php` wczytuje tylko `vendor/autoload.php`, a autoloader Composera odnajduje plik klasy przy jej pierwszym użyciu, według reguł PSR-4 z `composer.json`:
@@ -146,6 +146,7 @@ Bardziej szczegółowa reguła (`App\Controller\`) ma pierwszeństwo. Nowa klasa
 | Router | `src/Routing.php` | Dopasowanie metody i adresu do kontrolera i akcji |
 | Kontroler bazowy | `src/controllers/AppController.php` | Wspólne renderowanie widoków |
 | Kontrolery | `src/controllers/*Controller.php` | Wybór widoku i danych dla danej trasy |
+| Layout | `public/views/layout.html.php` | Wspólny dokument HTML: `<head>`, skrypt motywu, arkusze stylów (opcjonalny arkusz widoku ze zmiennej `$stylesheet`), przełącznik motywu, `theme.js` |
 | Widoki | `public/views/*.html.php` | Semantyczny HTML z danymi od kontrolera |
 | Wspólne fragmenty widoków | `public/views/partials/*.html.php` | Nagłówek z nawigacją i stopka, dołączane do widoków przez `require` |
 | Autoloader | `composer.json`, `vendor/autoload.php` | Wczytywanie plików klas na podstawie namespace |
@@ -180,11 +181,12 @@ Pierwszy i trzeci adres zwracają 404, bo `{id}` przyjmuje tylko cyfry. Drugi wy
 
 | Plik | Zawartość |
 |---|---|
-| `public/css/style.css` | Zmienne CSS (tokeny projektu), `box-sizing`, typografia, linki, fokus oraz wspólne komponenty: logo, przycisk, pola formularza, karty wyboru typu konta, stopka |
-| `public/css/login.css` | Układ widoku Logowanie |
+| `public/css/style.css` | Zmienne CSS (tokeny projektu w wariancie jasnym i ciemnym), `box-sizing`, typografia, linki, fokus oraz wspólne komponenty: logo, przycisk, pola formularza, karty wyboru typu konta, stopka, przełącznik motywu |
+| `public/css/login.css` | Układ widoku Logowanie (dołączany przez layout, gdy kontroler przekaże `'stylesheet' => 'login'`) |
+| `public/js/theme.js` | Przełączanie i zapamiętywanie motywu |
 | `public/images/login-hero.svg` | Ilustracja z prototypu w lewej kolumnie logowania |
 
-Kolory, fonty, odstępy i zaokrąglenia są zapisane raz w `:root` jako zmienne nazwane według roli (np. `--color-brand`, `--color-muted`, `--space-2`, `--radius`), a reguły odwołują się do nich przez `var()`. Wartości pochodzą z prototypu: kolor marki `#B4532A`, tekst `#1C1917`, tło `#F4EFE9`, nagłówki w kroju Newsreader, tekst w Inter (oba z Google Fonts).
+Kolory, fonty, odstępy i zaokrąglenia są zapisane raz w `:root` jako zmienne nazwane według roli (np. `--color-primary`, `--color-muted`, `--space-2`, `--radius`), a reguły odwołują się do nich przez `var()`. Wartości pochodzą z prototypu: kolor marki `#B4532A`, tekst `#1C1917`, tło `#F4EFE9`, nagłówki w kroju Newsreader, tekst w Inter (oba z Google Fonts).
 
 Widok Logowanie jest zbudowany mobile first – reguły bez media query opisują telefon, a szersze ekrany je rozszerzają:
 
@@ -197,6 +199,38 @@ Widok Logowanie jest zbudowany mobile first – reguły bez media query opisują
 Stany interfejsu: `:hover` dla linków, przycisku, pól i kart; `:focus-visible` z obrysem 3 px w kolorze marki dla linków, przycisków i pól. Karty typu konta to etykiety z ukrytymi polami `radio` – zaznaczenie i fokus pokazuje karta dzięki `:has(input:checked)` i `:has(input:focus-visible)`, a wybór działa myszą i strzałkami.
 
 Sprawdzone w przeglądarce na szerokościach 360, 768 i 1440 px – bez poziomego przewijania.
+
+## Motyw jasny i ciemny
+
+Motyw to dane: atrybut `data-theme="light"` albo `data-theme="dark"` na `<html>` wybiera zestaw wartości tych samych zmiennych CSS. Komponenty używają tylko ról (`var(--color-surface)`, `var(--color-text)` …), a blok `html[data-theme="dark"]` w `style.css` podmienia ich wartości. Nie ma osobnego arkusza dla ciemnego motywu.
+
+Kolejność wyboru motywu:
+
+1. zapisany wybór użytkownika – `localStorage`, klucz `theme`, wartość `light` albo `dark`;
+2. jeśli zapisu nie ma – ustawienie systemu (`prefers-color-scheme`); strona reaguje też na jego zmianę w trakcie oglądania.
+
+| Element | Plik | Działanie |
+|---|---|---|
+| Skrypt w `<head>` | `public/views/layout.html.php` | Ustawia `data-theme` przed pierwszym arkuszem stylów, więc strona nie miga jasnym motywem przed ciemnym (brak FOUC) |
+| Przełącznik | `public/views/layout.html.php`, `.theme-toggle` w `style.css` | Element `<button>` obsługiwany myszą i klawiaturą (Tab, Enter, Spacja); `aria-label` i `aria-pressed` opisują stan, ikona (Font Awesome) pokazuje działanie: księżyc włącza ciemny, słońce jasny |
+| Logika | `public/js/theme.js` | Przełącza motyw, zapisuje wybór, synchronizuje przycisk i podąża za systemem, dopóki nie ma zapisu |
+
+Kolor marki, przyciski, logo i ilustracja logowania są takie same w obu motywach. Powrót do ustawienia systemowego (np. przy testach): w konsoli przeglądarki `localStorage.removeItem('theme'); location.reload();`.
+
+Sprawdzone w przeglądarce: start w motywie systemowym bez zapisu, zapis po kliknięciu, zachowanie wyboru po przejściu na inną stronę i po odświeżeniu, obsługa klawiaturą, brak nadpisania zapisanego wyboru przez zmianę motywu systemu.
+
+Kontrast par kolorów (WCAG 2.1, wymagane 4,5:1 dla tekstu i 3:1 dla obrysu fokusu i ramek pól):
+
+| Para | Jasny | Ciemny |
+|---|---|---|
+| Tekst na tle | 15,3:1 | 16,2:1 |
+| Tekst pomocniczy na tle | 6,7:1 | 8,6:1 |
+| Tekst pomocniczy na karcie | 7,2:1 | 7,5:1 |
+| Link na tle | 6,2:1 | 7,7:1 |
+| Komunikat błędu na tle błędu | 5,7:1 | 8,3:1 |
+| Obrys fokusu na tle | 4,4:1 | 7,7:1 |
+| Ramka pola na tle | 3,3:1 | 5,0:1 |
+| Biały tekst na przycisku | 5,0:1 | 5,0:1 |
 
 ## Konfiguracja PHP
 
@@ -211,7 +245,7 @@ Pliki `docker-compose.yaml`, `docker/php/Dockerfile` i `docker/nginx/*` są zgod
 
 `docker/db/Dockerfile` (`FROM postgres:17-alpine`) jest wymagany przez `docker-compose.yaml`, ale instrukcja nie podaje jego treści.
 
-Szkielet MVC (`src/Routing.php`, `src/controllers/`, `public/views/`, `public/index.php`) i `composer.json` są zgodne 1:1 z instrukcjami z Laboratorium 2. Composer jest w obrazie PHP od Laboratorium 1, a `.gitignore` już zawierał wpis `vendor/`, który obejmuje `/vendor/` z instrukcji.
+Szkielet MVC (`src/Routing.php`, `src/controllers/`, `public/views/`, `public/index.php`) i `composer.json` są zgodne 1:1 z instrukcjami z Laboratorium 2, z wyjątkiem zmian wymaganych przez wspólny layout z Laboratorium 5 (opisanych niżej). Composer jest w obrazie PHP od Laboratorium 1, a `.gitignore` już zawierał wpis `vendor/`, który obejmuje `/vendor/` z instrukcji.
 
 Kontrolery `SecurityController`, `VenueController` i `HostController`, widoki PoGodzinach i katalog `public/views/partials/` powstały w ramach zadań 2 i 3 z Laboratorium 2 (własny kontroler, trasy, szablony widoków z prototypu). Pliki z instrukcji nie zostały zmienione – w `public/index.php` doszły tylko nowe trasy i instrukcje `use`. Nazwy `SecurityController` i `login.html.php` są takie same jak w Laboratorium 9, w którym powstaje logowanie.
 
@@ -220,8 +254,15 @@ Style z Laboratorium 3 korzystają z przykładów z instrukcji (zmienne w `:root
 - obrys fokusu ma pełny kolor marki zamiast `color-mix(in srgb, var(--color-brand) 45%, white)` – jaśniejszy kolor miał na kremowym tle kontrast tylko 1,7:1, a pełny ma 4,4:1;
 - linki po najechaniu zmieniają kolor na ciemniejszy (jak w prototypie) zamiast `opacity: 0.8`;
 - ramki pól formularza są ciemniejsze niż w prototypie (`#8A837C`), żeby pole było widoczne na tle z kontrastem co najmniej 3:1;
-- blok `[data-theme="dark"]` z kroku 1 nie jest jeszcze dodany – ciemny motyw powstaje w Laboratorium 5;
 - oprócz breakpointu 48rem jest drugi, 64rem, bo dwie kolumny logowania potrzebują więcej miejsca.
+
+Motyw z Laboratorium 5 korzysta 1:1 z kodu instrukcji: skrypt w `<head>`, znaczniki i style przełącznika `.theme-toggle`, `public/js/theme.js` oraz nazwy tokenów (`--color-bg`, `--color-primary`, `--color-focus`, `--shadow-soft` … – tokeny z Laboratorium 3 zostały do nich przemianowane). Świadome różnice:
+
+- instrukcja zakłada wspólny `public/views/layout.html.php` z `<?= $content ?>`, którego projekt wcześniej nie miał – powstał, a `AppController::render()` buforuje widok i dołącza layout; widoki z Laboratorium 2 straciły przez to własne `<!doctype>`, `<head>` i `<body>` (treść bez zmian);
+- przełącznik używa ikon Font Awesome (`fa-moon`, `fa-sun`), więc layout dołącza Font Awesome 6.7.2 z cdnjs;
+- wartości tokenów pochodzą z palety PoGodzinach, nie z projektu referencyjnego; `--color-focus` jest pełnym kolorem zamiast koloru z 35% krycia (ten miał na tle kontrast poniżej 3:1), a `--color-primary` jest taki sam w obu motywach, bo biały tekst na `#B4532A` ma 5:1;
+- ogólnej reguły `button { background: var(--color-primary) }` z kroku 4 nie dodano – przyciski są stylowane klasami (`.button`, `.theme-toggle`), a reguła zmieniłaby też np. przycisk wyszukiwarki;
+- przełącznik ma na razie `position: fixed` (wariant z instrukcji dla projektu bez ostylowanej nawigacji); po ostylowaniu nagłówka trafi do nawigacji.
 
 ## Znane ograniczenia
 
@@ -249,8 +290,9 @@ Wynikają z konfiguracji z laboratorium, do rozwiązania w kolejnych etapach:
 ├── public/               # katalog publiczny (document root Nginx)
 │   ├── index.php         # Front Controller – jedyny punkt wejścia
 │   ├── css/              # arkusze stylów (style.css – wspólny, login.css – logowanie)
+│   ├── js/               # skrypty (theme.js – motyw jasny i ciemny)
 │   ├── images/           # obrazy używane w stylach
-│   └── views/            # szablony HTML (*.html.php)
+│   └── views/            # layout.html.php i szablony widoków (*.html.php)
 │       └── partials/     # wspólny nagłówek i stopka
 ├── src/
 │   ├── Routing.php       # router: trasy i dopasowanie adresów (App\Routing)
