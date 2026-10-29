@@ -4,6 +4,27 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= htmlspecialchars($pageTitle) ?></title>
+    <script>
+        (function () {
+            const storageKey = 'theme';
+            let savedTheme = null;
+
+            try {
+                savedTheme = localStorage.getItem(storageKey);
+            } catch (error) {
+                savedTheme = null;
+            }
+
+            const hasSavedTheme = savedTheme === 'light' || savedTheme === 'dark';
+            const systemPrefersDark = window.matchMedia(
+                '(prefers-color-scheme: dark)'
+            ).matches;
+
+            document.documentElement.dataset.theme = hasSavedTheme
+                ? savedTheme
+                : (systemPrefersDark ? 'dark' : 'light');
+        })();
+    </script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Newsreader:opsz,wght@6..72,400..700&display=swap">
