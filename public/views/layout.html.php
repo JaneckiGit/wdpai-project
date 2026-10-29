@@ -28,12 +28,23 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Newsreader:opsz,wght@6..72,400..700&display=swap">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" referrerpolicy="no-referrer">
     <link rel="stylesheet" href="/css/style.css">
     <?php if (isset($stylesheet)): ?>
         <link rel="stylesheet" href="/css/<?= htmlspecialchars($stylesheet) ?>.css">
     <?php endif; ?>
 </head>
 <body>
+    <button
+        class="theme-toggle"
+        type="button"
+        aria-label="Włącz ciemny motyw"
+        aria-pressed="false"
+        title="Zmień motyw"
+    >
+        <i class="fa-solid fa-moon" aria-hidden="true"></i>
+    </button>
+
     <?= $content ?>
 </body>
 </html>
