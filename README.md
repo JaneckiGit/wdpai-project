@@ -48,13 +48,20 @@ Pięć widoków, każdy w wersji na komputer (1440 px) i na telefon (390 px):
 
 ## Stan implementacji
 
-Na razie gotowy jest szkielet MVC z laboratoriów:
+Gotowy jest szkielet MVC z laboratoriów oraz szablony HTML pięciu widoków z prototypu:
 
 | Obszar | Co robi |
 |---|---|
-| Strona główna | Widok startowy z linkiem do listy projektów |
-| Projekty | Lista projektów i widok szczegółów projektu o podanym id (na razie bez bazy danych) |
+| Strona główna | Widok startowy z linkiem do listy projektów (przykład z laboratorium) |
+| Projekty | Lista projektów i widok szczegółów projektu o podanym id (przykład z laboratorium) |
+| Logowanie | Formularz z wyborem typu konta, e-mailem i hasłem |
+| Odkrywaj | Filtry (cel, tryb, data, godziny, liczba osób, cena), legenda mapy i rolki lokali |
+| Lokal i rezerwacja | Opis lokalu, cele, oferta, udogodnienia, opinie i formularz prośby o rezerwację; id lokalu z adresu trafia do adresu formularza |
+| Panel gospodarza | Podsumowanie, prośby o rezerwację z przyciskami decyzji i kalendarz tygodnia w tabeli |
+| Dodaj lokal | Formularz w sześciu krokach, z uploadem zdjęć i rolki oraz oknem dostępności |
 | Obsługa błędów | Nieznany adres zwraca widok 404 i status HTTP 404 |
+
+Widoki to na razie surowy, semantyczny HTML bez stylów (CSS – Laboratorium 3). Dane w widokach są przykładowe, wzięte z prototypu – listy oznaczone komentarzem `TODO` będą wyświetlane w pętli z danych z bazy. Formularze nie są jeszcze obsługiwane: trasy `POST` i walidacja powstaną na kolejnych laboratoriach, więc wysłanie formularza kończy się na razie odpowiedzią 404. Tak samo kończą się linki do zaplanowanych, jeszcze nieistniejących stron (np. `/register`, `/reservations`, `/host/requests`, `/terms`). Przełącznik motywu (Laboratorium 5) i języka nie są jeszcze dodane.
 
 ## Tech stack
 
@@ -140,7 +147,10 @@ Bardziej szczegółowa reguła (`App\Controller\`) ma pierwszeństwo. Nowa klasa
 | Kontroler bazowy | `src/controllers/AppController.php` | Wspólne renderowanie widoków |
 | Kontrolery | `src/controllers/*Controller.php` | Wybór widoku i danych dla danej trasy |
 | Widoki | `public/views/*.html.php` | Semantyczny HTML z danymi od kontrolera |
+| Wspólne fragmenty widoków | `public/views/partials/*.html.php` | Nagłówek z nawigacją i stopka, dołączane do widoków przez `require` |
 | Autoloader | `composer.json`, `vendor/autoload.php` | Wczytywanie plików klas na podstawie namespace |
+
+Nagłówek i stopka są wspólne dla wielu widoków, więc nie są kopiowane do każdego szablonu. Widok dołącza je instrukcją `<?php require __DIR__ . '/partials/header.html.php'; ?>`. Dołączony plik ma dostęp do tych samych zmiennych co widok, dlatego nagłówek korzysta ze zmiennej `$activeNav` przekazanej z kontrolera i oznacza bieżącą pozycję menu atrybutem `aria-current="page"`.
 
 ## Routing
 
@@ -149,13 +159,22 @@ Bardziej szczegółowa reguła (`App\Controller\`) ma pierwszeństwo. Nowa klasa
 | GET | `/` | `DefaultController::index` | `home` |
 | GET | `/projects` | `ProjectController::index` | `projects` |
 | GET | `/projects/{id}` (`id` – tylko cyfry) | `ProjectController::show` | `project` |
+| GET | `/login` | `SecurityController::login` | `login` |
+| GET | `/venues` | `VenueController::index` | `venues` (Odkrywaj) |
+| GET | `/venues/{id}` (`id` – tylko cyfry) | `VenueController::show` | `venue` (Lokal i rezerwacja) |
+| GET | `/host` | `HostController::dashboard` | `host-dashboard` (Panel gospodarza) |
+| GET | `/host/venues/new` | `HostController::addVenue` | `add-venue` (Dodaj lokal) |
 | – | każdy inny adres lub metoda | `DefaultController::notFound` (status 404) | `not-found` |
 
 Sprawdzenie z terminala:
 
 ```bash
 curl -i http://localhost:8080/projects/abc
+curl -i http://localhost:8080/venues/2
+curl -i http://localhost:8080/venues/abc
 ```
+
+Pierwszy i trzeci adres zwracają 404, bo `{id}` przyjmuje tylko cyfry. Drugi wyświetla widok lokalu, a formularz rezerwacji wysyła dane na `/venues/2/reservations`.
 
 ## Konfiguracja PHP
 
@@ -171,6 +190,8 @@ Pliki `docker-compose.yaml`, `docker/php/Dockerfile` i `docker/nginx/*` są zgod
 `docker/db/Dockerfile` (`FROM postgres:17-alpine`) jest wymagany przez `docker-compose.yaml`, ale instrukcja nie podaje jego treści.
 
 Szkielet MVC (`src/Routing.php`, `src/controllers/`, `public/views/`, `public/index.php`) i `composer.json` są zgodne 1:1 z instrukcjami z Laboratorium 2. Composer jest w obrazie PHP od Laboratorium 1, a `.gitignore` już zawierał wpis `vendor/`, który obejmuje `/vendor/` z instrukcji.
+
+Kontrolery `SecurityController`, `VenueController` i `HostController`, widoki PoGodzinach i katalog `public/views/partials/` powstały w ramach zadań 2 i 3 z Laboratorium 2 (własny kontroler, trasy, szablony widoków z prototypu). Pliki z instrukcji nie zostały zmienione – w `public/index.php` doszły tylko nowe trasy i instrukcje `use`. Nazwy `SecurityController` i `login.html.php` są takie same jak w Laboratorium 9, w którym powstaje logowanie.
 
 ## Znane ograniczenia
 
@@ -198,6 +219,7 @@ Wynikają z konfiguracji z laboratorium, do rozwiązania w kolejnych etapach:
 ├── public/               # katalog publiczny (document root Nginx)
 │   ├── index.php         # Front Controller – jedyny punkt wejścia
 │   └── views/            # szablony HTML (*.html.php)
+│       └── partials/     # wspólny nagłówek i stopka
 ├── src/
 │   ├── Routing.php       # router: trasy i dopasowanie adresów (App\Routing)
 │   └── controllers/      # AppController i kontrolery aplikacji (App\Controller)
