@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Controller\DefaultController;
+use App\Controller\HostController;
 use App\Controller\ProjectController;
 use App\Controller\SecurityController;
 use App\Controller\VenueController;
@@ -18,6 +19,7 @@ $routing->get('/', DefaultController::class, 'index');
 $routing->get('/login', SecurityController::class, 'login');
 $routing->get('/venues', VenueController::class, 'index');
 $routing->get('/venues/{id}', VenueController::class, 'show');
+$routing->get('/host', HostController::class, 'dashboard');
 
 $routeFound = $routing->dispatch(
     $_SERVER['REQUEST_METHOD'],
