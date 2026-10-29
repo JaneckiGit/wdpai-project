@@ -5,8 +5,9 @@
 }
 
 :root {
-    --color-brand: #b4532a;
-    --color-brand-hover: #8f4122;
+    color-scheme: light;
+    --color-primary: #b4532a;
+    --color-primary-hover: #8f4122;
     --color-on-brand: #ffffff;
     --color-link: #8f4122;
     --color-link-hover: #6e3018;
@@ -18,10 +19,13 @@
     --color-chip: #ece6df;
     --color-border: #ddd5cc;
     --color-border-strong: #8a837c;
-    --color-background: #f4efe9;
+    --color-bg: #f4efe9;
     --color-dark: #1c1917;
     --color-on-dark: #ffffff;
     --color-on-dark-muted: #e7e1d9;
+    --color-focus: #b4532a;
+    --color-danger-bg: #fdecec;
+    --color-danger-text: #b91c1c;
     --font-body: Inter, system-ui, sans-serif;
     --font-heading: Newsreader, Georgia, serif;
     --space-1: 0.5rem;
@@ -32,13 +36,19 @@
     --radius-sm: 0.75rem;
     --radius: 1rem;
     --radius-pill: 999px;
+    --shadow-soft: 0 18px 45px rgb(28 25 23 / 12%);
     --shadow-selected: 0 6px 18px rgb(180 83 42 / 12%);
+}
+
+html {
+    background: var(--color-bg);
 }
 
 body {
     margin: 0;
+    min-height: 100vh;
     color: var(--color-text);
-    background: var(--color-background);
+    background: var(--color-bg);
     font-family: var(--font-body);
     line-height: 1.6;
 }
@@ -75,11 +85,11 @@ textarea {
     color: inherit;
 }
 
-/* Pełny kolor marki zamiast color-mix z bielą: jaśniejszy obrys miał kontrast tylko 1,7:1 z kremowym tłem. */
+/* --color-focus jest pełnym kolorem, nie półprzezroczystym: obrys z 35% krycia miał na kremowym tle kontrast poniżej 3:1. */
 a:focus-visible,
 button:focus-visible,
 input:focus-visible {
-    outline: 3px solid var(--color-brand);
+    outline: 3px solid var(--color-focus);
     outline-offset: 3px;
 }
 
@@ -105,7 +115,7 @@ input:focus-visible {
 }
 
 .brand__mark circle {
-    fill: var(--color-brand);
+    fill: var(--color-primary);
 }
 
 .brand__mark path {
@@ -133,14 +143,14 @@ input:focus-visible {
     padding: 0 var(--space-3);
     border: 0;
     border-radius: var(--radius-sm);
-    background: var(--color-brand);
+    background: var(--color-primary);
     color: var(--color-on-brand);
     font-weight: 600;
     cursor: pointer;
 }
 
 .button:hover {
-    background: var(--color-brand-hover);
+    background: var(--color-primary-hover);
 }
 
 .field {
@@ -180,6 +190,10 @@ input[type="password"] {
 input[type="email"]:hover,
 input[type="password"]:hover {
     border-color: var(--color-text);
+}
+
+input:focus {
+    border-color: var(--color-primary);
 }
 
 .choice-group {
@@ -223,14 +237,14 @@ input[type="password"]:hover {
 }
 
 .choice-card:hover {
-    border-color: var(--color-brand);
+    border-color: var(--color-primary);
 }
 
 /* Cień wewnętrzny pogrubia ramkę do 2 px bez przesuwania zawartości karty. */
 .choice-card:has(input:checked) {
-    border-color: var(--color-brand);
+    border-color: var(--color-primary);
     background: var(--color-surface-selected);
-    box-shadow: inset 0 0 0 1px var(--color-brand), var(--shadow-selected);
+    box-shadow: inset 0 0 0 1px var(--color-primary), var(--shadow-selected);
 }
 
 /* Zapis "✓" / "" pokazuje znak, ale ukrywa go przed czytnikiem ekranu – zaznaczenie ogłasza samo pole radio. */
@@ -245,7 +259,7 @@ input[type="password"]:hover {
     width: 1.625rem;
     height: 1.625rem;
     border-radius: 50%;
-    background: var(--color-brand);
+    background: var(--color-primary);
     color: var(--color-on-brand);
     font-size: 0.875rem;
     font-weight: 700;
@@ -253,7 +267,7 @@ input[type="password"]:hover {
 }
 
 .choice-card:has(input:focus-visible) {
-    outline: 3px solid var(--color-brand);
+    outline: 3px solid var(--color-focus);
     outline-offset: 3px;
 }
 
@@ -269,7 +283,7 @@ input[type="password"]:hover {
 }
 
 .choice-card:has(input:checked) .choice-card__icon {
-    background: var(--color-brand);
+    background: var(--color-primary);
     color: var(--color-on-brand);
 }
 
