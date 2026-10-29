@@ -1,0 +1,84 @@
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+:root {
+    --color-brand: #b4532a;
+    --color-brand-hover: #8f4122;
+    --color-on-brand: #ffffff;
+    --color-link: #8f4122;
+    --color-link-hover: #6e3018;
+    --color-text: #1c1917;
+    --color-muted: #57534e;
+    --color-surface: #ffffff;
+    --color-surface-muted: #fbf8f4;
+    --color-surface-selected: #fcf3ee;
+    --color-chip: #ece6df;
+    --color-border: #ddd5cc;
+    --color-border-strong: #8a837c;
+    --color-background: #f4efe9;
+    --color-dark: #1c1917;
+    --color-on-dark: #ffffff;
+    --color-on-dark-muted: #e7e1d9;
+    --font-body: Inter, system-ui, sans-serif;
+    --font-heading: Newsreader, Georgia, serif;
+    --space-1: 0.5rem;
+    --space-2: 1rem;
+    --space-3: 1.5rem;
+    --space-4: 2rem;
+    --space-5: 3.5rem;
+    --radius-sm: 0.75rem;
+    --radius: 1rem;
+    --radius-pill: 999px;
+    --shadow-selected: 0 6px 18px rgb(180 83 42 / 12%);
+}
+
+body {
+    margin: 0;
+    color: var(--color-text);
+    background: var(--color-background);
+    font-family: var(--font-body);
+    line-height: 1.6;
+}
+
+h1,
+h2,
+h3 {
+    margin: 0;
+    font-family: var(--font-heading);
+    font-weight: 500;
+    line-height: 1.05;
+    letter-spacing: -0.015em;
+}
+
+h1 {
+    font-size: clamp(2rem, 4vw, 3.125rem);
+}
+
+a {
+    color: var(--color-link);
+    text-decoration-thickness: 0.12em;
+    text-underline-offset: 0.2em;
+}
+
+a:hover {
+    color: var(--color-link-hover);
+}
+
+button,
+input,
+select,
+textarea {
+    font: inherit;
+    color: inherit;
+}
+
+/* Pełny kolor marki zamiast color-mix z bielą: jaśniejszy obrys miał kontrast tylko 1,7:1 z kremowym tłem. */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible {
+    outline: 3px solid var(--color-brand);
+    outline-offset: 3px;
+}
