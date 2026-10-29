@@ -1,16 +1,4 @@
-<!doctype html>
-<html lang="pl">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= htmlspecialchars($pageTitle) ?></title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Newsreader:opsz,wght@6..72,400..700&display=swap">
-    <link rel="stylesheet" href="/css/style.css">
-    <link rel="stylesheet" href="/css/login.css">
-</head>
-<body class="auth-page">
+<div class="auth-page">
     <header class="auth-hero">
         <a class="brand" href="/venues">
             <svg class="brand__mark" width="34" height="34" viewBox="0 0 32 32" aria-hidden="true">
@@ -87,5 +75,4 @@
     </main>
 
     <?php require __DIR__ . '/partials/footer.html.php'; ?>
-</body>
-</html>
+</div>

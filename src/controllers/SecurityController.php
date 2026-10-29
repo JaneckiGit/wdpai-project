@@ -10,6 +10,7 @@ final class SecurityController extends AppController
     {
         $this->render('login', [
             'pageTitle' => 'Logowanie – PoGodzinach',
+            'stylesheet' => 'login',
         ]);
     }
 }
