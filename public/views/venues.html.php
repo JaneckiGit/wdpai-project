@@ -4,39 +4,44 @@
     <h1>Odkrywaj lokale</h1>
 
     <form action="/venues" method="get" aria-label="Filtry">
+        <?php require __DIR__ . '/partials/form-errors.html.php'; ?>
+
+        <input type="hidden" name="q" value="<?= htmlspecialchars($form->query) ?>">
+
         <fieldset>
             <legend>Cel</legend>
-            <label><input type="radio" name="purpose" value="work" checked> Praca</label>
-            <label><input type="radio" name="purpose" value="meetings"> Spotkania i szkolenia</label>
-            <label><input type="radio" name="purpose" value="shoots"> Sesje foto i wideo</label>
-            <label><input type="radio" name="purpose" value="events"> Kameralne wydarzenia</label>
+            <label><input type="radio" name="purpose" value="work" <?= $form->purpose === 'work' ? 'checked' : '' ?>> Praca</label>
+            <label><input type="radio" name="purpose" value="meetings" <?= $form->purpose === 'meetings' ? 'checked' : '' ?>> Spotkania i szkolenia</label>
+            <label><input type="radio" name="purpose" value="shoots" <?= $form->purpose === 'shoots' ? 'checked' : '' ?>> Sesje foto i wideo</label>
+            <label><input type="radio" name="purpose" value="events" <?= $form->purpose === 'events' ? 'checked' : '' ?>> Kameralne wydarzenia</label>
         </fieldset>
 
         <fieldset>
             <legend>Tryb</legend>
-            <label><input type="radio" name="mode" value="seats" checked> Miejsce do pracy</label>
-            <label><input type="radio" name="mode" value="exclusive"> Cały lokal</label>
+            <label><input type="radio" name="mode" value="seats" <?= $form->mode === 'seats' ? 'checked' : '' ?>> Miejsce do pracy</label>
+            <label><input type="radio" name="mode" value="exclusive" <?= $form->mode === 'exclusive' ? 'checked' : '' ?>> Cały lokal</label>
         </fieldset>
 
         <label for="date">Data</label>
-        <input type="date" id="date" name="date">
+        <input type="date" id="date" name="date" value="<?= htmlspecialchars($form->date) ?>" <?= $form->invalidAttributes('date') ?>>
 
         <label for="time-from">Od godziny</label>
-        <input type="time" id="time-from" name="from" step="3600">
+        <input type="time" id="time-from" name="from" value="<?= htmlspecialchars($form->from) ?>" step="3600" <?= $form->invalidAttributes('from') ?>>
 
         <label for="time-to">Do godziny</label>
-        <input type="time" id="time-to" name="to" step="3600">
+        <input type="time" id="time-to" name="to" value="<?= htmlspecialchars($form->to) ?>" step="3600" <?= $form->invalidAttributes('to') ?>>
 
         <label for="guests">Liczba osób</label>
-        <input type="number" id="guests" name="guests" min="1" value="1">
+        <input type="number" id="guests" name="guests" min="1" value="<?= htmlspecialchars($form->guests) ?>" <?= $form->invalidAttributes('guests') ?>>
 
         <label for="max-price">Cena do (zł/h)</label>
-        <input type="number" id="max-price" name="maxPrice" min="0">
+        <input type="number" id="max-price" name="maxPrice" value="<?= htmlspecialchars($form->maxPrice) ?>" min="0" <?= $form->invalidAttributes('maxPrice') ?>>
 
         <button type="submit">Pokaż lokale</button>
         <a href="/venues">Wyczyść filtry</a>
     </form>
 
+    <!-- TODO: Lokale z bazy filtrowane według wartości z formularza (Laboratorium 8) -->
     <p>8 lokali w tym obszarze</p>
 
     <section aria-labelledby="map-heading">

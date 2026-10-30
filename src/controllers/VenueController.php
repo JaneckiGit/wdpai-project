@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use App\Form\ReservationForm;
+use App\Form\VenueFilterForm;
 
 final class VenueController extends AppController
 {
@@ -14,9 +15,18 @@ final class VenueController extends AppController
 
     public function index(): void
     {
+        $form = new VenueFilterForm($_GET);
+
+        if (!$form->isValid()) {
+            http_response_code(400);
+        }
+
         $this->render('venues', [
             'pageTitle' => 'Odkrywaj – PoGodzinach',
             'activeNav' => 'venues',
+            'form' => $form,
+            'errors' => $form->errors(),
+            'searchQuery' => $form->query,
         ]);
     }
 
