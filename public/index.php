@@ -28,6 +28,7 @@ $routing->get('/projects', ProjectController::class, 'index');
 $routing->get('/projects/{id}', ProjectController::class, 'show');
 $routing->get('/', DefaultController::class, 'index');
 $routing->get('/login', SecurityController::class, 'login');
+$routing->post('/login', SecurityController::class, 'login');
 $routing->get('/venues', VenueController::class, 'index');
 $routing->get('/venues/{id}', VenueController::class, 'show');
 $routing->get('/host', HostController::class, 'dashboard');
