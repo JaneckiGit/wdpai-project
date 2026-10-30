@@ -280,6 +280,7 @@ Wynikają z konfiguracji z laboratorium, do rozwiązania w kolejnych etapach:
 
 ```
 .
+├── AGENTS.md             # zasady pracy dla agentów AI w tym repozytorium
 ├── docker-compose.yaml   # definicja usług
 ├── .env.example          # wzór zmiennych środowiskowych
 ├── composer.json         # reguły autoloadingu PSR-4
