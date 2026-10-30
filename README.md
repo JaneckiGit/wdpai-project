@@ -54,14 +54,14 @@ Gotowy jest szkielet MVC z laboratoriów oraz szablony HTML pięciu widoków z p
 |---|---|
 | Strona główna | Widok startowy z linkiem do listy projektów (przykład z laboratorium) |
 | Projekty | Lista projektów i widok szczegółów projektu o podanym id (przykład z laboratorium) |
-| Logowanie | Formularz z wyborem typu konta, e-mailem i hasłem |
-| Odkrywaj | Filtry (cel, tryb, data, godziny, liczba osób, cena), legenda mapy i rolki lokali |
-| Lokal i rezerwacja | Opis lokalu, cele, oferta, udogodnienia, opinie i formularz prośby o rezerwację; id lokalu z adresu trafia do adresu formularza |
-| Panel gospodarza | Podsumowanie, prośby o rezerwację z przyciskami decyzji i kalendarz tygodnia w tabeli |
-| Dodaj lokal | Formularz w sześciu krokach, z uploadem zdjęć i rolki oraz oknem dostępności |
-| Obsługa błędów | Nieznany adres zwraca widok 404 i status HTTP 404 |
+| Logowanie | Formularz z wyborem typu konta, e-mailem i hasłem; walidacja i przekierowanie zależne od typu konta (bez sprawdzania hasła, które dojdzie w Laboratorium 9) |
+| Odkrywaj | Filtry w parametrach adresu (fraza, cel, tryb, data, godziny, liczba osób, cena) z walidacją, legenda mapy i rolki lokali |
+| Lokal i rezerwacja | Opis lokalu, cele, oferta, udogodnienia, opinie i formularz prośby o rezerwację z walidacją; id lokalu z adresu trafia do adresu formularza |
+| Panel gospodarza | Podsumowanie, prośby o rezerwację z działającymi przyciskami decyzji, kalendarz tygodnia w tabeli, komunikaty po przekierowaniu |
+| Dodaj lokal | Formularz w sześciu krokach z walidacją, w tym wykrywaniem nakładających się okien dostępności; szkic i wysłanie do weryfikacji |
+| Obsługa błędów | Kontrolowane odpowiedzi 400, 404, 422 i 500 (sekcja „Formularze i obsługa błędów”) |
 
-Widoki to semantyczny HTML. W pełni ostylowany jest na razie widok Logowanie (Laboratorium 3, opis w sekcji „Style CSS”), pozostałe widoki mają tylko style bazowe (kolory, fonty, linki, fokus). Na każdej stronie działa motyw jasny i ciemny (Laboratorium 5, sekcja „Motyw jasny i ciemny”). Dane w widokach są przykładowe, wzięte z prototypu – listy oznaczone komentarzem `TODO` będą wyświetlane w pętli z danych z bazy. Formularze nie są jeszcze obsługiwane: trasy `POST` i walidacja powstaną na kolejnych laboratoriach, więc wysłanie formularza kończy się na razie odpowiedzią 404. Tak samo kończą się linki do zaplanowanych, jeszcze nieistniejących stron (np. `/register`, `/reservations`, `/host/requests`, `/terms`). Przełącznika języka jeszcze nie ma.
+Widoki to semantyczny HTML. W pełni ostylowany jest na razie widok Logowanie (Laboratorium 3, opis w sekcji „Style CSS”), pozostałe widoki mają tylko style bazowe (kolory, fonty, linki, fokus). Na każdej stronie działa motyw jasny i ciemny (Laboratorium 5, sekcja „Motyw jasny i ciemny”). Dane w widokach są przykładowe, wzięte z prototypu – listy oznaczone komentarzem `TODO` będą wyświetlane w pętli z danych z bazy. Formularze są sprawdzane po stronie serwera, ale aplikacja nie ma jeszcze bazy, więc poprawne dane nie są nigdzie zapisywane, a filtry nie zawężają listy lokali (Laboratoria 7–8). Pliki z formularza „Dodaj lokal” nie są jeszcze przetwarzane (Laboratorium 13), a przycisk „Dodaj okno” zadziała po dodaniu JavaScriptu (Laboratorium 10) – do tego czasu formularz w przeglądarce pokazuje jedno okno, a serwer obsługuje ich dowolnie wiele. Ochrona CSRF i sprawdzanie hasła dojdą w Laboratorium 9. Linki do zaplanowanych, jeszcze nieistniejących stron (np. `/register`, `/reservations`, `/terms`) kończą się odpowiedzią 404. Przełącznika języka jeszcze nie ma.
 
 ## Tech stack
 
@@ -136,19 +136,21 @@ Klasy nie są ładowane ręcznie przez `require_once`. `index.php` wczytuje tylk
 | Namespace | Katalog | Przykład |
 |---|---|---|
 | `App\Controller\` | `src/controllers/` | `App\Controller\ProjectController` → `src/controllers/ProjectController.php` |
+| `App\Form\` | `src/forms/` | `App\Form\LoginForm` → `src/forms/LoginForm.php` |
 | `App\` | `src/` | `App\Routing` → `src/Routing.php` |
 
-Bardziej szczegółowa reguła (`App\Controller\`) ma pierwszeństwo. Nowa klasa jest odnajdywana bez zmian w `index.php`, jeśli jej namespace i nazwa pliku odpowiadają tym regułom.
+Bardziej szczegółowe reguły (`App\Controller\`, `App\Form\`) mają pierwszeństwo. Nowa klasa jest odnajdywana bez zmian w `index.php`, jeśli jej namespace i nazwa pliku odpowiadają tym regułom.
 
 | Element | Plik | Odpowiedzialność |
 |---|---|---|
-| Front Controller | `public/index.php` | Rejestracja tras, uruchomienie routera, obsługa 404 |
+| Front Controller | `public/index.php` | Konfiguracja błędów i strefy czasowej, rejestracja tras, uruchomienie routera, obsługa 404 i 500 |
 | Router | `src/Routing.php` | Dopasowanie metody i adresu do kontrolera i akcji |
-| Kontroler bazowy | `src/controllers/AppController.php` | Wspólne renderowanie widoków |
-| Kontrolery | `src/controllers/*Controller.php` | Wybór widoku i danych dla danej trasy |
+| Kontroler bazowy | `src/controllers/AppController.php` | Wspólne renderowanie widoków i stron błędów, `isPost()`, `redirect()`, komunikaty statusu |
+| Kontrolery | `src/controllers/*Controller.php` | Wybór widoku i danych dla danej trasy, koordynacja formularza i przekierowania |
+| Formularze | `src/forms/*Form.php` | Dane wpisane przez użytkownika i reguły ich walidacji |
 | Layout | `public/views/layout.html.php` | Wspólny dokument HTML: `<head>`, skrypt motywu, arkusze stylów (opcjonalny arkusz widoku ze zmiennej `$stylesheet`), przełącznik motywu, `theme.js` |
 | Widoki | `public/views/*.html.php` | Semantyczny HTML z danymi od kontrolera |
-| Wspólne fragmenty widoków | `public/views/partials/*.html.php` | Nagłówek z nawigacją i stopka, dołączane do widoków przez `require` |
+| Wspólne fragmenty widoków | `public/views/partials/*.html.php` | Nagłówek z nawigacją, stopka, lista błędów formularza i komunikat statusu, dołączane do widoków przez `require` |
 | Autoloader | `composer.json`, `vendor/autoload.php` | Wczytywanie plików klas na podstawie namespace |
 
 Nagłówek i stopka są wspólne dla wielu widoków, więc nie są kopiowane do każdego szablonu. Widok dołącza je instrukcją `<?php require __DIR__ . '/partials/header.html.php'; ?>`. Dołączony plik ma dostęp do tych samych zmiennych co widok, dlatego nagłówek korzysta ze zmiennej `$activeNav` przekazanej z kontrolera i oznacza bieżącą pozycję menu atrybutem `aria-current="page"`.
@@ -160,22 +162,71 @@ Nagłówek i stopka są wspólne dla wielu widoków, więc nie są kopiowane do 
 | GET | `/` | `DefaultController::index` | `home` |
 | GET | `/projects` | `ProjectController::index` | `projects` |
 | GET | `/projects/{id}` (`id` – tylko cyfry) | `ProjectController::show` | `project` |
-| GET | `/login` | `SecurityController::login` | `login` |
+| GET, POST | `/login` | `SecurityController::login` | `login` |
 | GET | `/venues` | `VenueController::index` | `venues` (Odkrywaj) |
 | GET | `/venues/{id}` (`id` – tylko cyfry) | `VenueController::show` | `venue` (Lokal i rezerwacja) |
+| POST | `/venues/{id}/reservations` | `VenueController::requestReservation` | przekierowanie albo `venue` z błędami |
 | GET | `/host` | `HostController::dashboard` | `host-dashboard` (Panel gospodarza) |
-| GET | `/host/venues/new` | `HostController::addVenue` | `add-venue` (Dodaj lokal) |
+| GET, POST | `/host/venues/new` | `HostController::addVenue` | `add-venue` (Dodaj lokal) |
+| POST | `/host/requests/{id}` | `HostController::decideRequest` | przekierowanie albo `error` (400) |
 | – | każdy inny adres lub metoda | `DefaultController::notFound` (status 404) | `not-found` |
+
+Parametry zapytania (query parameters):
+
+| Adres | Parametry | Znaczenie |
+|---|---|---|
+| `/venues` | `q`, `purpose`, `mode`, `date`, `from`, `to`, `guests`, `maxPrice` | Wyszukiwanie i filtry, np. `/venues?q=Kazimierz&purpose=meetings&guests=4`; niepoprawne wartości dają status 400 i listę błędów |
+| `/host`, `/venues/{id}` | `status` | Komunikat po przekierowaniu, wybierany z listy dozwolonych; nieznana wartość jest ignorowana |
 
 Sprawdzenie z terminala:
 
 ```bash
 curl -i http://localhost:8080/projects/abc
+```
+
+```bash
 curl -i http://localhost:8080/venues/2
+```
+
+```bash
 curl -i http://localhost:8080/venues/abc
 ```
 
-Pierwszy i trzeci adres zwracają 404, bo `{id}` przyjmuje tylko cyfry. Drugi wyświetla widok lokalu, a formularz rezerwacji wysyła dane na `/venues/2/reservations`.
+```bash
+curl -i "http://localhost:8080/venues?guests=0"
+```
+
+Pierwszy i trzeci adres zwracają 404, bo `{id}` przyjmuje tylko cyfry. Drugi wyświetla widok lokalu, a formularz rezerwacji wysyła dane na `/venues/2/reservations`. Czwarty zwraca 400, bo liczba osób musi być dodatnia.
+
+## Formularze i obsługa błędów
+
+Przepływ formularza (wzorzec Post/Redirect/Get):
+
+1. Router kieruje `POST` do akcji kontrolera, a ta tworzy obiekt formularza z danych `$_POST`.
+2. `isValid()` uruchamia reguły z klasy formularza.
+3. Dane poprawne: `redirect()` odsyła status 303 na inny adres, więc odświeżenie strony nie wyśle formularza drugi raz. Komunikat pokazuje parametr `status`.
+4. Dane błędne: status 422 i ten sam widok z listą błędów, czerwonymi ramkami pól (`aria-invalid`) i zachowanymi wartościami. Hasło nigdy nie wraca do formularza.
+
+| Klasa | Formularz | Najważniejsze reguły |
+|---|---|---|
+| `Form` | Klasa abstrakcyjna | Wspólne reguły: wybór z listy, długość tekstu, dodatnia liczba, zakres pełnych godzin, poprawna data; odporność na tablice zamiast tekstu (`email[]=x`) |
+| `LoginForm` | Logowanie | Poprawny e-mail, niepuste hasło, znany typ konta |
+| `ReservationForm` | Prośba o rezerwację | Znany tryb i cel, data nie z przeszłości, pełne godziny, koniec po początku, minimum 2 h, 1–4 miejsca w trybie „Miejsca do pracy” |
+| `VenueForm` | Dodaj lokal | Szkic wymaga tylko nazwy. Wysłanie do weryfikacji: typ, adres, opis, co najmniej jeden cel, poprawne okna, instrukcja wejścia przy przekazaniu klucza |
+| `AvailabilityWindowForm` | Okno dostępności | Dni, godziny, tryb, liczba miejsc, cena, minimum godzin nie dłuższe niż okno; `overlaps()` wykrywa okna o wspólnym dniu i przecinających się godzinach |
+| `VenueFilterForm` | Filtry w Odkrywaj (GET) | Sprawdza tylko podane parametry: cel, tryb, data, godziny, liczba osób, cena |
+
+| Status | Kiedy |
+|---|---|
+| 303 | Poprawny formularz – przekierowanie (`redirect()`) |
+| 400 | Nieznana decyzja gospodarza, niepoprawne filtry w adresie |
+| 404 | Nieznany adres lub metoda, identyfikator niebędący liczbą albo mniejszy niż 1 |
+| 422 | Błędne dane w formularzu `POST` |
+| 500 | Nieoczekiwany błąd – strona bez szczegółów technicznych |
+
+Błędy wykonania: `public/index.php` wyłącza `display_errors` i zamienia ostrzeżenia PHP na wyjątki, a blok `try/catch` wokół routera zapisuje wyjątek w logu (`docker compose logs php`), czyści bufor z niedokończonym widokiem i pokazuje stronę 500.
+
+Dane wyświetlane z powrotem w HTML przechodzą przez `htmlspecialchars()`, więc wpisany kod (np. `<script>`) jest pokazywany jako tekst.
 
 ## Style CSS
 
@@ -264,6 +315,13 @@ Motyw z Laboratorium 5 korzysta 1:1 z kodu instrukcji: skrypt w `<head>`, znaczn
 - ogólnej reguły `button { background: var(--color-primary) }` z kroku 4 nie dodano – przyciski są stylowane klasami (`.button`, `.theme-toggle`), a reguła zmieniłaby też np. przycisk wyszukiwarki;
 - przełącznik ma na razie `position: fixed` (wariant z instrukcji dla projektu bez ostylowanej nawigacji); po ostylowaniu nagłówka trafi do nawigacji.
 
+Materiały Laboratorium 6 omawiają podstawy PHP i programowanie obiektowe, ale nie zawierają kodu formularzy, więc jego struktura (`src/forms/`, klasa abstrakcyjna `Form`, stałe klas, dziedziczenie) jest własnym rozwiązaniem. Elementy z późniejszych instrukcji użyte wcześniej, żeby nie zmieniać ich potem:
+
+- `isPost()` i `redirect()` w `AppController` oraz wzorzec jednej akcji dla `GET` i `POST` są 1:1 z Laboratorium 9;
+- lista błędów w `partials/form-errors.html.php` powstała z bloku z Laboratorium 9, a klasa `auth-form__errors` jest zastąpiona wspólną `form-errors`, bo lista działa w każdym formularzu;
+- błędy walidacji dostają status 422, podczas gdy kod z Laboratorium 9 zwraca wtedy domyślne 200;
+- katalog `src/forms/` i wpis w `composer.json` naśladują konwencję `src/models/` i `src/repositories/` z Laboratorium 7.
+
 ## Znane ograniczenia
 
 Wynikają z konfiguracji z laboratorium, do rozwiązania w kolejnych etapach:
@@ -297,7 +355,8 @@ Wynikają z konfiguracji z laboratorium, do rozwiązania w kolejnych etapach:
 │       └── partials/     # wspólny nagłówek i stopka
 ├── src/
 │   ├── Routing.php       # router: trasy i dopasowanie adresów (App\Routing)
-│   └── controllers/      # AppController i kontrolery aplikacji (App\Controller)
+│   ├── controllers/      # AppController i kontrolery aplikacji (App\Controller)
+│   └── forms/            # formularze i ich walidacja (App\Form)
 └── vendor/               # autoloader Composera (generowany, poza repozytorium)
 ```
 
