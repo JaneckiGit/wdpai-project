@@ -35,6 +35,14 @@ abstract class AppController
         ]);
     }
 
+    /* Komunikat wybierany z listy dozwolonych, więc tekst z adresu nigdy nie trafia na stronę. */
+    protected function statusMessage(array $messages): ?string
+    {
+        $status = $_GET['status'] ?? null;
+
+        return is_string($status) ? ($messages[$status] ?? null) : null;
+    }
+
     protected function isPost(): bool
     {
         return ($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST';

@@ -26,6 +26,8 @@
     --color-focus: #b4532a;
     --color-danger-bg: #fdecec;
     --color-danger-text: #b91c1c;
+    --color-success-bg: #e8f0e2;
+    --color-success-text: #3f5b2a;
     --font-body: Inter, system-ui, sans-serif;
     --font-heading: Newsreader, Georgia, serif;
     --space-1: 0.5rem;
@@ -56,6 +58,8 @@ html[data-theme="dark"] {
     --color-focus: #e8916a;
     --color-danger-bg: #3f1515;
     --color-danger-text: #fca5a5;
+    --color-success-bg: #1f2e14;
+    --color-success-text: #b7d39c;
     --shadow-soft: 0 18px 45px rgb(0 0 0 / 40%);
     --shadow-selected: 0 6px 18px rgb(0 0 0 / 35%);
 }
@@ -401,4 +405,32 @@ input:focus {
 .theme-toggle:focus-visible {
     outline: 3px solid var(--color-focus);
     outline-offset: 3px;
+}
+
+.form-errors,
+.status-message {
+    margin: 0;
+    padding: 0.75rem var(--space-2);
+    border-radius: var(--radius-sm);
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.form-errors {
+    background: var(--color-danger-bg);
+    color: var(--color-danger-text);
+}
+
+.form-errors ul {
+    margin: 0;
+    padding-left: 1.125rem;
+}
+
+.status-message {
+    background: var(--color-success-bg);
+    color: var(--color-success-text);
+}
+
+[aria-invalid="true"] {
+    border-color: var(--color-danger-text);
 }
