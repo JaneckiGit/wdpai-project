@@ -30,11 +30,14 @@ abstract class Form
         return $this->errors;
     }
 
-    public function invalidAttributes(string $field): string
+    /* Atrybuty pola dla czytników ekranu: czy jest błędne i który tekst je opisuje (podpowiedź, lista błędów). */
+    public function invalidAttributes(string $field, string $hintId = ''): string
     {
-        return isset($this->errors[$field])
-            ? 'aria-invalid="true" aria-describedby="form-errors"'
-            : '';
+        if (!isset($this->errors[$field])) {
+            return $hintId === '' ? '' : 'aria-describedby="' . $hintId . '"';
+        }
+
+        return 'aria-invalid="true" aria-describedby="' . trim($hintId . ' form-errors') . '"';
     }
 
     abstract protected function validate(): void;

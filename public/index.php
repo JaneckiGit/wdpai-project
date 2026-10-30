@@ -13,6 +13,7 @@ require_once dirname(__DIR__) . '/vendor/autoload.php';
 
 // Szczegóły błędów trafiają do logu kontenera (docker compose logs php), a nie do przeglądarki.
 ini_set('display_errors', '0');
+date_default_timezone_set('Europe/Warsaw');
 
 set_error_handler(static function (int $severity, string $message, string $file, int $line): bool {
     if ((error_reporting() & $severity) === 0) {
@@ -31,6 +32,7 @@ $routing->get('/login', SecurityController::class, 'login');
 $routing->post('/login', SecurityController::class, 'login');
 $routing->get('/venues', VenueController::class, 'index');
 $routing->get('/venues/{id}', VenueController::class, 'show');
+$routing->post('/venues/{id}/reservations', VenueController::class, 'requestReservation');
 $routing->get('/host', HostController::class, 'dashboard');
 $routing->get('/host/venues/new', HostController::class, 'addVenue');
 
