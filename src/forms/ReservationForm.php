@@ -19,12 +19,12 @@ final class ReservationForm extends Form
 
     public function __construct(array $input = [])
     {
-        $this->mode = self::text($input, 'mode') ?: 'seats';
-        $this->purpose = self::text($input, 'purpose') ?: 'work';
+        $this->mode = self::textOr($input, 'mode', 'seats');
+        $this->purpose = self::textOr($input, 'purpose', 'work');
         $this->date = self::text($input, 'date');
         $this->from = self::text($input, 'from');
         $this->to = self::text($input, 'to');
-        $this->seats = self::text($input, 'seats') ?: '1';
+        $this->seats = self::textOr($input, 'seats', '1');
     }
 
     protected function validate(): void

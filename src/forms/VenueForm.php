@@ -29,7 +29,7 @@ final class VenueForm extends Form
         $this->type = self::text($input, 'type');
         $this->address = self::text($input, 'address');
         $this->description = self::text($input, 'description');
-        $this->entryMode = self::text($input, 'entryMode') ?: 'staff';
+        $this->entryMode = self::textOr($input, 'entryMode', 'staff');
         $this->entryInstructions = self::text($input, 'entryInstructions');
         $this->action = self::text($input, 'action');
         $this->purposes = self::stringList($input['purposes'] ?? []);

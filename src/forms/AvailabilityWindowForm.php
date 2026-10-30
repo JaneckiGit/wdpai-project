@@ -28,13 +28,13 @@ final class AvailabilityWindowForm extends Form
 
     public function __construct(array $input = [])
     {
-        $this->days = self::text($input, 'days') ?: 'mon-fri';
+        $this->days = self::textOr($input, 'days', 'mon-fri');
         $this->from = self::text($input, 'from');
         $this->to = self::text($input, 'to');
-        $this->mode = self::text($input, 'mode') ?: 'seats';
+        $this->mode = self::textOr($input, 'mode', 'seats');
         $this->capacity = self::text($input, 'capacity');
         $this->price = self::text($input, 'price');
-        $this->minHours = self::text($input, 'minHours') ?: '2';
+        $this->minHours = self::textOr($input, 'minHours', '2');
     }
 
     /* Okna nakładają się, gdy mają wspólny dzień i ich godziny się przecinają. */

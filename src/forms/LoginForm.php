@@ -14,7 +14,7 @@ final class LoginForm extends Form
 
     public function __construct(array $input = [])
     {
-        $this->accountType = self::text($input, 'accountType') ?: 'renter';
+        $this->accountType = self::textOr($input, 'accountType', 'renter');
         $this->email = mb_strtolower(self::text($input, 'email'));
         $this->password = self::text($input, 'password', false);
     }

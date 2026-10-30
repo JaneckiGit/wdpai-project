@@ -59,6 +59,14 @@ abstract class Form
         return $trim ? trim($value) : $value;
     }
 
+    /* Nie używamy ?:, bo tekst "0" też jest dla niego pusty i liczba 0 zniknęłaby przed walidacją. */
+    protected static function textOr(array $input, string $key, string $default): string
+    {
+        $value = self::text($input, $key);
+
+        return $value === '' ? $default : $value;
+    }
+
     protected function requireChoice(string $field, string $value, array $allowed, string $message): void
     {
         if (!in_array($value, $allowed, true)) {

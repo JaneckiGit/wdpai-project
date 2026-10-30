@@ -19,12 +19,12 @@ final class VenueFilterForm extends Form
     public function __construct(array $input = [])
     {
         $this->query = self::text($input, 'q');
-        $this->purpose = self::text($input, 'purpose') ?: 'work';
-        $this->mode = self::text($input, 'mode') ?: 'seats';
+        $this->purpose = self::textOr($input, 'purpose', 'work');
+        $this->mode = self::textOr($input, 'mode', 'seats');
         $this->date = self::text($input, 'date');
         $this->from = self::text($input, 'from');
         $this->to = self::text($input, 'to');
-        $this->guests = self::text($input, 'guests') ?: '1';
+        $this->guests = self::textOr($input, 'guests', '1');
         $this->maxPrice = self::text($input, 'maxPrice');
     }
 
