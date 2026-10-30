@@ -66,6 +66,13 @@ abstract class Form
         }
     }
 
+    protected function requireMaxLength(string $field, string $value, int $max, string $message): void
+    {
+        if (mb_strlen($value) > $max) {
+            $this->addError($field, $message);
+        }
+    }
+
     protected function requirePositiveInt(string $field, string $value, string $message): void
     {
         if (!ctype_digit($value) || (int) $value < 1) {

@@ -29,29 +29,30 @@
         </section>
     </aside>
 
-    <form action="/host/venues" method="post" enctype="multipart/form-data">
+    <form action="/host/venues/new" method="post" enctype="multipart/form-data">
+        <?php require __DIR__ . '/partials/form-errors.html.php'; ?>
+
         <fieldset id="basics">
             <legend>Podstawowe</legend>
 
             <label for="name">Nazwa lokalu</label>
-            <input type="text" id="name" name="name" maxlength="120" required>
+            <input type="text" id="name" name="name" value="<?= htmlspecialchars($form->name) ?>" maxlength="120" required <?= $form->invalidAttributes('name') ?>>
 
             <label for="type">Typ lokalu</label>
-            <select id="type" name="type" required>
+            <select id="type" name="type" required <?= $form->invalidAttributes('type') ?>>
                 <option value="">Wybierz typ</option>
-                <option value="cafe">Kawiarnia</option>
-                <option value="bar">Bar koktajlowy</option>
-                <option value="restaurant">Restauracja</option>
-                <option value="studio">Pracownia</option>
+                <?php foreach (['cafe' => 'Kawiarnia', 'bar' => 'Bar koktajlowy', 'restaurant' => 'Restauracja', 'studio' => 'Pracownia'] as $value => $label): ?>
+                    <option value="<?= $value ?>" <?= $form->type === $value ? 'selected' : '' ?>><?= $label ?></option>
+                <?php endforeach; ?>
             </select>
 
             <label for="address">Adres</label>
-            <input type="text" id="address" name="address" autocomplete="street-address" required aria-describedby="address-hint">
+            <input type="text" id="address" name="address" value="<?= htmlspecialchars($form->address) ?>" autocomplete="street-address" required <?= $form->invalidAttributes('address', 'address-hint') ?>>
             <!-- TODO: Mapa z pinezką do poprawienia lokalizacji -->
             <p id="address-hint">Przeciągnij pinezkę, jeśli adres wskazuje niedokładne miejsce. Najemcy zobaczą przybliżoną lokalizację.</p>
 
             <label for="description">Opis</label>
-            <textarea id="description" name="description" rows="4" maxlength="600" aria-describedby="description-hint"></textarea>
+            <textarea id="description" name="description" rows="4" maxlength="600" required <?= $form->invalidAttributes('description', 'description-hint') ?>><?= htmlspecialchars($form->description) ?></textarea>
             <p id="description-hint">Maksymalnie 600 znaków.</p>
         </fieldset>
 
@@ -59,10 +60,14 @@
             <legend>Dozwolone cele</legend>
             <p>Najemca wybierze jeden z zaznaczonych celów przy rezerwacji.</p>
 
-            <label><input type="checkbox" name="purposes[]" value="work"> <strong>Praca</strong> praca zdalna, coworking</label>
-            <label><input type="checkbox" name="purposes[]" value="meetings"> <strong>Spotkania i szkolenia</strong> zespoły, warsztaty, prezentacje</label>
-            <label><input type="checkbox" name="purposes[]" value="shoots"> <strong>Sesje foto i wideo</strong> zdjęcia, nagrania, reklamy</label>
-            <label><input type="checkbox" name="purposes[]" value="events"> <strong>Kameralne wydarzenia</strong> kluby, degustacje, małe przyjęcia</label>
+            <?php foreach ([
+                'work' => ['Praca', 'praca zdalna, coworking'],
+                'meetings' => ['Spotkania i szkolenia', 'zespoły, warsztaty, prezentacje'],
+                'shoots' => ['Sesje foto i wideo', 'zdjęcia, nagrania, reklamy'],
+                'events' => ['Kameralne wydarzenia', 'kluby, degustacje, małe przyjęcia'],
+            ] as $value => [$label, $hint]): ?>
+                <label><input type="checkbox" name="purposes[]" value="<?= $value ?>" <?= in_array($value, $form->purposes, true) ? 'checked' : '' ?>> <strong><?= $label ?></strong> <?= $hint ?></label>
+            <?php endforeach; ?>
         </fieldset>
 
         <fieldset id="photos">
@@ -86,59 +91,55 @@
             <legend>Okna dostępności</legend>
             <p>Ustal, kiedy i w jakim trybie lokal jest dostępny. Okna tego samego lokalu nie mogą się nakładać.</p>
 
-            <!-- TODO: Kolejne okna dodawane przyciskiem „Dodaj okno” -->
-            <fieldset>
-                <legend>Okno 1</legend>
+            <?php foreach ($form->windows as $index => $window): ?>
+                <fieldset>
+                    <legend>Okno <?= $index + 1 ?></legend>
 
-                <label for="window-days">Dni</label>
-                <select id="window-days" name="windows[0][days]">
-                    <option value="mon-fri">pon–pt</option>
-                    <option value="mon-thu">pon–czw</option>
-                    <option value="mon">pon</option>
-                    <option value="tue">wt</option>
-                    <option value="wed">śr</option>
-                    <option value="thu">czw</option>
-                    <option value="fri">pt</option>
-                    <option value="sat">sob</option>
-                    <option value="sun">nd</option>
-                </select>
+                    <label for="window-days-<?= $index ?>">Dni</label>
+                    <select id="window-days-<?= $index ?>" name="windows[<?= $index ?>][days]" <?= $window->invalidAttributes('days') ?>>
+                        <?php foreach (['mon-fri' => 'pon–pt', 'mon-thu' => 'pon–czw', 'mon' => 'pon', 'tue' => 'wt', 'wed' => 'śr', 'thu' => 'czw', 'fri' => 'pt', 'sat' => 'sob', 'sun' => 'nd'] as $value => $label): ?>
+                            <option value="<?= $value ?>" <?= $window->days === $value ? 'selected' : '' ?>><?= $label ?></option>
+                        <?php endforeach; ?>
+                    </select>
 
-                <label for="window-from">Od godziny</label>
-                <input type="time" id="window-from" name="windows[0][from]" step="3600" required>
+                    <label for="window-from-<?= $index ?>">Od godziny</label>
+                    <input type="time" id="window-from-<?= $index ?>" name="windows[<?= $index ?>][from]" value="<?= htmlspecialchars($window->from) ?>" step="3600" required <?= $window->invalidAttributes('from') ?>>
 
-                <label for="window-to">Do godziny</label>
-                <input type="time" id="window-to" name="windows[0][to]" step="3600" required>
+                    <label for="window-to-<?= $index ?>">Do godziny</label>
+                    <input type="time" id="window-to-<?= $index ?>" name="windows[<?= $index ?>][to]" value="<?= htmlspecialchars($window->to) ?>" step="3600" required <?= $window->invalidAttributes('to') ?>>
 
-                <label for="window-mode">Tryb</label>
-                <select id="window-mode" name="windows[0][mode]">
-                    <option value="seats">Miejsca do pracy</option>
-                    <option value="exclusive">Na wyłączność</option>
-                </select>
+                    <label for="window-mode-<?= $index ?>">Tryb</label>
+                    <select id="window-mode-<?= $index ?>" name="windows[<?= $index ?>][mode]" <?= $window->invalidAttributes('mode') ?>>
+                        <option value="seats" <?= $window->mode === 'seats' ? 'selected' : '' ?>>Miejsca do pracy</option>
+                        <option value="exclusive" <?= $window->mode === 'exclusive' ? 'selected' : '' ?>>Na wyłączność</option>
+                    </select>
 
-                <label for="window-capacity">Liczba miejsc / maks. osób</label>
-                <input type="number" id="window-capacity" name="windows[0][capacity]" min="1" required>
+                    <label for="window-capacity-<?= $index ?>">Liczba miejsc / maks. osób</label>
+                    <input type="number" id="window-capacity-<?= $index ?>" name="windows[<?= $index ?>][capacity]" value="<?= htmlspecialchars($window->capacity) ?>" min="1" required <?= $window->invalidAttributes('capacity') ?>>
 
-                <label for="window-price">Cena za godzinę (zł)</label>
-                <input type="number" id="window-price" name="windows[0][price]" min="0" step="0.01" required>
+                    <label for="window-price-<?= $index ?>">Cena za godzinę (zł)</label>
+                    <input type="number" id="window-price-<?= $index ?>" name="windows[<?= $index ?>][price]" value="<?= htmlspecialchars($window->price) ?>" min="0" step="0.01" required <?= $window->invalidAttributes('price') ?>>
 
-                <label for="window-min-hours">Minimum godzin</label>
-                <input type="number" id="window-min-hours" name="windows[0][minHours]" min="1" value="2" required>
-            </fieldset>
+                    <label for="window-min-hours-<?= $index ?>">Minimum godzin</label>
+                    <input type="number" id="window-min-hours-<?= $index ?>" name="windows[<?= $index ?>][minHours]" value="<?= htmlspecialchars($window->minHours) ?>" min="1" required <?= $window->invalidAttributes('minHours') ?>>
+                </fieldset>
+            <?php endforeach; ?>
 
+            <!-- TODO: Kolejne okna dodawane przyciskiem „Dodaj okno” (Laboratorium 10) -->
             <button type="button">Dodaj okno</button>
         </fieldset>
 
         <fieldset id="entry">
             <legend>Wejście do lokalu</legend>
 
-            <label><input type="radio" name="entryMode" value="staff" checked> <strong>Pracownik na miejscu</strong> Ktoś z obsługi wpuści najemcę i będzie dostępny w lokalu.</label>
-            <label><input type="radio" name="entryMode" value="key"> <strong>Przekazanie klucza</strong> Najemca odbiera klucz lub kod – instrukcję podajesz poniżej.</label>
+            <label><input type="radio" name="entryMode" value="staff" <?= $form->entryMode === 'staff' ? 'checked' : '' ?>> <strong>Pracownik na miejscu</strong> Ktoś z obsługi wpuści najemcę i będzie dostępny w lokalu.</label>
+            <label><input type="radio" name="entryMode" value="key" <?= $form->entryMode === 'key' ? 'checked' : '' ?>> <strong>Przekazanie klucza</strong> Najemca odbiera klucz lub kod – instrukcję podajesz poniżej.</label>
 
             <label for="entry-instructions">Instrukcja wejścia – widoczna dla najemcy dopiero po akceptacji</label>
-            <textarea id="entry-instructions" name="entryInstructions" rows="3"></textarea>
+            <textarea id="entry-instructions" name="entryInstructions" rows="3" maxlength="1000" <?= $form->invalidAttributes('entryInstructions') ?>><?= htmlspecialchars($form->entryInstructions) ?></textarea>
         </fieldset>
 
-        <button type="submit" name="action" value="draft">Zapisz szkic</button>
+        <button type="submit" name="action" value="draft" formnovalidate>Zapisz szkic</button>
         <button type="submit" name="action" value="submit">Wyślij do weryfikacji</button>
     </form>
 </main>

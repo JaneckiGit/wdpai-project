@@ -35,6 +35,7 @@ $routing->get('/venues/{id}', VenueController::class, 'show');
 $routing->post('/venues/{id}/reservations', VenueController::class, 'requestReservation');
 $routing->get('/host', HostController::class, 'dashboard');
 $routing->get('/host/venues/new', HostController::class, 'addVenue');
+$routing->post('/host/venues/new', HostController::class, 'addVenue');
 
 try {
     $routeFound = $routing->dispatch(

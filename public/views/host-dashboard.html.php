@@ -21,6 +21,8 @@
 </aside>
 
 <main>
+    <?php require __DIR__ . '/partials/status-message.html.php'; ?>
+
     <header>
         <p>Gospodarz · poniedziałek, 17.11</p>
         <h1>Dzień dobry, Piotr</h1>
