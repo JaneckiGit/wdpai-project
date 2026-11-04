@@ -566,6 +566,306 @@ Najpierw reguły wspólne, potem osobno telefon i komputer, bo oba układy są z
     font-size: 1rem;
 }
 
+/* Telefon (do 767 px): rolka na cały ekran, mapa i reszta filtrów jako warstwy otwierane linkiem do kotwicy. */
+@media (max-width: 47.9375rem) {
+    .site-header {
+        position: absolute;
+        top: 0;
+        right: 0;
+        left: 0;
+        z-index: 10;
+        border-bottom: 0;
+        background: transparent;
+        color: var(--color-on-dark);
+    }
+
+    .site-header .theme-toggle {
+        color: var(--color-on-dark);
+    }
+
+    .site-header__account {
+        box-shadow: 0 0 0 2px rgb(255 255 255 / 70%);
+    }
+
+    .site-nav {
+        border-top-color: rgb(255 255 255 / 8%);
+        background: var(--color-dark);
+    }
+
+    .site-nav__link {
+        color: #d6d0c9;
+    }
+
+    .site-nav__link[aria-current="page"] {
+        color: var(--color-on-dark);
+    }
+
+    /* Jaśniejszy obrys fokusu jest widoczny na ciemnym zdjęciu rolki. */
+    .site-header,
+    .view-switch--mobile,
+    .filters__open,
+    .filters__purpose,
+    .reel {
+        --color-focus: #f0a27e;
+    }
+
+    .discover {
+        position: relative;
+    }
+
+    .view-switch--desktop {
+        display: none;
+    }
+
+    .view-switch--mobile {
+        position: absolute;
+        top: 3.75rem;
+        left: 50%;
+        z-index: 10;
+        border: 1px solid rgb(255 255 255 / 22%);
+        background: rgb(255 255 255 / 14%);
+        transform: translateX(-50%);
+    }
+
+    .view-switch--mobile .view-switch__option {
+        height: 2.125rem;
+        padding: 0 1.125rem;
+        color: var(--color-on-dark);
+    }
+
+    /* Domyślnie wybrane są rolki, a po otwarciu mapy (#map w adresie) – mapa. */
+    .view-switch--mobile .view-switch__option--reels,
+    .discover:has(.map:target) .view-switch--mobile .view-switch__option--map {
+        background: var(--color-on-dark);
+        color: var(--color-dark);
+        font-weight: 600;
+    }
+
+    .discover:has(.map:target) .view-switch--mobile .view-switch__option--reels {
+        background: transparent;
+        color: var(--color-on-dark);
+        font-weight: 500;
+    }
+
+    .filters {
+        position: absolute;
+        top: 6.875rem;
+        right: 0;
+        left: 0;
+        z-index: 10;
+        display: flex;
+        align-items: center;
+        gap: var(--space-1);
+        padding: 0 var(--space-2);
+    }
+
+    .filters .form-errors {
+        position: absolute;
+        top: 3rem;
+        right: var(--space-2);
+        left: var(--space-2);
+    }
+
+    .filters__open {
+        display: grid;
+        flex: none;
+        place-items: center;
+        width: 2.5rem;
+        height: 2.25rem;
+        border: 1px solid rgb(255 255 255 / 35%);
+        border-radius: var(--radius-pill);
+        background: rgb(28 25 23 / 55%);
+        color: var(--color-on-dark);
+    }
+
+    .filters__purpose {
+        display: flex;
+        gap: var(--space-1);
+        overflow-x: auto;
+        scrollbar-width: none;
+    }
+
+    .filters__purpose legend {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip: rect(0 0 0 0);
+        white-space: nowrap;
+    }
+
+    .filters__purpose .chip {
+        border-color: rgb(255 255 255 / 35%);
+        background: rgb(28 25 23 / 55%);
+        color: var(--color-on-dark);
+    }
+
+    .filters__purpose .chip:has(input:checked) {
+        border-color: var(--color-on-dark);
+        background: var(--color-on-dark);
+        color: var(--color-dark);
+    }
+
+    .filters__panel {
+        display: none;
+    }
+
+    .filters__panel:target {
+        position: fixed;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        z-index: 30;
+        display: flex;
+        flex-direction: column;
+        gap: 1.25rem;
+        max-height: 85svh;
+        overflow-y: auto;
+        padding: var(--space-2) 1.25rem var(--space-3);
+        border-radius: 1.5rem 1.5rem 0 0;
+        background: var(--color-surface-muted);
+        color: var(--color-text);
+        box-shadow: 0 -12px 32px rgb(28 25 23 / 25%);
+    }
+
+    .filters__panel-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .filters__panel-header h2 {
+        font-size: 1.625rem;
+    }
+
+    .filters__close {
+        display: grid;
+        place-items: center;
+        width: 2.75rem;
+        height: 2.75rem;
+        margin-right: -0.5rem;
+        color: var(--color-text);
+    }
+
+    .filters__mode legend {
+        margin-bottom: var(--space-1);
+        padding: 0;
+        font-size: 0.875rem;
+        font-weight: 600;
+    }
+
+    .segmented {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        padding: 0.25rem;
+        border-radius: 0.875rem;
+        background: var(--color-chip);
+    }
+
+    .segmented__option {
+        justify-content: center;
+        height: 2.375rem;
+        border-radius: 0.625rem;
+        color: var(--color-muted);
+    }
+
+    .segmented__option:has(input:checked) {
+        background: var(--color-surface);
+        color: var(--color-text);
+        box-shadow: 0 1px 3px rgb(28 25 23 / 14%);
+    }
+
+    .filters__fields {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .pill-field {
+        min-height: 3rem;
+    }
+
+    .filters__submit {
+        min-height: 3rem;
+        border-radius: var(--radius-sm);
+        font-size: 1rem;
+    }
+
+    .filters__clear,
+    .filters__count {
+        text-align: center;
+    }
+
+    .map {
+        display: none;
+    }
+
+    /* Otwarta mapa zaczyna się pod paskiem celów, a ciemny pas nad nią zastępuje rolkę pod nagłówkiem. */
+    .map:target {
+        position: fixed;
+        top: 9.5rem;
+        right: 0;
+        bottom: 4.5rem;
+        left: 0;
+        z-index: 5;
+        display: block;
+    }
+
+    .discover:has(.map:target)::before {
+        content: "";
+        position: fixed;
+        top: 0;
+        right: 0;
+        left: 0;
+        z-index: 5;
+        height: 9.5rem;
+        background: var(--color-dark);
+    }
+
+    .reels__hint {
+        display: none;
+    }
+
+    .reels__feed {
+        height: calc(100svh - 4.5rem);
+    }
+
+    .reel {
+        height: 100%;
+    }
+
+    .reel::after {
+        background: linear-gradient(
+            180deg,
+            rgb(28 25 23 / 88%) 0%,
+            rgb(28 25 23 / 55%) 16%,
+            rgb(28 25 23 / 0%) 30%,
+            rgb(28 25 23 / 0%) 39%,
+            rgb(28 25 23 / 70%) 70%,
+            rgb(28 25 23 / 96%) 100%
+        );
+    }
+
+    /* Na telefonie pasek postępu leży na dole rolki, a opis czasu jest ukryty jak w prototypie. */
+    .reel__status {
+        right: 0;
+        bottom: 0;
+        left: 0;
+    }
+
+    .reel__meta {
+        display: none;
+    }
+
+    .reel__actions {
+        bottom: 9.375rem;
+    }
+
+    .reel__info {
+        bottom: 4.875rem;
+    }
+}
+
 /* Komputer i tablet (od 768 px): pasek filtrów, a pod nim mapa obok kolumny rolek. */
 @media (min-width: 48rem) {
     .view-switch--mobile,
