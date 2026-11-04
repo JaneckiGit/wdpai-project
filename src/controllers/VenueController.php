@@ -23,6 +23,7 @@ final class VenueController extends AppController
 
         $this->render('venues', [
             'pageTitle' => 'Odkrywaj – PoGodzinach',
+            'stylesheet' => 'venues',
             'activeNav' => 'venues',
             'form' => $form,
             'errors' => $form->errors(),
