@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 900" width="1200" height="900" preserveAspectRatio="none">
+<rect width="1200" height="900" fill="#ECE5DA"></rect>
+<g fill="#D3DCC1">
+<path d="M70 300c60-44 180-52 240-22 34 40 22 116-20 146-74 32-180 22-230-20-22-32-12-74 10-104z"></path>
+<path d="M330 236c30-22 74-16 88 10 10 32-10 62-42 66-36 6-62-10-62-42 0-14 6-24 16-34z"></path>
+<path d="M620 760c42-26 104-20 124 16 10 32-16 62-62 66-42 6-78-14-78-46 0-14 6-26 16-36z"></path>
+<path d="M150 760c64-32 158-22 178 32 10 42-42 84-116 84-62 0-104-32-94-74 4-16 16-32 32-42z"></path>
+<path d="M940 120c50-20 120-10 150 30 20 40-10 80-60 86-60 6-110-20-110-60 0-24 6-44 20-56z"></path>
+<circle cx="538" cy="520" r="36"></circle>
+</g>
+<path d="M548 228c56-6 98 30 104 86 6 62-14 122-56 152-30 22-82 22-108-4-30-30-46-92-42-142 6-52 46-86 102-92z" fill="none" stroke="#C5D1AF" stroke-width="20"></path>
+<path d="M-20 610C120 566 250 600 350 644S500 610 560 576 660 600 720 652 860 708 960 668 1100 622 1220 664" fill="none" stroke="#C6D4D7" stroke-width="48" stroke-linecap="round"></path>
+<g fill="none" stroke="#F8F4EE" stroke-linecap="round" stroke-width="6">
+<path d="M20 200H330M60 560C150 540 250 560 330 600M700 260L880 300M680 330L900 360M700 420L900 470M640 500L860 540M760 220L720 520M840 250L800 560M200 120L230 280M120 640L200 880M300 680L280 900M700 740L760 880M560 720L900 780M80 820H420M960 520L1200 560M980 640L1200 600M1000 260L1200 220M1040 360L1200 380M120 420L60 560"></path>
+<path d="M482 300H622M474 360H634M484 420H612M522 250V454M574 244V458"></path>
+</g>
+<rect x="527" y="307" width="44" height="50" rx="3" fill="#E1D5C3"></rect>
+<g fill="none" stroke="#FFFFFF" stroke-linecap="round" stroke-linejoin="round" stroke-width="12">
+<path d="M330 110C400 190 430 300 428 410S440 560 476 616"></path>
+<path d="M430 130C540 146 650 156 760 196S900 300 936 420"></path>
+<path d="M936 420C928 540 884 640 820 712"></path>
+<path d="M-10 470H300C360 470 412 446 428 410"></path>
+<path d="M660 160L700 -10"></path>
+<path d="M936 420H1210"></path>
+<path d="M610 640L650 910"></path>
+<path d="M476 616L430 910"></path>
+<path d="M820 712L1000 910"></path>
+<path d="M330 110L250 -10"></path>
+</g>
+<path d="M640 -10C700 110 760 200 900 258S1100 300 1210 292" fill="none" stroke="#CBC2B5" stroke-width="4" stroke-dasharray="14 10"></path>
+</svg>
