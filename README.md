@@ -55,13 +55,13 @@ Gotowy jest szkielet MVC z laboratoriów oraz szablony HTML pięciu widoków z p
 | Strona główna | Widok startowy z linkiem do listy projektów (przykład z laboratorium) |
 | Projekty | Lista projektów i widok szczegółów projektu o podanym id (przykład z laboratorium) |
 | Logowanie | Formularz z wyborem typu konta, e-mailem i hasłem; walidacja i przekierowanie zależne od typu konta (bez sprawdzania hasła, które dojdzie w Laboratorium 9) |
-| Odkrywaj | Filtry w parametrach adresu (fraza, cel, tryb, data, godziny, liczba osób, cena) z walidacją, legenda mapy i rolki lokali |
+| Odkrywaj | Filtry w parametrach adresu (fraza, cel, tryb, data, godziny, liczba osób, cena) z walidacją, mapa z cenami lokali i przewijana kolumna rolek; na telefonie rolka na cały ekran, a mapa i reszta filtrów jako warstwy |
 | Lokal i rezerwacja | Opis lokalu, cele, oferta, udogodnienia, opinie i formularz prośby o rezerwację z walidacją; id lokalu z adresu trafia do adresu formularza |
 | Panel gospodarza | Podsumowanie, prośby o rezerwację z działającymi przyciskami decyzji, kalendarz tygodnia w tabeli, komunikaty po przekierowaniu |
 | Dodaj lokal | Formularz w sześciu krokach z walidacją, w tym wykrywaniem nakładających się okien dostępności; szkic i wysłanie do weryfikacji |
 | Obsługa błędów | Kontrolowane odpowiedzi 400, 404, 422 i 500 (sekcja „Formularze i obsługa błędów”) |
 
-Widoki to semantyczny HTML. W pełni ostylowany jest na razie widok Logowanie (Laboratorium 3, opis w sekcji „Style CSS”), pozostałe widoki mają tylko style bazowe (kolory, fonty, linki, fokus). Na każdej stronie działa motyw jasny i ciemny (Laboratorium 5, sekcja „Motyw jasny i ciemny”). Dane w widokach są przykładowe, wzięte z prototypu – listy oznaczone komentarzem `TODO` będą wyświetlane w pętli z danych z bazy. Formularze są sprawdzane po stronie serwera, ale aplikacja nie ma jeszcze bazy, więc poprawne dane nie są nigdzie zapisywane, a filtry nie zawężają listy lokali (Laboratoria 7–8). Pliki z formularza „Dodaj lokal” nie są jeszcze przetwarzane (Laboratorium 13), a przycisk „Dodaj okno” zadziała po dodaniu JavaScriptu (Laboratorium 10) – do tego czasu formularz w przeglądarce pokazuje jedno okno, a serwer obsługuje ich dowolnie wiele. Ochrona CSRF i sprawdzanie hasła dojdą w Laboratorium 9. Linki do zaplanowanych, jeszcze nieistniejących stron (np. `/register`, `/reservations`, `/terms`) kończą się odpowiedzią 404. Przełącznika języka jeszcze nie ma.
+Widoki to semantyczny HTML. Według prototypu ostylowane są widoki Logowanie i Odkrywaj oraz wspólny nagłówek, nawigacja i stopka (opis w sekcji „Style CSS”). Pozostałe widoki mają już ten nagłówek i stopkę, a ich treść ma na razie tylko style bazowe (kolory, fonty, linki, fokus). Na każdej stronie działa motyw jasny i ciemny (Laboratorium 5, sekcja „Motyw jasny i ciemny”). Dane w widokach są przykładowe, wzięte z prototypu – listy oznaczone komentarzem `TODO` będą wyświetlane w pętli z danych z bazy. Formularze są sprawdzane po stronie serwera, ale aplikacja nie ma jeszcze bazy, więc poprawne dane nie są nigdzie zapisywane, a filtry nie zawężają listy lokali (Laboratoria 7–8). Pliki z formularza „Dodaj lokal” nie są jeszcze przetwarzane (Laboratorium 13), a przycisk „Dodaj okno” zadziała po dodaniu JavaScriptu (Laboratorium 10) – do tego czasu formularz w przeglądarce pokazuje jedno okno, a serwer obsługuje ich dowolnie wiele. Ochrona CSRF i sprawdzanie hasła dojdą w Laboratorium 9. Mapa w widoku Odkrywaj jest na razie ilustracją z pinezkami w stałych miejscach, a przyciski mapy i rolek (przybliżanie, „Zapisz”, „Pauza” itp.) zaczną działać razem z mapą, wideo i JavaScriptem (Laboratoria 10 i 13). Linki do zaplanowanych, jeszcze nieistniejących stron (np. `/register`, `/reservations`, `/profile`, `/terms`) kończą się odpowiedzią 404. Przełącznika języka jeszcze nie ma.
 
 ## Tech stack
 
@@ -148,12 +148,12 @@ Bardziej szczegółowe reguły (`App\Controller\`, `App\Form\`) mają pierwszeń
 | Kontroler bazowy | `src/controllers/AppController.php` | Wspólne renderowanie widoków i stron błędów, `isPost()`, `redirect()`, komunikaty statusu |
 | Kontrolery | `src/controllers/*Controller.php` | Wybór widoku i danych dla danej trasy, koordynacja formularza i przekierowania |
 | Formularze | `src/forms/*Form.php` | Dane wpisane przez użytkownika i reguły ich walidacji |
-| Layout | `public/views/layout.html.php` | Wspólny dokument HTML: `<head>`, skrypt motywu, arkusze stylów (opcjonalny arkusz widoku ze zmiennej `$stylesheet`), przełącznik motywu, `theme.js` |
+| Layout | `public/views/layout.html.php` | Wspólny dokument HTML: `<head>`, skrypt motywu, arkusze stylów (opcjonalny arkusz widoku ze zmiennej `$stylesheet`), pływający przełącznik motywu na stronach bez nagłówka, `theme.js` |
 | Widoki | `public/views/*.html.php` | Semantyczny HTML z danymi od kontrolera |
-| Wspólne fragmenty widoków | `public/views/partials/*.html.php` | Nagłówek z nawigacją, stopka, lista błędów formularza i komunikat statusu, dołączane do widoków przez `require` |
+| Wspólne fragmenty widoków | `public/views/partials/*.html.php` | Nagłówek z nawigacją, stopka, przełącznik motywu, lista błędów formularza i komunikat statusu, dołączane do widoków przez `require` |
 | Autoloader | `composer.json`, `vendor/autoload.php` | Wczytywanie plików klas na podstawie namespace |
 
-Nagłówek i stopka są wspólne dla wielu widoków, więc nie są kopiowane do każdego szablonu. Widok dołącza je instrukcją `<?php require __DIR__ . '/partials/header.html.php'; ?>`. Dołączony plik ma dostęp do tych samych zmiennych co widok, dlatego nagłówek korzysta ze zmiennej `$activeNav` przekazanej z kontrolera i oznacza bieżącą pozycję menu atrybutem `aria-current="page"`.
+Nagłówek i stopka są wspólne dla wielu widoków, więc nie są kopiowane do każdego szablonu. Widok dołącza je instrukcją `<?php require __DIR__ . '/partials/header.html.php'; ?>`. Dołączony plik ma dostęp do tych samych zmiennych co widok, dlatego nagłówek korzysta ze zmiennej `$activeNav` przekazanej z kontrolera i oznacza bieżącą pozycję menu atrybutem `aria-current="page"`. Działa to też w drugą stronę: nagłówek ustawia zmienną `$themeToggleInHeader`, a layout (wykonywany po widoku w tej samej metodzie `render()`) dołącza pływający przełącznik motywu tylko wtedy, gdy tej zmiennej nie ma – strona z nagłówkiem ma przełącznik w nagłówku, a np. Logowanie w rogu ekranu.
 
 ## Routing
 
@@ -232,10 +232,13 @@ Dane wyświetlane z powrotem w HTML przechodzą przez `htmlspecialchars()`, wię
 
 | Plik | Zawartość |
 |---|---|
-| `public/css/style.css` | Zmienne CSS (tokeny projektu w wariancie jasnym i ciemnym), `box-sizing`, typografia, linki, fokus oraz wspólne komponenty: logo, przycisk, pola formularza, karty wyboru typu konta, stopka, przełącznik motywu |
+| `public/css/style.css` | Zmienne CSS (tokeny projektu w wariancie jasnym i ciemnym), `box-sizing`, typografia, linki, fokus, klasa `visually-hidden` oraz wspólne komponenty: logo, przycisk, pola formularza, karty wyboru typu konta, nagłówek z nawigacją, stopka, przełącznik motywu |
 | `public/css/login.css` | Układ widoku Logowanie (dołączany przez layout, gdy kontroler przekaże `'stylesheet' => 'login'`) |
+| `public/css/venues.css` | Układ widoku Odkrywaj: pasek filtrów, mapa z pinezkami, kolumna rolek (`'stylesheet' => 'venues'`) |
 | `public/js/theme.js` | Przełączanie i zapamiętywanie motywu |
-| `public/images/login-hero.svg` | Ilustracja z prototypu w lewej kolumnie logowania |
+| `public/images/icons.svg` | Ikony z prototypu jako `<symbol>`; widok wstawia ikonę przez `<svg class="icon"><use href="/images/icons.svg#laptop"></use></svg>`, więc kod ikony nie jest kopiowany do każdego miejsca |
+| `public/images/map-krakow.svg` | Mapa Krakowa z prototypu (tło mapy w widoku Odkrywaj) |
+| `public/images/venues/*.svg` | Ilustracje przykładowych lokali z prototypu: Bar Lampion (też tło logowania) i Kawiarnia Ziarno |
 
 Kolory, fonty, odstępy i zaokrąglenia są zapisane raz w `:root` jako zmienne nazwane według roli (np. `--color-primary`, `--color-muted`, `--space-2`, `--radius`), a reguły odwołują się do nich przez `var()`. Wartości pochodzą z prototypu: kolor marki `#B4532A`, tekst `#1C1917`, tło `#F4EFE9`, nagłówki w kroju Newsreader, tekst w Inter (oba z Google Fonts).
 
@@ -251,6 +254,46 @@ Stany interfejsu: `:hover` dla linków, przycisku, pól i kart; `:focus-visible`
 
 Sprawdzone w przeglądarce na szerokościach 360, 768 i 1440 px – bez poziomego przewijania.
 
+### Nagłówek i nawigacja
+
+Wspólny nagłówek (`partials/header.html.php`) ma logo, wyszukiwarkę, nawigację, przełącznik motywu i avatar konta. Jest zbudowany mobile first:
+
+| Szerokość | Układ |
+|---|---|
+| poniżej 48rem (768 px) | W nagłówku logo, przełącznik motywu (sama ikona działania) i avatar; nawigacja to przyklejony do dołu ekranu pasek z ikonami (`position: fixed`), a `body:has(.site-nav)` dostaje dolny margines, żeby pasek nie zasłaniał końca strony |
+| od 48rem | Logo, wyszukiwarka, nawigacja tekstowa z podkreśleniem bieżącej strony, przełącznik motywu z dwiema opcjami (słońce i księżyc, wybrana na białym tle) i avatar w jednym rzędzie |
+
+Pozycja „Moje rezerwacje” ma dwie etykiety: pełną na komputerze i krótką („Rezerwacje”) w dolnym pasku. Niewidoczna jest ukryta przez `display: none`, więc czytnik ekranu nie czyta obu naraz. Pozycja „Profil” jest tylko w dolnym pasku, bo na komputerze tę rolę pełni avatar.
+
+### Odkrywaj
+
+`venues.css` ma reguły wspólne, a potem osobne bloki dla telefonu (`max-width: 47.9375rem`) i komputera (`min-width: 48rem`). Oba układy są zupełnie różne, więc rozdzielenie ich jest prostsze niż nadpisywanie reguł telefonu na dużym ekranie.
+
+| Szerokość | Układ |
+|---|---|
+| poniżej 48rem (768 px) | Rolka na cały ekran (nad dolnym paskiem), a na niej przezroczysty nagłówek, przełącznik „Rolki / Mapa” i przewijany w poziomie rząd celów. Ikona suwaków otwiera panel z resztą filtrów, a „Mapa” – mapę jako warstwę pod paskiem celów |
+| od 48rem | Pasek filtrów (cele, tryb, przełącznik „Mapa / Lista”, a w drugim rzędzie data, godziny, liczba osób, cena, liczba lokali), pod nim mapa (3 części szerokości) obok kolumny rolek (2 części); poniżej 1020 px kolumny układają się jedna pod drugą (`flex-wrap`) |
+
+Użyte techniki:
+
+- **Warstwy bez JavaScriptu** – panel filtrów i mapa na telefonie są ukryte, dopóki adres nie kończy się ich kotwicą (`#filters-panel`, `#map`). Pokazuje je selektor `:target`, a przełącznik „Rolki / Mapa” podświetla wybraną opcję dzięki `.discover:has(.map:target)`. Link „Zamknij” prowadzi do `#`.
+- **Jeden formularz na dwa układy** – na telefonie tryb i pola są w panelu `.filters__panel`, a na komputerze ten sam panel ma `display: contents`, więc jego dzieci stają się elementami paska filtrów i ustawia je `order`.
+- **Legenda w jednym rzędzie z opcjami** – `float: left` na `<legend>` zamienia ją w zwykły element pola `fieldset`, więc „Cel” i „Tryb” stoją obok przycisków.
+- **Cele i tryb** to etykiety z ukrytymi polami `radio`, jak karty typu konta w logowaniu – wybór pokazuje `:has(input:checked)`, fokus `:has(input:focus-visible)`.
+- **Rolki** przewijają się w kolumnie z `scroll-snap-type: y mandatory`, więc każda zatrzymuje się na górze. Kolumna ma `tabindex="0"`, dlatego po przejściu do niej klawiszem Tab można ją przewijać strzałkami. Postęp rolki to element `<progress>`.
+- **Mapa** jest jasna w obu motywach (jak obraz), więc ma własne stałe kolory w zmiennych `--map-*`. Pinezki to linki do stron lokali z opisem dla czytnika ekranu w `aria-label`. Ich położenie w procentach pochodzi z prototypu i zastąpi je mapa ze współrzędnymi z bazy (Laboratorium 13).
+
+Różnice względem prototypu, które wynikają z braku JavaScriptu i bazy na tym etapie:
+
+| Prototyp | Teraz | Kiedy jak w prototypie |
+|---|---|---|
+| Filtry działają od razu po zmianie | Przycisk „Pokaż lokale” wysyła formularz | Laboratorium 10 |
+| Data i godziny w rozwijanych „pigułkach” („Dziś, pon 17.11”, „9:00–13:00”) | Natywne pola `date` i `time` w takich samych „pigułkach” | Laboratorium 10 |
+| Kliknięcie pinezki przewija rolki do lokalu | Pinezka prowadzi na stronę lokalu | Laboratorium 13 |
+| Przycisk „Lista” zmienia widok wyników | Link bez osobnego widoku (prototyp nie ma ekranu listy) | po zaprojektowaniu widoku |
+
+Sprawdzone w przeglądarce na szerokościach 375, 768 i 1440 px w obu motywach – bez poziomego przewijania; przewijanie rolek myszą i klawiaturą, otwieranie i zamykanie panelu filtrów i mapy, błędy walidacji filtrów (np. `?guests=0`) na obu szerokościach.
+
 ## Motyw jasny i ciemny
 
 Motyw to dane: atrybut `data-theme="light"` albo `data-theme="dark"` na `<html>` wybiera zestaw wartości tych samych zmiennych CSS. Komponenty używają tylko ról (`var(--color-surface)`, `var(--color-text)` …), a blok `html[data-theme="dark"]` w `style.css` podmienia ich wartości. Nie ma osobnego arkusza dla ciemnego motywu.
@@ -263,7 +306,7 @@ Kolejność wyboru motywu:
 | Element | Plik | Działanie |
 |---|---|---|
 | Skrypt w `<head>` | `public/views/layout.html.php` | Ustawia `data-theme` przed pierwszym arkuszem stylów, więc strona nie miga jasnym motywem przed ciemnym (brak FOUC) |
-| Przełącznik | `public/views/layout.html.php`, `.theme-toggle` w `style.css` | Element `<button>` obsługiwany myszą i klawiaturą (Tab, Enter, Spacja); `aria-label` i `aria-pressed` opisują stan, ikona (Font Awesome) pokazuje działanie: księżyc włącza ciemny, słońce jasny |
+| Przełącznik | `public/views/partials/theme-toggle.html.php`, `.theme-toggle` w `style.css` | Element `<button>` obsługiwany myszą i klawiaturą (Tab, Enter, Spacja); `aria-label` i `aria-pressed` opisują stan. Przycisk ma dwie ikony SVG (słońce i księżyc), a CSS wybiera, co widać: pływający przycisk na Logowaniu i nagłówek na telefonie pokazują działanie (księżyc włącza ciemny, słońce jasny), a nagłówek na komputerze obie opcje z wyróżnioną bieżącą |
 | Logika | `public/js/theme.js` | Przełącza motyw, zapisuje wybór, synchronizuje przycisk i podąża za systemem, dopóki nie ma zapisu |
 
 Kolor marki, przyciski, logo i ilustracja logowania są takie same w obu motywach. Powrót do ustawienia systemowego (np. przy testach): w konsoli przeglądarki `localStorage.removeItem('theme'); location.reload();`.
@@ -310,10 +353,10 @@ Style z Laboratorium 3 korzystają z przykładów z instrukcji (zmienne w `:root
 Motyw z Laboratorium 5 korzysta 1:1 z kodu instrukcji: skrypt w `<head>`, znaczniki i style przełącznika `.theme-toggle`, `public/js/theme.js` oraz nazwy tokenów (`--color-bg`, `--color-primary`, `--color-focus`, `--shadow-soft` … – tokeny z Laboratorium 3 zostały do nich przemianowane). Świadome różnice:
 
 - instrukcja zakłada wspólny `public/views/layout.html.php` z `<?= $content ?>`, którego projekt wcześniej nie miał – powstał, a `AppController::render()` buforuje widok i dołącza layout; widoki z Laboratorium 2 straciły przez to własne `<!doctype>`, `<head>` i `<body>` (treść bez zmian);
-- przełącznik używa ikon Font Awesome (`fa-moon`, `fa-sun`), więc layout dołącza Font Awesome 6.7.2 z cdnjs;
+- przełącznik ma dwie ikony SVG (słońce i księżyc) zamiast jednej ikony Font Awesome (`fa-moon` / `fa-sun`) – nagłówek z prototypu pokazuje na komputerze obie opcje naraz, a jedna podmieniana ikona tego nie umożliwia; z `public/js/theme.js` usunięte są przez to trzy linie obsługujące ikonę (`themeIcon`), a layout nie dołącza już Font Awesome; którą ikonę widać, wybiera CSS na podstawie `data-theme`;
 - wartości tokenów pochodzą z palety PoGodzinach, nie z projektu referencyjnego; `--color-focus` jest pełnym kolorem zamiast koloru z 35% krycia (ten miał na tle kontrast poniżej 3:1), a `--color-primary` jest taki sam w obu motywach, bo biały tekst na `#B4532A` ma 5:1;
 - ogólnej reguły `button { background: var(--color-primary) }` z kroku 4 nie dodano – przyciski są stylowane klasami (`.button`, `.theme-toggle`), a reguła zmieniłaby też np. przycisk wyszukiwarki;
-- przełącznik ma na razie `position: fixed` (wariant z instrukcji dla projektu bez ostylowanej nawigacji); po ostylowaniu nagłówka trafi do nawigacji.
+- na stronach z nagłówkiem przełącznik jest w nagłówku (`partials/header.html.php`), a wariant `position: fixed` z instrukcji został na stronach bez nagłówka (Logowanie, strony błędów, przykłady z laboratorium); znaczniki są w jednym miejscu, `partials/theme-toggle.html.php`.
 
 Materiały Laboratorium 6 omawiają podstawy PHP i programowanie obiektowe, ale nie zawierają kodu formularzy, więc jego struktura (`src/forms/`, klasa abstrakcyjna `Form`, stałe klas, dziedziczenie) jest własnym rozwiązaniem. Elementy z późniejszych instrukcji użyte wcześniej, żeby nie zmieniać ich potem:
 
@@ -348,11 +391,11 @@ Wynikają z konfiguracji z laboratorium, do rozwiązania w kolejnych etapach:
 │   └── php/              # obraz PHP-FPM z rozszerzeniami
 ├── public/               # katalog publiczny (document root Nginx)
 │   ├── index.php         # Front Controller – jedyny punkt wejścia
-│   ├── css/              # arkusze stylów (style.css – wspólny, login.css – logowanie)
+│   ├── css/              # arkusze stylów (style.css – wspólny, login.css – logowanie, venues.css – Odkrywaj)
 │   ├── js/               # skrypty (theme.js – motyw jasny i ciemny)
-│   ├── images/           # obrazy używane w stylach
+│   ├── images/           # ikony (icons.svg), mapa i ilustracje lokali (venues/)
 │   └── views/            # layout.html.php i szablony widoków (*.html.php)
-│       └── partials/     # wspólny nagłówek i stopka
+│       └── partials/     # nagłówek, stopka, przełącznik motywu, błędy formularza, komunikat statusu
 ├── src/
 │   ├── Routing.php       # router: trasy i dopasowanie adresów (App\Routing)
 │   ├── controllers/      # AppController i kontrolery aplikacji (App\Controller)
