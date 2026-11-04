@@ -128,8 +128,11 @@
         <section class="map" id="map" aria-labelledby="map-heading">
             <h2 class="visually-hidden" id="map-heading">Mapa lokali w Krakowie</h2>
 
-            <!-- TODO: Interaktywna mapa z położeniem lokali z bazy (Laboratorium 13) -->
+            <!-- Bez tokenu Mapbox (albo bez JavaScriptu) zostaje ilustracja z pinezkami ustawionymi w CSS. -->
             <img class="map__image" src="/images/map-krakow.svg" alt="Mapa Krakowa: Stare Miasto, Kazimierz, Podgórze, Krowodrza i Wisła">
+            <?php if ($mapbox['token'] !== ''): ?>
+                <div class="map__canvas" data-token="<?= htmlspecialchars($mapbox['token']) ?>" data-style="<?= htmlspecialchars($mapbox['style']) ?>"></div>
+            <?php endif; ?>
 
             <ul class="map__labels" aria-hidden="true">
                 <li class="map__label map__label--stare-miasto">Stare Miasto</li>
@@ -143,23 +146,59 @@
                 <li class="map__place map__place--wisla">Wisła</li>
             </ul>
 
+            <!-- TODO: Lokale z bazy z ich współrzędnymi (Laboratorium 8) -->
             <ul class="map__pins" aria-label="Lokale na mapie">
-                <li><a class="map-pin map-pin--oliwka" href="/venues/3" aria-label="Bistro Oliwka, 18 zł za godzinę za miejsce">18 zł/h · miejsce</a></li>
-                <li><a class="map-pin map-pin--pod-zegarem" href="/venues/4" aria-label="Kawiarnia Pod Zegarem, 20 zł za godzinę za miejsce">20 zł/h · miejsce</a></li>
-                <li><a class="map-pin map-pin--polcien" href="/venues/5" aria-label="Galeria Półcień, 12 zł za godzinę za miejsce">12 zł/h · miejsce</a></li>
-                <li><a class="map-pin map-pin--wiklina" href="/venues/6" aria-label="Studio Wiklina, 200 zł za godzinę za cały lokal">200 zł/h</a></li>
-                <li><a class="map-pin map-pin--ziarno" href="/venues/2" aria-label="Kawiarnia Ziarno, 15 zł za godzinę za miejsce">15 zł/h · miejsce</a></li>
-                <li><a class="map-pin map-pin--glina" href="/venues/7" aria-label="Pracownia Ceramiki Glina, 120 zł za godzinę za cały lokal">120 zł/h</a></li>
-                <li><a class="map-pin map-pin--debnik" href="/venues/8" aria-label="Herbaciarnia Dębnik, 90 zł za godzinę za cały lokal">90 zł/h</a></li>
                 <li>
-                    <a class="map-pin map-pin--selected map-pin--lampion" href="/venues/1" aria-label="Bar Lampion, 15 zł za godzinę za miejsce – wybrany, odtwarzany w rolce">
+                    <a class="map-pin map-pin--oliwka" href="/venues/3" data-venue-id="3" data-lng="19.9235" data-lat="50.0705" aria-label="Bistro Oliwka, 18 zł za godzinę za miejsce">
+                        <span class="map-pin__name">Bistro Oliwka</span>
+                        18 zł/h · miejsce
+                    </a>
+                </li>
+                <li>
+                    <a class="map-pin map-pin--pod-zegarem" href="/venues/4" data-venue-id="4" data-lng="19.9420" data-lat="50.0668" aria-label="Kawiarnia Pod Zegarem, 20 zł za godzinę za miejsce">
+                        <span class="map-pin__name">Kawiarnia Pod Zegarem</span>
+                        20 zł/h · miejsce
+                    </a>
+                </li>
+                <li>
+                    <a class="map-pin map-pin--polcien" href="/venues/5" data-venue-id="5" data-lng="19.9285" data-lat="50.0652" aria-label="Galeria Półcień, 12 zł za godzinę za miejsce">
+                        <span class="map-pin__name">Galeria Półcień</span>
+                        12 zł/h · miejsce
+                    </a>
+                </li>
+                <li>
+                    <a class="map-pin map-pin--wiklina" href="/venues/6" data-venue-id="6" data-lng="19.9585" data-lat="50.0612" aria-label="Studio Wiklina, 200 zł za godzinę za cały lokal">
+                        <span class="map-pin__name">Studio Wiklina</span>
+                        200 zł/h
+                    </a>
+                </li>
+                <li>
+                    <a class="map-pin map-pin--ziarno" href="/venues/2" data-venue-id="2" data-lng="19.9466" data-lat="50.0512" aria-label="Kawiarnia Ziarno, 15 zł za godzinę za miejsce">
+                        <span class="map-pin__name">Kawiarnia Ziarno</span>
+                        15 zł/h · miejsce
+                    </a>
+                </li>
+                <li>
+                    <a class="map-pin map-pin--glina" href="/venues/7" data-venue-id="7" data-lng="19.9535" data-lat="50.0442" aria-label="Pracownia Ceramiki Glina, 120 zł za godzinę za cały lokal">
+                        <span class="map-pin__name">Pracownia Ceramiki Glina</span>
+                        120 zł/h
+                    </a>
+                </li>
+                <li>
+                    <a class="map-pin map-pin--debnik" href="/venues/8" data-venue-id="8" data-lng="19.9248" data-lat="50.0465" aria-label="Herbaciarnia Dębnik, 90 zł za godzinę za cały lokal">
+                        <span class="map-pin__name">Herbaciarnia Dębnik</span>
+                        90 zł/h
+                    </a>
+                </li>
+                <li>
+                    <a class="map-pin map-pin--lampion map-pin--selected" href="/venues/1" data-venue-id="1" data-lng="19.9343" data-lat="50.0623" aria-label="Bar Lampion, 15 zł za godzinę za miejsce" aria-current="true">
                         <span class="map-pin__name">Bar Lampion</span>
                         15 zł/h · miejsce
                     </a>
                 </li>
             </ul>
 
-            <!-- TODO: Przyciski mapy zaczną działać razem z mapą (Laboratorium 13) -->
+            <!-- TODO: Wyszukiwanie lokali w widocznym obszarze mapy przez Fetch API (Laboratorium 11) -->
             <button class="map__search" type="button">
                 <svg class="icon" width="16" height="16" aria-hidden="true"><use href="/images/icons.svg#search"></use></svg>
                 Szukaj w tym obszarze
@@ -167,14 +206,14 @@
 
             <div class="map__controls">
                 <div class="map__zoom">
-                    <button class="map__control" type="button" aria-label="Przybliż mapę">
+                    <button class="map__control" type="button" aria-label="Przybliż mapę" data-map-action="zoom-in">
                         <svg class="icon" width="18" height="18" aria-hidden="true"><use href="/images/icons.svg#plus"></use></svg>
                     </button>
-                    <button class="map__control" type="button" aria-label="Oddal mapę">
+                    <button class="map__control" type="button" aria-label="Oddal mapę" data-map-action="zoom-out">
                         <svg class="icon" width="18" height="18" aria-hidden="true"><use href="/images/icons.svg#minus"></use></svg>
                     </button>
                 </div>
-                <button class="map__control map__locate" type="button" aria-label="Pokaż moją lokalizację">
+                <button class="map__control map__locate" type="button" aria-label="Pokaż moją lokalizację" data-map-action="locate">
                     <svg class="icon" width="18" height="18" aria-hidden="true"><use href="/images/icons.svg#locate"></use></svg>
                 </button>
             </div>
@@ -196,7 +235,7 @@
             <!-- tabindex="0" pozwala przewijać rolki strzałkami po przejściu do nich klawiszem Tab. -->
             <div class="reels__feed" tabindex="0" role="group" aria-labelledby="reels-heading">
                 <!-- TODO: Lokale z bazy wyświetlone w pętli, rolka jako wideo (Laboratorium 13) -->
-                <article class="reel" aria-labelledby="reel-1-title">
+                <article class="reel" aria-labelledby="reel-1-title" data-venue-id="1">
                     <img class="reel__media" src="/images/venues/bar-lampion.svg" alt="Bar Lampion rano: długi stół, laptopy, światło z łukowego okna">
 
                     <div class="reel__status">
@@ -254,7 +293,7 @@
                     </div>
                 </article>
 
-                <article class="reel" aria-labelledby="reel-2-title">
+                <article class="reel" aria-labelledby="reel-2-title" data-venue-id="2">
                     <img class="reel__media reel__media--top" src="/images/venues/kawiarnia-ziarno.svg" alt="Kawiarnia Ziarno wieczorem: ceglana ściana, długi stół i lampki">
 
                     <div class="reel__status">
@@ -316,3 +355,9 @@
 </main>
 
 <?php require __DIR__ . '/partials/footer.html.php'; ?>
+
+<?php if ($mapbox['token'] !== ''): ?>
+    <link rel="stylesheet" href="https://api.mapbox.com/mapbox-gl-js/v3.16.0/mapbox-gl.css">
+    <script src="https://api.mapbox.com/mapbox-gl-js/v3.16.0/mapbox-gl.js" defer></script>
+    <script src="/js/map.js" defer></script>
+<?php endif; ?>

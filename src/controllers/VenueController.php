@@ -28,6 +28,10 @@ final class VenueController extends AppController
             'form' => $form,
             'errors' => $form->errors(),
             'searchQuery' => $form->query,
+            'mapbox' => [
+                'token' => getenv('MAPBOX_TOKEN') ?: '',
+                'style' => getenv('MAPBOX_STYLE') ?: 'mapbox://styles/mapbox/light-v11',
+            ],
         ]);
     }
 
