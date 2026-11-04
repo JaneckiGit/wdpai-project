@@ -407,6 +407,21 @@ input:focus {
     outline-offset: 3px;
 }
 
+.theme-toggle__option {
+    display: grid;
+    place-items: center;
+}
+
+/* Pływający przycisk pokazuje działanie: w jasnym motywie księżyc (włącz ciemny), w ciemnym słońce. */
+.theme-toggle__option--light,
+html[data-theme="dark"] .theme-toggle__option--dark {
+    display: none;
+}
+
+html[data-theme="dark"] .theme-toggle__option--light {
+    display: grid;
+}
+
 .form-errors,
 .status-message {
     margin: 0;

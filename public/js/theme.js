@@ -1,6 +1,5 @@
 const storageKey = 'theme';
 const themeToggle = document.querySelector('.theme-toggle');
-const themeIcon = themeToggle?.querySelector('i') ?? null;
 const colorSchemeQuery = window.matchMedia('(prefers-color-scheme: dark)');
 
 function getCurrentTheme() {
@@ -38,9 +37,6 @@ function syncThemeToggle() {
         'aria-label',
         isDark ? 'Włącz jasny motyw' : 'Włącz ciemny motyw'
     );
-
-    themeIcon?.classList.toggle('fa-sun', isDark);
-    themeIcon?.classList.toggle('fa-moon', !isDark);
 }
 
 function setTheme(theme, remember = true) {
