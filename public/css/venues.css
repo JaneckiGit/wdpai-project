@@ -1,0 +1,794 @@
+/*
+Odkrywaj. Na telefonie rolka wypełnia ekran, a nagłówek, przełącznik widoku i cele leżą na niej.
+Na komputerze pod nagłówkiem jest pasek filtrów, a niżej mapa obok kolumny rolek.
+Najpierw reguły wspólne, potem osobno telefon i komputer, bo oba układy są zupełnie różne.
+*/
+
+:where(.discover) p {
+    margin: 0;
+}
+
+.filters__purpose,
+.filters__mode {
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+}
+
+/* Pole radio jest niewidoczne, ale działa z klawiatury i czytnikiem ekranu – wygląd przejmuje etykieta. */
+.chip input,
+.segmented__option input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.chip,
+.segmented__option,
+.view-switch__option {
+    position: relative;
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    gap: 0.375rem;
+    border-radius: var(--radius-pill);
+    font-size: 0.875rem;
+    font-weight: 500;
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+.chip {
+    height: 2.25rem;
+    padding: 0 0.875rem;
+    border: 1px solid;
+}
+
+.chip:has(input:checked),
+.segmented__option:has(input:checked) {
+    font-weight: 600;
+}
+
+.chip:has(input:focus-visible),
+.segmented__option:has(input:focus-visible) {
+    outline: 3px solid var(--color-focus);
+    outline-offset: 2px;
+}
+
+.view-switch {
+    display: flex;
+    padding: 3px;
+    border-radius: var(--radius-pill);
+}
+
+.view-switch__option {
+    text-decoration: none;
+}
+
+.pill-field {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-height: 2.375rem;
+    padding: 0 0.75rem;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-pill);
+    background: var(--color-surface);
+    font-size: 0.875rem;
+}
+
+.pill-field .icon,
+.pill-field__name,
+.pill-field__unit {
+    color: var(--color-muted);
+}
+
+.pill-field input {
+    min-width: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+}
+
+/* Obrys fokusu i błędu dostaje cała „pigułka”, a nie samo pole w jej środku. */
+.pill-field input:focus-visible {
+    outline: none;
+}
+
+.pill-field:has(input:focus-visible) {
+    outline: 3px solid var(--color-focus);
+    outline-offset: 2px;
+}
+
+.pill-field:has(input[aria-invalid="true"]) {
+    border-color: var(--color-danger-text);
+}
+
+.pill-field__number {
+    width: 3.25rem;
+}
+
+.filters__submit {
+    min-height: 2.375rem;
+    padding: 0 var(--space-2);
+    border: 0;
+    border-radius: var(--radius-pill);
+    background: var(--color-primary);
+    color: var(--color-on-brand);
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.filters__submit:hover {
+    background: var(--color-primary-hover);
+}
+
+.filters__clear {
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.filters__count {
+    color: var(--color-muted);
+    font-size: 0.875rem;
+}
+
+.filters__count strong {
+    color: var(--color-text);
+}
+
+/* Mapa jest obrazem i zostaje jasna w obu motywach, więc ma własne stałe kolory. */
+.map {
+    --map-ink: #1c1917;
+    --map-muted: #57534e;
+    --map-label: #6b655f;
+    --map-card: #ffffff;
+    --map-line: #e7e1d9;
+    --map-border: #ddd5cc;
+
+    overflow: hidden;
+    background: #ece5da;
+}
+
+.map__image {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.map__labels,
+.map__pins {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.map__label,
+.map__place {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    white-space: nowrap;
+}
+
+.map__label {
+    color: var(--map-label);
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+}
+
+.map__place {
+    color: var(--map-muted);
+    font-family: var(--font-heading);
+    font-size: 0.8125rem;
+    font-style: italic;
+}
+
+.map__place--wisla {
+    font-size: 1.0625rem;
+}
+
+/* Położenie w procentach szerokości i wysokości mapy, jak w prototypie. Zastąpi je mapa z Laboratorium 13. */
+.map__label--stare-miasto { left: 46.3%; top: 41.5%; }
+.map__label--kazimierz { left: 58.3%; top: 69.5%; }
+.map__label--podgorze { left: 61.7%; top: 87.5%; }
+.map__label--krowodrza { left: 28.3%; top: 25.8%; }
+.map__label--grzegorzki { left: 70.8%; top: 45.8%; }
+.map__label--debniki { left: 25%; top: 83.8%; }
+.map__place--wawel { left: 44.8%; top: 57.8%; }
+.map__place--blonia { left: 15%; top: 39%; }
+.map__place--wisla { left: 85%; top: 70.5%; }
+
+.map-pin--oliwka { left: 28.3%; top: 22.2%; }
+.map-pin--pod-zegarem { left: 56.7%; top: 24.4%; }
+.map-pin--polcien { left: 31.7%; top: 36.7%; }
+.map-pin--wiklina { left: 70.8%; top: 42.2%; }
+.map-pin--ziarno { left: 58.3%; top: 65.6%; }
+.map-pin--glina { left: 61.7%; top: 83.3%; }
+.map-pin--debnik { left: 25%; top: 80%; }
+.map-pin--lampion { left: 48.3%; top: 34.4%; }
+
+/* Punkt (lewy, górny) wskazuje czubek „ogonka”, dlatego dymek jest przesunięty o swoją szerokość i wysokość. */
+.map-pin {
+    position: absolute;
+    z-index: 1;
+    padding: 0.4375rem 0.75rem;
+    border: 1px solid var(--map-line);
+    border-radius: var(--radius-pill);
+    background: var(--map-card);
+    color: var(--map-ink);
+    box-shadow: 0 2px 8px rgb(28 25 23 / 18%);
+    font-size: 0.8125rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    line-height: 1.4;
+    white-space: nowrap;
+    text-decoration: none;
+    transform: translate(-50%, calc(-100% - 6px));
+}
+
+.map-pin::after {
+    content: "";
+    position: absolute;
+    bottom: -6px;
+    left: 50%;
+    width: 10px;
+    height: 10px;
+    border-right: 1px solid var(--map-line);
+    border-bottom: 1px solid var(--map-line);
+    background: inherit;
+    transform: translateX(-50%) rotate(45deg);
+}
+
+.map-pin:hover {
+    border-color: var(--color-primary);
+    color: var(--map-ink);
+}
+
+.map-pin--selected {
+    z-index: 3;
+    padding: 0.5625rem 0.875rem;
+    border: 2px solid var(--map-card);
+    background: var(--color-primary);
+    color: var(--color-on-brand);
+    box-shadow: 0 6px 16px rgb(180 83 42 / 45%);
+    font-size: 0.875rem;
+    font-weight: 700;
+}
+
+.map-pin--selected::after {
+    bottom: -8px;
+    width: 12px;
+    height: 12px;
+    border-right: 2px solid var(--map-card);
+    border-bottom: 2px solid var(--map-card);
+}
+
+.map-pin--selected:hover {
+    border-color: var(--map-card);
+    color: var(--color-on-brand);
+}
+
+.map-pin__name {
+    position: absolute;
+    bottom: calc(100% + 0.375rem);
+    left: 50%;
+    padding: 0.25rem 0.625rem;
+    border-radius: 0.5rem;
+    background: var(--color-dark);
+    color: var(--color-on-dark);
+    font-size: 0.75rem;
+    font-weight: 600;
+    transform: translateX(-50%);
+}
+
+.map__search {
+    position: absolute;
+    top: var(--space-2);
+    left: 50%;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+    height: 2.5rem;
+    padding: 0 var(--space-2);
+    border: 1px solid var(--map-border);
+    border-radius: var(--radius-pill);
+    background: var(--map-card);
+    color: var(--map-ink);
+    box-shadow: 0 2px 10px rgb(28 25 23 / 12%);
+    font-size: 0.875rem;
+    font-weight: 600;
+    white-space: nowrap;
+    cursor: pointer;
+    transform: translateX(-50%);
+}
+
+.map__controls {
+    position: absolute;
+    top: var(--space-2);
+    right: var(--space-2);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+}
+
+.map__zoom {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border: 1px solid var(--map-border);
+    border-radius: var(--radius-sm);
+    box-shadow: 0 2px 10px rgb(28 25 23 / 12%);
+}
+
+.map__control {
+    display: grid;
+    place-items: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    border: 0;
+    background: var(--map-card);
+    color: var(--map-ink);
+    cursor: pointer;
+}
+
+.map__control + .map__control {
+    border-top: 1px solid var(--map-line);
+}
+
+.map__locate {
+    width: 2.875rem;
+    height: 2.875rem;
+    border: 1px solid var(--map-border);
+    border-radius: var(--radius-sm);
+    box-shadow: 0 2px 10px rgb(28 25 23 / 12%);
+}
+
+.map__legend {
+    position: absolute;
+    bottom: var(--space-2);
+    left: var(--space-2);
+    max-width: 18.75rem;
+    padding: 0.75rem 0.875rem;
+    border: 1px solid var(--map-line);
+    border-radius: 0.875rem;
+    background: rgb(251 248 244 / 96%);
+    color: var(--map-muted);
+    box-shadow: 0 2px 10px rgb(28 25 23 / 10%);
+    font-size: 0.8125rem;
+    line-height: 1.5;
+}
+
+.map__legend-title {
+    margin-bottom: 0.25rem;
+    font-weight: 600;
+}
+
+.map__legend-title,
+.map__legend strong {
+    color: var(--map-ink);
+}
+
+.reels {
+    background: var(--color-dark);
+    color: var(--color-on-dark);
+}
+
+/* Rolki przewija się jak na telefonie: każda zatrzymuje się na górze kolumny (scroll snap). */
+.reels__feed {
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scroll-snap-type: y mandatory;
+    scrollbar-width: none;
+}
+
+.reels__feed:focus-visible {
+    outline: 3px solid #f0a27e;
+    outline-offset: -3px;
+}
+
+.reel {
+    position: relative;
+    overflow: hidden;
+    background: #2a2522;
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+}
+
+.reel__media {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.reel__media--top {
+    object-position: 50% 22%;
+}
+
+/* Gradient przyciemnia górę i dół zdjęcia, żeby biały tekst miał wystarczający kontrast. */
+.reel::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+}
+
+.reel__status,
+.reel__actions,
+.reel__info {
+    position: absolute;
+    z-index: 1;
+}
+
+.reel__progress {
+    display: block;
+    width: 100%;
+    height: 3px;
+    border: 0;
+    background: rgb(255 255 255 / 25%);
+    appearance: none;
+}
+
+.reel__progress::-webkit-progress-bar {
+    background: rgb(255 255 255 / 25%);
+}
+
+.reel__progress::-webkit-progress-value {
+    background: var(--color-on-dark);
+}
+
+.reel__progress::-moz-progress-bar {
+    background: var(--color-on-dark);
+}
+
+.reel__meta span {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+}
+
+.reel__actions {
+    right: 0.625rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.reel__action {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--color-on-dark);
+    font-size: 0.6875rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.reel__action-icon {
+    display: grid;
+    place-items: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    border: 1px solid rgb(255 255 255 / 20%);
+    border-radius: 50%;
+    background: rgb(28 25 23 / 60%);
+}
+
+.reel__action:hover .reel__action-icon {
+    background: rgb(28 25 23 / 85%);
+}
+
+.reel__info {
+    right: var(--space-2);
+    left: var(--space-2);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+}
+
+/* Tekst omija kolumnę przycisków po prawej, a „Zarezerwuj” ma pełną szerokość. */
+.reel__info > :not(.reel__book) {
+    margin-right: 3.75rem;
+}
+
+.reel__info h3 {
+    font-size: 1.875rem;
+}
+
+.reel__place,
+.reel__availability {
+    display: flex;
+    gap: 0.375rem;
+    font-size: 0.875rem;
+}
+
+.reel__place {
+    align-items: center;
+    color: var(--color-on-dark-muted);
+}
+
+.reel__availability {
+    align-items: flex-start;
+    font-weight: 500;
+    line-height: 1.4;
+}
+
+.reel__availability .icon {
+    margin-top: 1px;
+}
+
+.reel__offers {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.375rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+/* Plakietki trybów mają stałe kolory, bo zawsze leżą na ciemnym zdjęciu rolki. */
+.badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.3125rem 0.625rem;
+    border-radius: var(--radius-pill);
+    font-size: 0.8125rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+.badge--seats {
+    background: #e7eddf;
+    color: #3f5b2a;
+}
+
+.badge--exclusive {
+    background: #f6e3d9;
+    color: #8f4122;
+}
+
+.reel__book {
+    min-height: 3rem;
+    margin-top: 0.375rem;
+    font-size: 1rem;
+}
+
+/* Komputer i tablet (od 768 px): pasek filtrów, a pod nim mapa obok kolumny rolek. */
+@media (min-width: 48rem) {
+    .view-switch--mobile,
+    .filters__open,
+    .filters__panel-header {
+        display: none;
+    }
+
+    .filters {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.75rem 1.25rem;
+        padding: 0.875rem var(--space-4);
+        border-bottom: 1px solid var(--color-border-subtle);
+        background: var(--color-surface-muted);
+    }
+
+    .filters .form-errors {
+        flex-basis: 100%;
+    }
+
+    /* display: contents „rozpakowuje” panel – tryb i pola stają się elementami paska filtrów. */
+    .filters__panel {
+        display: contents;
+    }
+
+    .filters__purpose {
+        order: 1;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: var(--space-1);
+    }
+
+    /* float: left zamienia legendę w zwykły element, więc stoi w jednym rzędzie z opcjami. */
+    .filters__purpose legend,
+    .filters__mode legend {
+        float: left;
+        margin-right: 0.125rem;
+        padding: 0;
+        color: var(--color-muted);
+        font-size: 0.8125rem;
+        font-weight: 600;
+    }
+
+    .filters__mode {
+        order: 2;
+        display: flex;
+        align-items: center;
+        gap: var(--space-1);
+        padding-left: 1.25rem;
+        border-left: 1px solid var(--color-border);
+    }
+
+    .view-switch--desktop {
+        order: 3;
+        margin-left: auto;
+        background: var(--color-chip);
+    }
+
+    .filters__fields {
+        order: 4;
+        display: flex;
+        flex-basis: 100%;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: var(--space-1);
+    }
+
+    .chip {
+        border-color: var(--color-border);
+        background: var(--color-surface);
+        color: var(--color-text);
+    }
+
+    .chip .icon {
+        color: var(--color-muted);
+    }
+
+    /* Wybrany cel ma odwrócone kolory – w obu motywach tło w kolorze tekstu. */
+    .chip:has(input:checked) {
+        border-color: var(--color-text);
+        background: var(--color-text);
+        color: var(--color-bg);
+    }
+
+    .chip:has(input:checked) .icon {
+        color: inherit;
+    }
+
+    .segmented {
+        display: flex;
+        padding: 3px;
+        border-radius: var(--radius-pill);
+        background: var(--color-chip);
+    }
+
+    .segmented__option,
+    .view-switch--desktop .view-switch__option {
+        height: 2rem;
+        padding: 0 0.875rem;
+        color: var(--color-muted);
+    }
+
+    .segmented__option:has(input:checked) {
+        background: var(--color-surface);
+        color: var(--color-text);
+        box-shadow: 0 1px 2px rgb(28 25 23 / 14%);
+    }
+
+    .view-switch--desktop .view-switch__option {
+        padding: 0 var(--space-2);
+    }
+
+    .view-switch--desktop .view-switch__option[aria-current="page"] {
+        background: var(--color-text);
+        color: var(--color-bg);
+        font-weight: 600;
+    }
+
+    .filters__clear {
+        margin-left: 0.375rem;
+    }
+
+    .filters__count {
+        margin-left: auto;
+    }
+
+    .discover__results {
+        display: flex;
+        flex-wrap: wrap;
+    }
+
+    .map {
+        position: relative;
+        flex: 3 1 37.5rem;
+        min-height: 48.75rem;
+    }
+
+    .reels {
+        display: flex;
+        flex: 2 1 26.25rem;
+        flex-direction: column;
+        align-items: center;
+        gap: var(--space-2);
+        height: 48.75rem;
+        padding: 1.25rem var(--space-3) 0;
+    }
+
+    .reels__hint {
+        display: inline-flex;
+        align-items: center;
+        gap: var(--space-1);
+        padding: var(--space-1) 0.875rem;
+        border-radius: var(--radius-pill);
+        background: #2e2926;
+        color: var(--color-on-dark-muted);
+        font-size: 0.8125rem;
+        font-weight: 500;
+    }
+
+    .reels__feed {
+        display: flex;
+        flex: 1;
+        flex-direction: column;
+        align-items: center;
+        gap: var(--space-3);
+        width: 100%;
+        min-height: 0;
+        padding-bottom: var(--space-3);
+    }
+
+    .reel {
+        flex: none;
+        width: 21.8125rem;
+        height: 38.75rem;
+        border-radius: 1.25rem;
+        box-shadow: 0 20px 50px rgb(0 0 0 / 45%);
+    }
+
+    .reel::after {
+        background: linear-gradient(
+            180deg,
+            rgb(28 25 23 / 60%) 0%,
+            rgb(28 25 23 / 0%) 18%,
+            rgb(28 25 23 / 0%) 40%,
+            rgb(28 25 23 / 95%) 100%
+        );
+    }
+
+    .reel__status {
+        top: 0.75rem;
+        right: 0.875rem;
+        left: 0.875rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.625rem;
+    }
+
+    .reel__progress,
+    .reel__progress::-webkit-progress-bar,
+    .reel__progress::-webkit-progress-value {
+        border-radius: 3px;
+    }
+
+    .reel__meta {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        font-size: 0.75rem;
+        font-weight: 500;
+    }
+
+    .reel__actions {
+        bottom: 14.75rem;
+    }
+
+    .reel__info {
+        bottom: var(--space-2);
+    }
+
+    .reel__book {
+        margin-top: 0.25rem;
+    }
+}
