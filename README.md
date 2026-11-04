@@ -55,13 +55,13 @@ Gotowy jest szkielet MVC z laboratoriów oraz szablony HTML pięciu widoków z p
 | Strona główna | Widok startowy z linkiem do listy projektów (przykład z laboratorium) |
 | Projekty | Lista projektów i widok szczegółów projektu o podanym id (przykład z laboratorium) |
 | Logowanie | Formularz z wyborem typu konta, e-mailem i hasłem; walidacja i przekierowanie zależne od typu konta (bez sprawdzania hasła, które dojdzie w Laboratorium 9) |
-| Odkrywaj | Filtry w parametrach adresu (fraza, cel, tryb, data, godziny, liczba osób, cena) z walidacją, mapa z cenami lokali i przewijana kolumna rolek; na telefonie rolka na cały ekran, a mapa i reszta filtrów jako warstwy |
+| Odkrywaj | Filtry w parametrach adresu (fraza, cel, tryb, data, godziny, liczba osób, cena) z walidacją, mapa Mapbox z pinezkami cen, która podąża za przewijanymi rolkami; na telefonie rolka na cały ekran, a mapa i reszta filtrów jako warstwy |
 | Lokal i rezerwacja | Opis lokalu, cele, oferta, udogodnienia, opinie i formularz prośby o rezerwację z walidacją; id lokalu z adresu trafia do adresu formularza |
 | Panel gospodarza | Podsumowanie, prośby o rezerwację z działającymi przyciskami decyzji, kalendarz tygodnia w tabeli, komunikaty po przekierowaniu |
 | Dodaj lokal | Formularz w sześciu krokach z walidacją, w tym wykrywaniem nakładających się okien dostępności; szkic i wysłanie do weryfikacji |
 | Obsługa błędów | Kontrolowane odpowiedzi 400, 404, 422 i 500 (sekcja „Formularze i obsługa błędów”) |
 
-Widoki to semantyczny HTML. Według prototypu ostylowane są widoki Logowanie i Odkrywaj oraz wspólny nagłówek, nawigacja i stopka (opis w sekcji „Style CSS”). Pozostałe widoki mają już ten nagłówek i stopkę, a ich treść ma na razie tylko style bazowe (kolory, fonty, linki, fokus). Na każdej stronie działa motyw jasny i ciemny (Laboratorium 5, sekcja „Motyw jasny i ciemny”). Dane w widokach są przykładowe, wzięte z prototypu – listy oznaczone komentarzem `TODO` będą wyświetlane w pętli z danych z bazy. Formularze są sprawdzane po stronie serwera, ale aplikacja nie ma jeszcze bazy, więc poprawne dane nie są nigdzie zapisywane, a filtry nie zawężają listy lokali (Laboratoria 7–8). Pliki z formularza „Dodaj lokal” nie są jeszcze przetwarzane (Laboratorium 13), a przycisk „Dodaj okno” zadziała po dodaniu JavaScriptu (Laboratorium 10) – do tego czasu formularz w przeglądarce pokazuje jedno okno, a serwer obsługuje ich dowolnie wiele. Ochrona CSRF i sprawdzanie hasła dojdą w Laboratorium 9. Mapa w widoku Odkrywaj jest na razie ilustracją z pinezkami w stałych miejscach, a przyciski mapy i rolek (przybliżanie, „Zapisz”, „Pauza” itp.) zaczną działać razem z mapą, wideo i JavaScriptem (Laboratoria 10 i 13). Linki do zaplanowanych, jeszcze nieistniejących stron (np. `/register`, `/reservations`, `/profile`, `/terms`) kończą się odpowiedzią 404. Przełącznika języka jeszcze nie ma.
+Widoki to semantyczny HTML. Według prototypu ostylowane są widoki Logowanie i Odkrywaj oraz wspólny nagłówek, nawigacja i stopka (opis w sekcji „Style CSS”). Pozostałe widoki mają już ten nagłówek i stopkę, a ich treść ma na razie tylko style bazowe (kolory, fonty, linki, fokus). Na każdej stronie działa motyw jasny i ciemny (Laboratorium 5, sekcja „Motyw jasny i ciemny”). Dane w widokach są przykładowe, wzięte z prototypu – listy oznaczone komentarzem `TODO` będą wyświetlane w pętli z danych z bazy. Formularze są sprawdzane po stronie serwera, ale aplikacja nie ma jeszcze bazy, więc poprawne dane nie są nigdzie zapisywane, a filtry nie zawężają listy lokali (Laboratoria 7–8). Pliki z formularza „Dodaj lokal” nie są jeszcze przetwarzane (Laboratorium 13), a przycisk „Dodaj okno” zadziała po dodaniu JavaScriptu (Laboratorium 10) – do tego czasu formularz w przeglądarce pokazuje jedno okno, a serwer obsługuje ich dowolnie wiele. Ochrona CSRF i sprawdzanie hasła dojdą w Laboratorium 9. Lokale na mapie w widoku Odkrywaj to na razie przykładowe dane ze współrzędnymi zapisanymi w szablonie, a przycisk „Szukaj w tym obszarze” i przyciski rolek („Zapisz”, „Pauza” itp.) zaczną działać razem z bazą, Fetch API i wideo (Laboratoria 8, 11 i 13). Linki do zaplanowanych, jeszcze nieistniejących stron (np. `/register`, `/reservations`, `/profile`, `/terms`) kończą się odpowiedzią 404. Przełącznika języka jeszcze nie ma.
 
 ## Tech stack
 
@@ -88,6 +88,8 @@ docker compose exec php composer dump-autoload   # generuje vendor/autoload.php
 Katalog `vendor/` nie jest w repozytorium, więc bez `composer dump-autoload` aplikacja kończy się błędem `Fatal error` (brak `vendor/autoload.php`).
 
 Bez pliku `.env` zmienne `POSTGRES_*` i `PGADMIN_*` są puste (Docker Compose pokazuje tylko ostrzeżenia), więc baza i pgAdmin nie wystartują.
+
+**Mapa (Mapbox)** – mapa w widoku Odkrywaj potrzebuje publicznego tokenu Mapbox (`pk.…`, konto na mapbox.com → *Tokens*). Wpisz go w `.env` jako `MAPBOX_TOKEN`, a w `MAPBOX_STYLE` adres stylu z Mapbox Studio (*Share → Style URL*, np. `mapbox://styles/<konto>/<id>`; domyślnie publiczny `mapbox://styles/mapbox/light-v11`). Po zmianie `.env` uruchom `docker compose up -d php`, żeby kontener PHP dostał nowe wartości. Token jest widoczny w przeglądarce (tak działa Mapbox GL JS), dlatego w panelu Mapbox ogranicz go do adresów aplikacji (*URL restrictions*: `http://localhost:8080` i adres deployu). Bez tokenu widok pokazuje statyczną ilustrację mapy.
 
 ## Usługi
 
@@ -281,7 +283,7 @@ Użyte techniki:
 - **Legenda w jednym rzędzie z opcjami** – `float: left` na `<legend>` zamienia ją w zwykły element pola `fieldset`, więc „Cel” i „Tryb” stoją obok przycisków.
 - **Cele i tryb** to etykiety z ukrytymi polami `radio`, jak karty typu konta w logowaniu – wybór pokazuje `:has(input:checked)`, fokus `:has(input:focus-visible)`.
 - **Rolki** przewijają się w kolumnie z `scroll-snap-type: y mandatory`, więc każda zatrzymuje się na górze. Kolumna ma `tabindex="0"`, dlatego po przejściu do niej klawiszem Tab można ją przewijać strzałkami. Postęp rolki to element `<progress>`.
-- **Mapa** jest jasna w obu motywach (jak obraz), więc ma własne stałe kolory w zmiennych `--map-*`. Pinezki to linki do stron lokali z opisem dla czytnika ekranu w `aria-label`. Ich położenie w procentach pochodzi z prototypu i zastąpi je mapa ze współrzędnymi z bazy (Laboratorium 13).
+- **Mapa** jest jasna w obu motywach, więc ma własne stałe kolory w zmiennych `--map-*`. Pinezki to linki do stron lokali z opisem dla czytnika ekranu w `aria-label` – te same elementy służą ilustracji (położenie w procentach z prototypu) i mapie Mapbox (współrzędne w `data-lng` / `data-lat`).
 
 Różnice względem prototypu, które wynikają z braku JavaScriptu i bazy na tym etapie:
 
@@ -289,10 +291,25 @@ Różnice względem prototypu, które wynikają z braku JavaScriptu i bazy na ty
 |---|---|---|
 | Filtry działają od razu po zmianie | Przycisk „Pokaż lokale” wysyła formularz | Laboratorium 10 |
 | Data i godziny w rozwijanych „pigułkach” („Dziś, pon 17.11”, „9:00–13:00”) | Natywne pola `date` i `time` w takich samych „pigułkach” | Laboratorium 10 |
-| Kliknięcie pinezki przewija rolki do lokalu | Pinezka prowadzi na stronę lokalu | Laboratorium 13 |
+| Kliknięcie pinezki przewija rolki do lokalu | Pinezka prowadzi na stronę lokalu (w drugą stronę działa: przewinięcie rolki wybiera pinezkę) | po dodaniu rolek wszystkich lokali |
 | Przycisk „Lista” zmienia widok wyników | Link bez osobnego widoku (prototyp nie ma ekranu listy) | po zaprojektowaniu widoku |
 
 Sprawdzone w przeglądarce na szerokościach 375, 768 i 1440 px w obu motywach – bez poziomego przewijania; przewijanie rolek myszą i klawiaturą, otwieranie i zamykanie panelu filtrów i mapy, błędy walidacji filtrów (np. `?guests=0`) na obu szerokościach.
+
+### Mapa (Mapbox)
+
+Mapa działa jako ulepszenie strony, która bez niej też jest kompletna (progressive enhancement):
+
+1. Kontroler (`VenueController::index`) odczytuje `MAPBOX_TOKEN` i `MAPBOX_STYLE` przez `getenv()` i przekazuje je widokowi.
+2. Gdy token jest ustawiony, widok dodaje pusty `<div class="map__canvas">` z tokenem i stylem w atrybutach `data-*` oraz wczytuje Mapbox GL JS 3.16.0 (CDN) i `public/js/map.js`. Bez tokenu nic z tego nie powstaje i zostaje ilustracja.
+3. `map.js` tworzy mapę dopasowaną do wszystkich pinezek, a po zdarzeniu `load` dodaje sekcji klasę `map--live`: ilustracja i podpisy dzielnic znikają, a pinezki z HTML są przenoszone do znaczników Mapboxa (`mapboxgl.Marker`), więc wyglądają jak w prototypie. Do tego czasu mapa jest przezroczysta i widać ilustrację.
+4. Przyciski „+”, „−” i „Pokaż moją lokalizację” wywołują `zoomIn()`, `zoomOut()` i `navigator.geolocation` (po zgodzie przeglądarki mapa leci do użytkownika i pokazuje kropkę „Twoja lokalizacja”).
+5. „Mapa podąża za Tobą”: `IntersectionObserver` sprawdza, która rolka jest widoczna co najmniej w 60%, wyróżnia pinezkę jej lokalu (klasa i `aria-current`) i przesuwa do niej mapę.
+6. Na telefonie mapa jest ukrytą warstwą, więc `ResizeObserver` przelicza jej rozmiar i dopasowuje widok w chwili otwarcia.
+
+Mapbox oznacza znaczniki jako obrazek (`role="img"`, „Map marker”), co ukryłoby linki pinezek przed czytnikiem ekranu, dlatego `map.js` usuwa te atrybuty. Logo i atrybucja Mapbox (wymagane przez warunki usługi) zostają widoczne – legenda cen stoi nad nimi.
+
+Sprawdzone w przeglądarce: styl z Mapbox Studio, 8 pinezek we właściwych dzielnicach, przybliżanie i oddalanie przyciskami, przejście mapy do Kawiarni Ziarno po przewinięciu do jej rolki, otwarcie warstwy mapy na telefonie, brak błędów w konsoli.
 
 ## Motyw jasny i ciemny
 
@@ -332,9 +349,10 @@ Obraz PHP zawiera moduły `pdo_pgsql`, `pgsql`, `gd` (z JPEG), `zip`, `bcmath`, 
 
 ## Różnice względem konfiguracji z laboratorium
 
-Pliki `docker-compose.yaml`, `docker/php/Dockerfile` i `docker/nginx/*` są zgodne z instrukcjami z laboratorium, z dwoma wyjątkami:
+Pliki `docker-compose.yaml`, `docker/php/Dockerfile` i `docker/nginx/*` są zgodne z instrukcjami z laboratorium, z trzema wyjątkami:
 
 - z usługi `ollama` usunięto `gpus: all`, bo Docker Desktop na macOS zwraca błąd `could not select device driver "" with capabilities: [[gpu]]` i kontener nie startuje;
+- usługa `php` dostaje zmienne `MAPBOX_TOKEN` i `MAPBOX_STYLE` z `.env` (`environment`, tak jak usługa `db` dostaje `POSTGRES_*`) – PHP odczytuje je funkcją `getenv()` i przekazuje do widoku Odkrywaj; token nie trafia przez to do repozytorium (kryterium sekretów w `.env`);
 - usługa `ollama` i wolumen `ollama_data` są zakomentowane – uruchamianie modeli językowych w kontenerze (na CPU) wymaga kilku GB pamięci RAM, a Docker ma na tym komputerze do dyspozycji 7,7 GB. Usługa została dodana i uruchomiona zgodnie z zadaniem, a następnie wyłączona.
 
 `docker/db/Dockerfile` (`FROM postgres:17-alpine`) jest wymagany przez `docker-compose.yaml`, ale instrukcja nie podaje jego treści.
@@ -392,7 +410,7 @@ Wynikają z konfiguracji z laboratorium, do rozwiązania w kolejnych etapach:
 ├── public/               # katalog publiczny (document root Nginx)
 │   ├── index.php         # Front Controller – jedyny punkt wejścia
 │   ├── css/              # arkusze stylów (style.css – wspólny, login.css – logowanie, venues.css – Odkrywaj)
-│   ├── js/               # skrypty (theme.js – motyw jasny i ciemny)
+│   ├── js/               # skrypty (theme.js – motyw jasny i ciemny, map.js – mapa Mapbox w Odkrywaj)
 │   ├── images/           # ikony (icons.svg), mapa i ilustracje lokali (venues/)
 │   └── views/            # layout.html.php i szablony widoków (*.html.php)
 │       └── partials/     # nagłówek, stopka, przełącznik motywu, błędy formularza, komunikat statusu
