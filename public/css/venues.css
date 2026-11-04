@@ -275,8 +275,10 @@ Najpierw reguły wspólne, potem osobno telefon i komputer, bo oba układy są z
     color: var(--color-on-brand);
 }
 
+/* Nazwa lokalu jest widoczna tylko nad wybraną pinezką (lokal z bieżącej rolki). */
 .map-pin__name {
     position: absolute;
+    display: none;
     bottom: calc(100% + 0.375rem);
     left: 50%;
     padding: 0.25rem 0.625rem;
@@ -286,6 +288,10 @@ Najpierw reguły wspólne, potem osobno telefon i komputer, bo oba układy są z
     font-size: 0.75rem;
     font-weight: 600;
     transform: translateX(-50%);
+}
+
+.map-pin--selected .map-pin__name {
+    display: block;
 }
 
 .map__search {
@@ -373,6 +379,50 @@ Najpierw reguły wspólne, potem osobno telefon i komputer, bo oba układy są z
 .map__legend-title,
 .map__legend strong {
     color: var(--map-ink);
+}
+
+/* Mapa Mapbox (public/js/map.js) – po jej wczytaniu sekcja dostaje klasę map--live i ilustracja znika. */
+.map .map__canvas {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+}
+
+/* Do czasu wczytania stylu mapa jest przezroczysta, więc widać ilustrację z pinezkami, a nie puste tło. */
+.map--live .map__canvas {
+    opacity: 1;
+}
+
+.map--live .map__image,
+.map--live .map__labels {
+    display: none;
+}
+
+/* Na mapie położenie pinezki ustala Mapbox, więc pozycja z ilustracji jest wyłączona. */
+.map--live .map-pin {
+    position: relative;
+    top: auto;
+    left: auto;
+    display: block;
+    transform: none;
+}
+
+.map__marker--selected {
+    z-index: 2;
+}
+
+/* Logo i atrybucja Mapbox muszą być widoczne, więc legenda stoi nad nimi. */
+.map--live .map__legend {
+    bottom: 2.75rem;
+}
+
+.map__me {
+    width: 1rem;
+    height: 1rem;
+    border: 3px solid var(--map-card);
+    border-radius: 50%;
+    background: var(--color-tertiary);
+    box-shadow: 0 2px 8px rgb(28 25 23 / 30%);
 }
 
 .reels {
