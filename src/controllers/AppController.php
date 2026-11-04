@@ -23,4 +23,34 @@ abstract class AppController
 
         require dirname(__DIR__, 2) . '/public/views/layout.html.php';
     }
+
+    protected function renderError(int $status, string $title, string $message): void
+    {
+        http_response_code($status);
+
+        $this->render('error', [
+            'pageTitle' => $title,
+            'status' => $status,
+            'message' => $message,
+        ]);
+    }
+
+    /* Komunikat wybierany z listy dozwolonych, więc tekst z adresu nigdy nie trafia na stronę. */
+    protected function statusMessage(array $messages): ?string
+    {
+        $status = $_GET['status'] ?? null;
+
+        return is_string($status) ? ($messages[$status] ?? null) : null;
+    }
+
+    protected function isPost(): bool
+    {
+        return ($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST';
+    }
+
+    protected function redirect(string $path): never
+    {
+        header('Location: ' . $path, true, 303);
+        exit;
+    }
 }

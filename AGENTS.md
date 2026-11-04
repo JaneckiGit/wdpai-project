@@ -11,6 +11,7 @@ PoGodzinach to aplikacja webowa do wynajmu lokali na godziny, w czasie gdy stoj�
 - `public/js/` — skrypty przeglądarki.
 - `src/Routing.php` — dopasowanie tras i uruchamianie kontrolerów.
 - `src/controllers/` — kontrolery w namespace `App\Controller`, dziedziczące po `AppController`.
+- `src/forms/` — formularze i ich walidacja w namespace `App\Form`, dziedziczące po `Form`.
 - `docker/`, `docker-compose.yaml` — środowisko uruchomieniowe.
 
 Pełny opis architektury, tras i stylów jest w `README.md`.
@@ -21,6 +22,7 @@ Pełny opis architektury, tras i stylów jest w `README.md`.
 - Nie dodawaj frameworków ani zależności bez zgody.
 - Kontroler przygotowuje dane, a widok odpowiada za prezentację.
 - Dane wyświetlane w HTML zabezpieczaj przez `htmlspecialchars()`.
+- Dane od użytkownika sprawdzaj po stronie serwera w klasie formularza; po poprawnym `POST` przekierowuj przez `redirect()` (status 303), a przy błędach zwracaj 422 i ten sam widok.
 - Kolory, odstępy i cienie zapisuj jako zmienne CSS; nowy kolor musi mieć wartość w obu motywach. Nie używaj stylów inline.
 - Kod z instrukcji laboratorium przenoś 1:1, a każde odstępstwo opisz w `README.md` w sekcji „Różnice względem konfiguracji z laboratorium”.
 - Teksty interfejsu i komentarze pisz po polsku, nazwy w kodzie po angielsku.

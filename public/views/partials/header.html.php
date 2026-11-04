@@ -3,7 +3,7 @@
 
     <form action="/venues" method="get" role="search">
         <label for="site-search">Szukaj lokalu</label>
-        <input type="search" id="site-search" name="q" placeholder="Dzielnica, nazwa lokalu...">
+        <input type="search" id="site-search" name="q" value="<?= htmlspecialchars($searchQuery ?? '') ?>" placeholder="Dzielnica, nazwa lokalu...">
         <button type="submit">Szukaj</button>
     </form>
 

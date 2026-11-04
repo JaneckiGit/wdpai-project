@@ -1,6 +1,8 @@
 <?php require __DIR__ . '/partials/header.html.php'; ?>
 
 <main>
+    <?php require __DIR__ . '/partials/status-message.html.php'; ?>
+
     <!-- TODO: Dane lokalu o id z adresu pobrane z bazy -->
     <nav aria-label="Ścieżka">
         <ol>
@@ -105,37 +107,40 @@
         </article>
     </section>
 
-    <aside aria-labelledby="reservation-heading">
+    <aside id="reservation" aria-labelledby="reservation-heading">
         <h2 id="reservation-heading">Rezerwacja</h2>
         <p><strong>15 zł/h</strong> za miejsce</p>
 
-        <form action="/venues/<?= $venueId ?>/reservations" method="post">
+        <form action="/venues/<?= $venueId ?>/reservations#reservation" method="post">
+            <?php require __DIR__ . '/partials/form-errors.html.php'; ?>
+
             <fieldset>
                 <legend>Tryb</legend>
-                <label><input type="radio" name="mode" value="seats" checked> Miejsce do pracy</label>
-                <label><input type="radio" name="mode" value="exclusive"> Cały lokal</label>
+                <label><input type="radio" name="mode" value="seats" <?= $form->mode === 'seats' ? 'checked' : '' ?>> Miejsce do pracy</label>
+                <label><input type="radio" name="mode" value="exclusive" <?= $form->mode === 'exclusive' ? 'checked' : '' ?>> Cały lokal</label>
             </fieldset>
 
             <label for="purpose">Cel</label>
-            <select id="purpose" name="purpose">
-                <option value="work" selected>Praca</option>
-                <option value="meetings">Spotkania i szkolenia</option>
-                <option value="events">Kameralne wydarzenia</option>
+            <select id="purpose" name="purpose" <?= $form->invalidAttributes('purpose') ?>>
+                <option value="work" <?= $form->purpose === 'work' ? 'selected' : '' ?>>Praca</option>
+                <option value="meetings" <?= $form->purpose === 'meetings' ? 'selected' : '' ?>>Spotkania i szkolenia</option>
+                <option value="events" <?= $form->purpose === 'events' ? 'selected' : '' ?>>Kameralne wydarzenia</option>
             </select>
 
             <label for="date">Data</label>
-            <input type="date" id="date" name="date" required>
+            <input type="date" id="date" name="date" value="<?= htmlspecialchars($form->date) ?>" required <?= $form->invalidAttributes('date') ?>>
 
             <label for="time-from">Od godziny</label>
-            <input type="time" id="time-from" name="from" step="3600" required>
+            <input type="time" id="time-from" name="from" value="<?= htmlspecialchars($form->from) ?>" step="3600" required <?= $form->invalidAttributes('from') ?>>
 
             <label for="time-to">Do godziny</label>
-            <input type="time" id="time-to" name="to" step="3600" required>
+            <input type="time" id="time-to" name="to" value="<?= htmlspecialchars($form->to) ?>" step="3600" required <?= $form->invalidAttributes('to') ?>>
 
             <label for="seats">Liczba miejsc</label>
-            <input type="number" id="seats" name="seats" min="1" max="4" value="1" aria-describedby="seats-hint">
+            <input type="number" id="seats" name="seats" min="1" max="4" value="<?= htmlspecialchars($form->seats) ?>" <?= $form->invalidAttributes('seats', 'seats-hint') ?>>
             <p id="seats-hint">maks. 4 w tym zakresie</p>
 
+            <!-- TODO: Podsumowanie liczone z wybranych wartości (Laboratorium 10) -->
             <dl>
                 <dt>Termin</dt>
                 <dd>czw 20.11, 18:00–22:00 (4 h)</dd>

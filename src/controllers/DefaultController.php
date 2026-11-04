@@ -19,4 +19,9 @@ final class DefaultController extends AppController
             'pageTitle' => 'Nie znaleziono strony',
         ]);
     }
+
+    public function serverError(): void
+    {
+        $this->renderError(500, 'Błąd serwera', 'Coś poszło nie tak po naszej stronie. Spróbuj ponownie za chwilę.');
+    }
 }
