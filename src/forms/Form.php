@@ -12,6 +12,7 @@ abstract class Form
 {
     protected const PURPOSES = ['work', 'meetings', 'shoots', 'events'];
     protected const MODES = ['seats', 'exclusive'];
+    protected const VENUE_TYPES = ['cafe', 'bar', 'restaurant', 'workshop', 'studio', 'bookstore', 'gallery'];
 
     /** @var array<string, string> pole => komunikat błędu */
     private array $errors = [];

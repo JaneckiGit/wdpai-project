@@ -1,11 +1,6 @@
-/* Dodaj lokal: licznik znaków opisu, dodawanie i usuwanie okien dostępności oraz mapa z pinezką do przeciągnięcia. */
+/* Dodaj lokal: dodawanie i usuwanie okien dostępności oraz mapa z pinezką do przeciągnięcia (licznik znaków: char-count.js). */
 const form = document.querySelector('.add-venue__form');
-const description = form.querySelector('#description');
 const windows = form.querySelector('.windows');
-
-description.addEventListener('input', () => {
-    form.querySelector('[data-count]').textContent = description.value.length;
-});
 
 function windowRows() {
     return windows.querySelectorAll('.window-row:not(.window-row--header)');

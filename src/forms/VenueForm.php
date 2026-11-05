@@ -6,7 +6,6 @@ namespace App\Form;
 
 final class VenueForm extends Form
 {
-    private const TYPES = ['cafe', 'bar', 'restaurant', 'studio'];
     private const ENTRY_MODES = ['staff', 'key'];
     // Pinezka startuje w centrum Krakowa, gospodarz przeciąga ją na swój lokal.
     private const DEFAULT_LATITUDE = '50.0614';
@@ -61,7 +60,7 @@ final class VenueForm extends Form
             return;
         }
 
-        $this->requireChoice('type', $this->type, self::TYPES, 'Wybierz typ lokalu.');
+        $this->requireChoice('type', $this->type, self::VENUE_TYPES, 'Wybierz typ lokalu.');
 
         if ($this->address === '') {
             $this->addError('address', 'Podaj adres lokalu.');

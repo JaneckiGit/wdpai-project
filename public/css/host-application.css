@@ -1,0 +1,83 @@
+/* Zostań gospodarzem: wniosek w kartach sekcji (wspólne .form-section) obok karty „Jak to działa”.
+   Na telefonie karta „Jak to działa” jest pod formularzem, od 1024 px obok i przyklejona przy przewijaniu. */
+.host-application__lead {
+    max-width: 45rem;
+    margin-top: var(--space-1);
+    color: var(--color-muted);
+}
+
+.host-application .status-message {
+    margin-top: var(--space-2);
+}
+
+.host-application__layout {
+    display: grid;
+    gap: var(--space-3);
+    align-items: start;
+    margin-top: var(--space-3);
+}
+
+.host-application__form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+}
+
+/* E-mail pochodzi z konta, więc pole jest tylko do odczytu i wygląda na nieaktywne. */
+.host-application__form input[readonly] {
+    background: var(--color-surface-muted);
+    color: var(--color-muted);
+}
+
+.host-application__actions {
+    align-items: center;
+    justify-content: flex-end;
+}
+
+.host-application__actions .field__hint {
+    flex: 1 1 16rem;
+}
+
+.host-application__steps {
+    padding: var(--space-3);
+    border-radius: 1.25rem;
+}
+
+.host-application__steps h2 {
+    font-size: 1.5rem;
+}
+
+.host-application__steps ol {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    margin: var(--space-2) 0 0;
+    padding: 0;
+    list-style: none;
+}
+
+.host-application__steps li {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+}
+
+.host-application__steps .initials {
+    width: 2rem;
+    height: 2rem;
+}
+
+.host-application__steps li .muted {
+    display: block;
+}
+
+@media (min-width: 64rem) {
+    .host-application__layout {
+        grid-template-columns: minmax(0, 1fr) 20rem;
+    }
+
+    .host-application__steps {
+        position: sticky;
+        top: 4.5rem;
+    }
+}
