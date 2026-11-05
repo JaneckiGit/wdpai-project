@@ -1,0 +1,103 @@
+/* Lokal i rezerwacja: na telefonie jedna kolumna, na komputerze opis lokalu obok formularza rezerwacji. */
+.venue {
+    max-width: 75rem;
+    margin: 0 auto;
+    padding: var(--space-2);
+}
+
+.venue p,
+.venue ul {
+    margin: 0.5rem 0 0;
+}
+
+.breadcrumbs ol {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    color: var(--color-muted);
+    font-size: 0.875rem;
+}
+
+/* Ukośnik między elementami ścieżki. */
+.breadcrumbs li + li::before {
+    content: "/";
+    margin-right: 0.5rem;
+}
+
+.venue__layout {
+    display: grid;
+    gap: var(--space-4);
+    margin-top: var(--space-2);
+}
+
+.venue__details {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+}
+
+.venue__image {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+    border-radius: var(--radius);
+}
+
+.offers {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+    gap: var(--space-2);
+    margin-top: var(--space-1);
+}
+
+.offer,
+.reservation-panel {
+    padding: var(--space-2);
+    border: 1px solid var(--color-border-subtle);
+    border-radius: var(--radius);
+    background: var(--color-surface);
+}
+
+.reservation-panel form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    margin-top: var(--space-2);
+}
+
+.reservation-panel fieldset {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    margin: 0;
+    padding: 0;
+    border: 0;
+}
+
+.reservation-panel legend {
+    margin-bottom: var(--space-1);
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+.reservation-panel__hours {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-2);
+}
+
+/* Formularz zostaje widoczny przy przewijaniu, poniżej pływającego przełącznika motywu. */
+@media (min-width: 64rem) {
+    .venue__layout {
+        grid-template-columns: 1fr 24rem;
+        align-items: start;
+    }
+
+    .reservation-panel {
+        position: sticky;
+        top: 4.5rem;
+    }
+}
