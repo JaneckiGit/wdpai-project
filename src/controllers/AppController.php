@@ -7,7 +7,7 @@ namespace App\Controller;
 abstract class AppController
 {
     // TODO: Laboratorium 9 – zalogowany użytkownik z sesji zamiast przykładowego gospodarza.
-    protected const CURRENT_USER = ['name' => 'Piotr Nowak', 'email' => 'piotr.nowak@example.com', 'role' => 'Gospodarz'];
+    protected const CURRENT_USER = ['name' => 'Piotr Nowak', 'email' => 'piotr.nowak@example.com', 'role' => 'Gospodarz', 'isHost' => true];
 
     protected function render(string $template, array $variables = []): void
     {

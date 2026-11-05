@@ -40,6 +40,8 @@ $routing->post('/venues/{id}/reservations', VenueController::class, 'requestRese
 $routing->get('/reservations', ReservationController::class, 'index');
 $routing->post('/reservations/{id}/cancel', ReservationController::class, 'cancel');
 $routing->get('/host', HostController::class, 'dashboard');
+$routing->get('/host/apply', HostController::class, 'apply');
+$routing->post('/host/apply', HostController::class, 'apply');
 $routing->get('/host/venues/new', HostController::class, 'addVenue');
 $routing->post('/host/venues/new', HostController::class, 'addVenue');
 $routing->post('/host/requests/{id}', HostController::class, 'decideRequest');

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
+use App\Form\HostApplicationForm;
 use App\Form\VenueForm;
 
 final class HostController extends AppController
@@ -15,6 +16,10 @@ final class HostController extends AppController
         'venue-draft' => 'Szkic lokalu jest poprawny. Zostanie zapisany, gdy aplikacja będzie miała bazę danych.',
         'request-accept' => 'Decyzja przyjęta: akceptacja. Status prośby zmieni się, gdy aplikacja będzie miała bazę danych.',
         'request-reject' => 'Decyzja przyjęta: odrzucenie. Status prośby zmieni się, gdy aplikacja będzie miała bazę danych.',
+    ];
+
+    private const APPLICATION_STATUS_MESSAGES = [
+        'sent' => 'Wniosek jest poprawny. Administrator sprawdzi go, gdy aplikacja będzie miała bazę danych – decyzję dostaniesz e-mailem.',
     ];
 
     // TODO: Laboratorium 8 – oczekujące prośby o rezerwację w lokalach zalogowanego gospodarza z bazy.
@@ -33,6 +38,12 @@ final class HostController extends AppController
 
     public function dashboard(): void
     {
+        // Panel widzi tylko gospodarz – pozostali najpierw wysyłają wniosek o tę rolę.
+        // TODO: Laboratorium 9 – rola z sesji zalogowanego użytkownika zamiast przykładowej.
+        if (!self::CURRENT_USER['isHost']) {
+            $this->redirect('/host/apply');
+        }
+
         $venues = array_column(VenueController::SAMPLE_VENUES, null, 'id');
 
         $this->render('host-dashboard', [
@@ -73,6 +84,31 @@ final class HostController extends AppController
 
         // TODO: Laboratorium 8 – zmiana statusu prośby w bazie.
         $this->redirect('/host?status=request-' . $decision);
+    }
+
+    /* Wniosek o rolę gospodarza; imię i nazwisko podpowiadamy z konta. */
+    public function apply(): void
+    {
+        [$firstName, $lastName] = explode(' ', self::CURRENT_USER['name'], 2);
+        $form = new HostApplicationForm($this->isPost() ? $_POST : ['firstName' => $firstName, 'lastName' => $lastName]);
+
+        if ($this->isPost()) {
+            if ($form->isValid()) {
+                // TODO: Laboratorium 8 – zapis wniosku w bazie, żeby zobaczył go administrator.
+                $this->redirect('/host/apply?status=sent');
+            }
+
+            http_response_code(422);
+        }
+
+        $this->render('host-application', [
+            'pageTitle' => 'Zostań gospodarzem – PoGodzinach',
+            'stylesheet' => 'host-application',
+            'activeNav' => 'host',
+            'form' => $form,
+            'errors' => $form->errors(),
+            'statusMessage' => $this->statusMessage(self::APPLICATION_STATUS_MESSAGES),
+        ]);
     }
 
     public function addVenue(): void
