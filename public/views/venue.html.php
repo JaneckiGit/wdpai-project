@@ -129,7 +129,7 @@ $hostInitials = implode('', array_map(static fn (string $word): string => mb_sub
                 <p><strong data-price><?= $modes[$activeMode]['price'] ?> zł/h</strong> <span data-unit><?= $modes[$activeMode]['unit'] ?></span></p>
             </div>
 
-            <form action="/venues/<?= $venue['id'] ?>/reservations#reservation" method="post">
+            <form class="app-form" action="/venues/<?= $venue['id'] ?>/reservations#reservation" method="post">
                 <?php require __DIR__ . '/partials/form-errors.html.php'; ?>
 
                 <fieldset class="mode-switch">
