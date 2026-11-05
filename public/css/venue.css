@@ -4,27 +4,6 @@
     font-size: 1.625rem;
 }
 
-.breadcrumbs ol {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    margin: 0 0 0.875rem;
-    padding: 0;
-    list-style: none;
-    color: var(--color-muted);
-    font-size: 0.875rem;
-}
-
-.breadcrumbs li + li::before {
-    content: "/";
-    margin-right: 0.5rem;
-}
-
-.breadcrumbs [aria-current] {
-    color: var(--color-text);
-    font-weight: 500;
-}
-
 .venue__address {
     margin-top: 0.5rem;
     color: var(--color-muted);
@@ -206,17 +185,6 @@
     font-size: 0.9375rem;
 }
 
-.icon-tile {
-    display: grid;
-    place-items: center;
-    flex: none;
-    width: 2.625rem;
-    height: 2.625rem;
-    border-radius: 0.75rem;
-    background: var(--color-chip);
-    color: var(--color-text);
-}
-
 .venue__details .entry {
     padding: var(--space-2) 1.125rem;
     border-radius: var(--radius);
@@ -345,10 +313,7 @@
 }
 
 .reservation-panel select {
-    height: 3rem;
     padding: 0 2.5rem 0 2.625rem;
-    border: 1px solid var(--color-border);
-    border-radius: 0.75rem;
     appearance: none;
 }
 
@@ -536,11 +501,6 @@
     font-size: 1.0625rem;
     font-weight: 700;
     text-align: center;
-    appearance: textfield;
-}
-
-.stepper input::-webkit-inner-spin-button {
-    appearance: none;
 }
 
 .summary {

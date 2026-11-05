@@ -1,0 +1,393 @@
+/* Dodaj lokal według prototypu: kroki po lewej, sekcje formularza jako karty i przyklejony pasek z przyciskami.
+   Na telefonie kroki są ukryte, a sekcje leżą jedna pod drugą. */
+.add-venue h1 {
+    margin-bottom: var(--space-3);
+}
+
+.add-venue__aside {
+    display: none;
+}
+
+.add-venue__form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+}
+
+.steps {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.steps__link {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.625rem 0.75rem;
+    border-radius: 0.75rem;
+    color: var(--color-text);
+    font-size: 0.9375rem;
+    font-weight: 500;
+    text-decoration: none;
+}
+
+.steps__link:hover {
+    background: var(--color-surface);
+    color: var(--color-text);
+}
+
+.steps__icon {
+    width: 1.625rem;
+    height: 1.625rem;
+    border: 1.5px solid var(--color-border-strong);
+    background: none;
+    color: var(--color-muted);
+    font-size: 0.8125rem;
+}
+
+.steps__link--done .steps__icon {
+    border-color: var(--color-success-text);
+    background: var(--color-success-text);
+    color: var(--color-surface);
+}
+
+.steps__link--error,
+.steps__link--error:hover {
+    color: var(--color-danger-text);
+    font-weight: 600;
+}
+
+.steps__link--error .steps__icon {
+    border-color: var(--color-danger-text);
+    background: var(--color-danger-text);
+    color: var(--color-surface);
+}
+
+.add-venue__next {
+    margin: var(--space-3) 0 0;
+    padding: var(--space-2);
+    border-radius: var(--radius);
+    background: var(--color-success-bg);
+    color: var(--color-success-text);
+    font-size: 0.8125rem;
+    line-height: 1.55;
+}
+
+.add-venue__next strong {
+    display: block;
+    margin-bottom: 0.25rem;
+    font-size: 0.875rem;
+}
+
+/* Karta sekcji z numerem przed tytułem. */
+.form-section {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    padding: 1.25rem;
+    border-radius: 1.25rem;
+    scroll-margin-top: var(--space-2);
+}
+
+.form-section h2 {
+    display: flex;
+    align-items: baseline;
+    gap: 0.75rem;
+    font-size: 1.75rem;
+}
+
+.form-section h2 > span:first-child {
+    color: var(--color-link);
+    font-family: var(--font-body);
+    font-size: 0.8125rem;
+    font-weight: 700;
+}
+
+.form-grid,
+.option-grid {
+    display: grid;
+    gap: 1.125rem 1.25rem;
+}
+
+.location-map {
+    height: 13.75rem;
+    overflow: hidden;
+    border: 1px solid var(--color-border);
+    border-radius: 0.875rem;
+}
+
+.field__count {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+}
+
+/* Karta wyboru celu albo sposobu wejścia; zaznaczona ma ramkę i tło w kolorze marki. */
+.option-card {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.875rem var(--space-2);
+    border: 1px solid var(--color-border);
+    border-radius: 0.875rem;
+    color: var(--color-muted);
+    font-size: 0.8125rem;
+    line-height: 1.45;
+    cursor: pointer;
+}
+
+.option-card:has(:checked) {
+    border: 1.5px solid var(--color-primary);
+    background: var(--color-surface-selected);
+}
+
+.option-card input {
+    flex: none;
+    width: 1.25rem;
+    height: 1.25rem;
+    margin: 0;
+    accent-color: var(--color-primary);
+}
+
+.option-card strong {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--color-text);
+    font-size: 0.9375rem;
+}
+
+.option-card .icon-tile {
+    width: 2.375rem;
+    height: 2.375rem;
+    border-radius: 0.625rem;
+    background: var(--color-bg);
+    color: var(--color-muted);
+}
+
+.option-card:has(:checked) .icon-tile {
+    background: var(--color-surface);
+    color: var(--color-link);
+}
+
+/* Pole pliku w ramce z przerywaną linią; przycisk wyboru pliku ma wygląd przycisku drugorzędnego. */
+.dropzone {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.625rem;
+    padding: var(--space-3);
+    border: 2px dashed var(--color-border);
+    border-radius: var(--radius);
+    background: var(--color-surface-muted);
+    text-align: center;
+    cursor: pointer;
+}
+
+.dropzone .icon-tile {
+    width: 3rem;
+    height: 3rem;
+    background: var(--color-exclusive-bg);
+    color: var(--color-exclusive-text);
+}
+
+.dropzone input::file-selector-button {
+    margin-right: 0.75rem;
+    padding: 0.625rem var(--space-2);
+    border: 0;
+    border-radius: 0.625rem;
+    background: var(--color-chip);
+    color: var(--color-text);
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.add-venue__optional {
+    background: var(--color-chip);
+    color: var(--color-muted);
+    font-family: var(--font-body);
+    font-size: 0.75rem;
+}
+
+.add-venue__tip {
+    color: var(--color-success-text);
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+/* Okna dostępności jako tabela; na wąskim ekranie przewija się w poziomie. */
+.windows {
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+    overflow-x: auto;
+}
+
+.window-row {
+    display: grid;
+    grid-template-columns: 7rem 11rem 11rem 7.5rem 7rem 5rem 2.5rem;
+    gap: var(--space-1);
+    align-items: center;
+    min-width: 53.75rem;
+}
+
+.window-row--header {
+    color: var(--color-muted);
+    font-size: 0.8125rem;
+    font-weight: 600;
+    line-height: 1.25;
+}
+
+.app-form .window-row :is(input, select) {
+    height: 2.75rem;
+    padding: 0 0.75rem;
+    border-radius: 0.625rem;
+    font-size: 0.875rem;
+}
+
+.window-row__hours {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+}
+
+.window-row__mode,
+.unit {
+    position: relative;
+}
+
+/* Kropka trybu: zielona przy miejscach do pracy, w kolorze marki przy wyłączności. */
+.window-row__mode::before {
+    content: "";
+    position: absolute;
+    top: calc(50% - 0.25rem);
+    left: 0.75rem;
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    background: var(--color-success-text);
+    pointer-events: none;
+}
+
+.window-row__mode:has(option[value="exclusive"]:checked)::before {
+    background: var(--color-primary);
+}
+
+.app-form .window-row__mode select {
+    padding-left: 1.75rem;
+}
+
+/* Jednostka (miejsc, osób, zł/h, h) w prawej części pola liczby. */
+.unit::after {
+    content: attr(data-unit);
+    position: absolute;
+    top: calc(50% - 0.6rem);
+    right: 0.625rem;
+    color: var(--color-muted);
+    font-size: 0.8125rem;
+    pointer-events: none;
+}
+
+.unit--capacity::after {
+    content: "miejsc";
+}
+
+.window-row:has(option[value="exclusive"]:checked) .unit--capacity::after {
+    content: "osób";
+}
+
+.app-form .unit input {
+    padding-right: 3.25rem;
+}
+
+.window-row__remove {
+    width: 2.5rem;
+    height: 2.5rem;
+    border: 0;
+    border-radius: 0.625rem;
+    background: none;
+    color: var(--color-muted);
+    cursor: pointer;
+}
+
+.add-venue__add-window {
+    align-self: flex-start;
+    gap: var(--space-1);
+    min-height: 2.75rem;
+}
+
+/* Pasek z przyciskami; od 768 px zostaje widoczny przy przewijaniu (na telefonie zasłaniałby formularz). */
+.form-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    padding: 0.75rem;
+    box-shadow: var(--shadow-soft);
+}
+
+.form-actions__errors {
+    flex: 1 1 16rem;
+    margin: 0;
+    color: var(--color-danger-text);
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.form-actions__errors a {
+    color: inherit;
+    font-weight: 600;
+}
+
+.form-actions .button {
+    flex: 1 1 auto;
+    min-height: 3rem;
+    padding: 0 0.875rem;
+}
+
+@media (min-width: 48rem) {
+    .form-section {
+        padding: 1.75rem;
+    }
+
+    .form-grid,
+    .option-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .form-grid__wide {
+        grid-column: 1 / -1;
+    }
+
+    .form-actions {
+        position: sticky;
+        bottom: var(--space-2);
+        padding: var(--space-2) 1.25rem;
+    }
+
+    .form-actions .button {
+        flex: none;
+        padding: 0 1.25rem;
+    }
+}
+
+/* Od 1024 px kroki formularza po lewej, przyklejone przy przewijaniu. */
+@media (min-width: 64rem) {
+    .add-venue__layout {
+        display: grid;
+        grid-template-columns: 15rem minmax(0, 1fr);
+        gap: var(--space-4);
+        align-items: start;
+    }
+
+    .add-venue__aside {
+        position: sticky;
+        top: 4.5rem;
+        display: block;
+    }
+}

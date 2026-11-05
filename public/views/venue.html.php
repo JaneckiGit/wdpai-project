@@ -128,7 +128,7 @@ $initials = require __DIR__ . '/partials/initials.php';
                 <p><strong data-price><?= $modes[$activeMode]['price'] ?> zł/h</strong> <span data-unit><?= $modes[$activeMode]['unit'] ?></span></p>
             </div>
 
-            <form action="/venues/<?= $venue['id'] ?>/reservations#reservation" method="post">
+            <form class="app-form" action="/venues/<?= $venue['id'] ?>/reservations#reservation" method="post">
                 <?php require __DIR__ . '/partials/form-errors.html.php'; ?>
 
                 <fieldset class="mode-switch">

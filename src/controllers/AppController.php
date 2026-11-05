@@ -28,6 +28,15 @@ abstract class AppController
         require dirname(__DIR__, 2) . '/public/views/layout.html.php';
     }
 
+    /* Token i styl mapy z .env – docker-compose przekazuje je usłudze php. */
+    protected function mapbox(): array
+    {
+        return [
+            'token' => getenv('MAPBOX_TOKEN') ?: '',
+            'style' => getenv('MAPBOX_STYLE') ?: 'mapbox://styles/mapbox/light-v11',
+        ];
+    }
+
     protected function renderError(int $status, string $title, string $message): void
     {
         http_response_code($status);

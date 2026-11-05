@@ -202,6 +202,13 @@ input:focus-visible {
     color: var(--color-on-brand);
 }
 
+/* Przycisk drugorzędny, np. „Zapisz szkic” obok „Wyślij do weryfikacji”. */
+.button--secondary,
+.button--secondary:hover {
+    background: var(--color-chip);
+    color: var(--color-text);
+}
+
 .field {
     display: flex;
     flex-direction: column;
@@ -254,7 +261,8 @@ input[type="password"],
 input[type="date"],
 input[type="time"],
 input[type="number"],
-select {
+select,
+textarea {
     width: 100%;
     height: 3.25rem;
     padding: 0 var(--space-2);
@@ -269,8 +277,36 @@ input[type="password"]:hover,
 input[type="date"]:hover,
 input[type="time"]:hover,
 input[type="number"]:hover,
-select:hover {
+select:hover,
+textarea:hover {
     border-color: var(--color-text);
+}
+
+textarea {
+    height: auto;
+    padding: 0.75rem var(--space-2);
+    line-height: 1.55;
+    resize: vertical;
+}
+
+/* Pola liczb w formularzach aplikacji bez strzałek przeglądarki – obok stoi jednostka albo przyciski −/+. */
+.app-form input[type="number"] {
+    appearance: textfield;
+}
+
+.app-form input[type="number"]::-webkit-inner-spin-button {
+    appearance: none;
+}
+
+/* Formularze w aplikacji (panel rezerwacji, Dodaj lokal) mają niższe pola z cieńszą ramką niż logowanie.
+   Pole z błędem zostawia czerwoną ramkę z reguły aria-invalid. */
+.app-form :is(input[type="text"], input[type="time"], input[type="number"], select, textarea):not([aria-invalid="true"]) {
+    border: 1px solid var(--color-border);
+}
+
+.app-form input:is([type="text"], [type="time"], [type="number"]),
+.app-form select {
+    height: 3rem;
 }
 
 input:focus {
@@ -380,16 +416,37 @@ input:focus {
     color: var(--color-exclusive-text);
 }
 
-/* Kontener stron aplikacji (Lokal, Panel gospodarza): szerokość i odstępy od krawędzi ekranu. */
+/* Ścieżka nad tytułem strony, np. Odkrywaj / Kazimierz / Kawiarnia Ziarno. */
+.breadcrumbs ol {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin: 0 0 0.875rem;
+    padding: 0;
+    list-style: none;
+    color: var(--color-muted);
+    font-size: 0.875rem;
+}
+
+.breadcrumbs li + li::before {
+    content: "/";
+    margin-right: 0.5rem;
+}
+
+.breadcrumbs [aria-current] {
+    color: var(--color-text);
+    font-weight: 500;
+}
+
+/* Kontener stron aplikacji (Lokal, Panel gospodarza, Dodaj lokal): szerokość i odstępy od krawędzi ekranu. */
 .page {
     max-width: 86rem;
     margin: 0 auto;
     padding: 1.25rem var(--space-2) var(--space-5);
 }
 
-.page p,
-.page ul,
-.page figure {
+/* :where() nie dodaje specyficzności, więc klasa z arkusza strony (np. margin-top adresu) może nadpisać ten margines. */
+.page :where(p, ul, figure) {
     margin: 0;
 }
 
@@ -399,7 +456,19 @@ input:focus {
     font-size: 0.875rem;
 }
 
-/* Kółko z inicjałami osoby: najemca w prośbie, gospodarz na stronie lokalu. */
+/* Kwadrat z ikoną na środku, np. udogodnienie na stronie lokalu, cel w Dodaj lokal. */
+.icon-tile {
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: 2.625rem;
+    height: 2.625rem;
+    border-radius: 0.75rem;
+    background: var(--color-chip);
+    color: var(--color-text);
+}
+
+/* Kółko z inicjałami osoby: najemca w prośbie, gospodarz na stronie lokalu, numer kroku w Dodaj lokal. */
 .initials {
     display: grid;
     place-items: center;

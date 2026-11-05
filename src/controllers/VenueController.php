@@ -71,10 +71,7 @@ final class VenueController extends AppController
             'errors' => $form->errors(),
             'searchQuery' => $form->query,
             'venues' => $isValid ? $this->findVenues($form) : [],
-            'mapbox' => [
-                'token' => getenv('MAPBOX_TOKEN') ?: '',
-                'style' => getenv('MAPBOX_STYLE') ?: 'mapbox://styles/mapbox/light-v11',
-            ],
+            'mapbox' => $this->mapbox(),
         ]);
     }
 
