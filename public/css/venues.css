@@ -19,7 +19,6 @@
     list-style: none;
 }
 
-.chip,
 .segmented a,
 .view-switch a {
     display: inline-flex;
@@ -33,11 +32,6 @@
     font-weight: 500;
     text-decoration: none;
     white-space: nowrap;
-}
-
-.chip {
-    border: 1px solid var(--color-border);
-    background: var(--color-surface);
 }
 
 /* Wybrany cel ma odwrócone kolory – w obu motywach tło w kolorze tekstu. */
@@ -185,23 +179,6 @@
     margin: 0;
     padding: 0;
     list-style: none;
-}
-
-.badge {
-    padding: 0.3125rem 0.625rem;
-    border-radius: var(--radius-pill);
-    font-size: 0.8125rem;
-    font-weight: 600;
-}
-
-.badge--seats {
-    background: var(--color-seats-bg);
-    color: var(--color-seats-text);
-}
-
-.badge--exclusive {
-    background: var(--color-exclusive-bg);
-    color: var(--color-exclusive-text);
 }
 
 .venue-card .button {
