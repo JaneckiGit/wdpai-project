@@ -1,160 +1,227 @@
+<?php
+$purposes = require __DIR__ . '/partials/purposes.php';
+$dayNames = [1 => 'pon', 'wt', 'śr', 'czw', 'pt', 'sob', 'nd'];
+$monthNames = [1 => 'styczeń', 'luty', 'marzec', 'kwiecień', 'maj', 'czerwiec', 'lipiec', 'sierpień', 'wrzesień', 'październik', 'listopad', 'grudzień'];
+
+// Teksty i ceny obu trybów; strona pokazuje tylko tryby, dla których gospodarz ma okno dostępności.
+// TODO: Laboratorium 8 – wolne miejsca w godzinie liczone z zapisanych rezerwacji.
+$modes = [
+    'seats' => ['name' => 'Miejsca do pracy', 'choice' => 'Miejsce do pracy', 'icon' => 'fa-laptop',
+        'price' => $venue['seatPrice'], 'unit' => 'za miejsce',
+        'details' => $venue['seatCount'] . ' miejsc · rezerwujesz pojedyncze miejsca',
+        'free' => $venue['seatCount'] . ' z ' . $venue['seatCount'] . ' wolnych'],
+    'exclusive' => ['name' => 'Na wyłączność', 'choice' => 'Cały lokal', 'icon' => 'fa-key',
+        'price' => $venue['exclusivePrice'], 'unit' => 'za cały lokal',
+        'details' => 'do ' . $venue['capacity'] . ' osób · min. ' . $form::MIN_HOURS . ' h',
+        'free' => 'wolne'],
+];
+$activeMode = isset($venue['windows'][$form->mode]) ? $form->mode : array_key_first($venue['windows']);
+
+// Cele, na które gospodarz nie pozwala – do zdania pod listą dozwolonych celów.
+$deniedPurposes = [];
+foreach ($purposes as $value => [$label]) {
+    if (!in_array($value, $venue['purposes'], true)) {
+        $deniedPurposes[] = mb_strtolower($label);
+    }
+}
+
+// Inicjały gospodarza w kółku: pierwsza litera każdego słowa.
+$hostInitials = implode('', array_map(static fn (string $word): string => mb_substr($word, 0, 1), explode(' ', $venue['host'])));
+?>
 <?php require __DIR__ . '/partials/header.html.php'; ?>
 
-<main>
+<main class="venue">
     <?php require __DIR__ . '/partials/status-message.html.php'; ?>
 
-    <!-- TODO: Dane lokalu o id z adresu pobrane z bazy -->
-    <nav aria-label="Ścieżka">
+    <nav class="breadcrumbs" aria-label="Ścieżka">
         <ol>
             <li><a href="/venues">Odkrywaj</a></li>
-            <li><a href="/venues?q=Kazimierz">Kazimierz</a></li>
-            <li aria-current="page">Kawiarnia Ziarno</li>
+            <li><a href="/venues?q=<?= urlencode($venue['district']) ?>"><?= htmlspecialchars($venue['district']) ?></a></li>
+            <li aria-current="page"><?= htmlspecialchars($venue['name']) ?></li>
         </ol>
     </nav>
 
-    <header>
-        <h1>Kawiarnia Ziarno</h1>
-        <p>Ocena 4,9 · <a href="#reviews">31 opinii</a> · Kazimierz, ul. Estery 8 · 1,2 km od Ciebie</p>
-    </header>
+    <h1><?= htmlspecialchars($venue['name']) ?></h1>
+    <p class="venue__address">
+        <i class="fa-solid fa-location-dot" aria-hidden="true"></i>
+        <?= htmlspecialchars($venue['district'] . ', ' . $venue['address']) ?>
+    </p>
 
-    <section aria-labelledby="media-heading">
-        <h2 id="media-heading">Rolka i zdjęcia</h2>
-        <!-- TODO: Rolka gospodarza „Wieczór przy długim stole” i galeria zdjęć -->
-    </section>
+    <div class="venue__layout">
+        <section class="venue__media" aria-label="Zdjęcia i rolki">
+            <!-- TODO: Laboratorium 13 – wideo rolki gospodarza zamiast ilustracji. -->
+            <figure class="reel reel--host">
+                <img src="/images/login-hero.svg" alt="">
+                <figcaption><?= htmlspecialchars($venue['reelTitle']) ?></figcaption>
+            </figure>
 
-    <section aria-labelledby="recorded-heading">
-        <h2 id="recorded-heading">Nagrane tutaj</h2>
-        <p>Rolki najemców po wizycie</p>
-        <ul>
-            <li>Sesja foto · Marta Z. · 0:24</li>
-            <li>Praca · Kuba W. · 0:18</li>
-            <li>Spotkanie · Ola M. · 0:31</li>
-        </ul>
-    </section>
+            <ul class="venue-photos" aria-label="Zdjęcia lokalu dodane przez gospodarza">
+                <?php foreach ($venue['photos'] as $photo): ?>
+                    <li>
+                        <img src="<?= htmlspecialchars($photo) ?>" alt="Zdjęcie lokalu">
+                    </li>
+                <?php endforeach; ?>
+            </ul>
+        </section>
 
-    <section aria-labelledby="host-heading">
-        <h2 id="host-heading">Gospodarz</h2>
-        <p><strong>Piotr Nowak</strong> · ocena 4,9 · 31 opinii · potwierdza prośby w ciągu 24 h</p>
-    </section>
+        <div class="venue__details">
+            <section class="card host-card">
+                <span class="host-card__avatar" aria-hidden="true"><?= htmlspecialchars($hostInitials) ?></span>
+                <div>
+                    <p class="venue__muted">Gospodarz</p>
+                    <h2><?= htmlspecialchars($venue['host']) ?></h2>
+                    <p class="venue__muted">potwierdza prośby w ciągu 24 h</p>
+                </div>
+            </section>
 
-    <section aria-labelledby="about-heading">
-        <h2 id="about-heading">O lokalu</h2>
-        <p>Kameralna kawiarnia na Kazimierzu z długim dębowym stołem, ceglaną ścianą i oknem na podwórko. Wieczorami, gdy kończymy obsługę gości, oddajemy salę do cichej pracy, a w poniedziałki – gdy kawiarnia jest nieczynna – cały lokal na wyłączność.</p>
-    </section>
+            <section>
+                <h2>O lokalu</h2>
+                <p><?= htmlspecialchars($venue['description']) ?></p>
+            </section>
 
-    <section aria-labelledby="purposes-heading">
-        <h2 id="purposes-heading">Dozwolone cele</h2>
-        <ul>
-            <li>Praca</li>
-            <li>Spotkania i szkolenia</li>
-            <li>Kameralne wydarzenia</li>
-        </ul>
-        <p>Gospodarz nie zezwala na sesje foto i wideo.</p>
-    </section>
+            <section>
+                <h2>Dozwolone cele</h2>
+                <ul class="purpose-list">
+                    <?php foreach ($venue['purposes'] as $purpose): ?>
+                        <li class="chip"><i class="fa-solid <?= $purposes[$purpose][1] ?>" aria-hidden="true"></i> <?= $purposes[$purpose][0] ?></li>
+                    <?php endforeach; ?>
+                </ul>
+                <?php if ($deniedPurposes !== []): ?>
+                    <p class="venue__muted">Gospodarz nie zezwala na: <?= implode(', ', $deniedPurposes) ?>.</p>
+                <?php endif; ?>
+            </section>
 
-    <section aria-labelledby="offer-heading">
-        <h2 id="offer-heading">Oferta</h2>
+            <section>
+                <h2>Oferta</h2>
+                <?php foreach ($venue['windows'] as $mode => $window): ?>
+                    <article class="card offer">
+                        <div>
+                            <span class="badge badge--<?= $mode ?>"><i class="fa-solid <?= $modes[$mode]['icon'] ?>" aria-hidden="true"></i> <?= $modes[$mode]['name'] ?></span>
+                            <h3><?= htmlspecialchars($window['label']) ?> <?= $window['from'] ?>:00–<?= $window['to'] ?>:00</h3>
+                            <p class="venue__muted"><?= $modes[$mode]['details'] ?></p>
+                        </div>
+                        <p class="offer__price"><strong><?= $modes[$mode]['price'] ?> zł/h</strong> <?= $modes[$mode]['unit'] ?></p>
+                    </article>
+                <?php endforeach; ?>
+            </section>
 
-        <article>
-            <h3>Miejsca do pracy</h3>
-            <p>wt–pt 18:00–22:00</p>
-            <p>12 miejsc · rezerwujesz pojedyncze miejsca</p>
-            <p><strong>15 zł/h</strong> za miejsce</p>
-        </article>
+            <section>
+                <h2>Udogodnienia</h2>
+                <ul class="amenities">
+                    <?php foreach ($venue['amenities'] as [$icon, $name, $note]): ?>
+                        <li>
+                            <span class="icon-tile"><i class="fa-solid <?= $icon ?>" aria-hidden="true"></i></span>
+                            <span><strong><?= htmlspecialchars($name) ?></strong><?= htmlspecialchars($note) ?></span>
+                        </li>
+                    <?php endforeach; ?>
+                </ul>
+            </section>
 
-        <article>
-            <h3>Na wyłączność</h3>
-            <p>poniedziałki 9:00–21:00</p>
-            <p>do 20 osób · min. 2 h</p>
-            <p><strong>150 zł/h</strong> za cały lokal</p>
-        </article>
-    </section>
+            <section class="entry">
+                <span class="icon-tile"><i class="fa-solid fa-user-check" aria-hidden="true"></i></span>
+                <p><strong>Wejście: <?= htmlspecialchars($venue['entry']) ?></strong> Szczegóły wejścia zobaczysz po akceptacji rezerwacji.</p>
+            </section>
+        </div>
 
-    <section aria-labelledby="amenities-heading">
-        <h2 id="amenities-heading">Udogodnienia</h2>
-        <dl>
-            <dt>Wi-Fi</dt>
-            <dd>hasło w instrukcji po akceptacji</dd>
-            <dt>Gniazdka</dt>
-            <dd>przy każdym miejscu</dd>
-            <dt>Rzutnik</dt>
-            <dd>na spotkania i szkolenia</dd>
-            <dt>Ekspres do kawy</dt>
-            <dd>do dyspozycji najemców</dd>
-        </dl>
-    </section>
+        <aside class="card reservation-panel" id="reservation" aria-labelledby="reservation-heading">
+            <div class="reservation-panel__title">
+                <h2 id="reservation-heading">Rezerwacja</h2>
+                <p><strong data-price><?= $modes[$activeMode]['price'] ?> zł/h</strong> <span data-unit><?= $modes[$activeMode]['unit'] ?></span></p>
+            </div>
 
-    <section aria-labelledby="entry-heading">
-        <h2 id="entry-heading">Wejście do lokalu</h2>
-        <p>Na miejscu będzie pracownik. Szczegóły wejścia zobaczysz po akceptacji rezerwacji.</p>
-    </section>
+            <form action="/venues/<?= $venue['id'] ?>/reservations#reservation" method="post">
+                <?php require __DIR__ . '/partials/form-errors.html.php'; ?>
 
-    <section id="reviews" aria-labelledby="reviews-heading">
-        <h2 id="reviews-heading">Opinie</h2>
-        <p>Średnia ocena 4,9 · 31 opinii</p>
+                <fieldset class="mode-switch">
+                    <legend class="visually-hidden">Tryb rezerwacji</legend>
+                    <?php foreach ($venue['windows'] as $mode => $window): ?>
+                        <label>
+                            <input type="radio" name="mode" value="<?= $mode ?>" data-price="<?= $modes[$mode]['price'] ?>" data-unit="<?= $modes[$mode]['unit'] ?>" <?= $mode === $activeMode ? 'checked' : '' ?>>
+                            <i class="fa-solid <?= $modes[$mode]['icon'] ?>" aria-hidden="true"></i> <?= $modes[$mode]['choice'] ?>
+                        </label>
+                    <?php endforeach; ?>
+                </fieldset>
 
-        <!-- TODO: Opinie z bazy wyświetlone w pętli -->
-        <article>
-            <h3>Kasia Lis</h3>
-            <p>Praca · październik</p>
-            <p>Cicho, ciepło i świetne światło nad stołem. Cztery godziny pracy minęły szybciej niż w domu.</p>
-        </article>
+                <div class="field">
+                    <label for="purpose">Cel</label>
+                    <div class="select">
+                        <i class="fa-solid <?= $purposes[$form->purpose][1] ?? 'fa-laptop' ?>" aria-hidden="true" data-purpose-icon></i>
+                        <select id="purpose" name="purpose" <?= $form->invalidAttributes('purpose') ?>>
+                            <?php foreach ($venue['purposes'] as $purpose): ?>
+                                <option value="<?= $purpose ?>" data-icon="<?= $purposes[$purpose][1] ?>" <?= $form->purpose === $purpose ? 'selected' : '' ?>><?= $purposes[$purpose][0] ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                        <i class="fa-solid fa-chevron-down" aria-hidden="true"></i>
+                    </div>
+                </div>
 
-        <article>
-            <h3>Michał Bąk</h3>
-            <p>Spotkania i szkolenia · wrzesień</p>
-            <p>Cała sala na poniedziałkowe warsztaty dla 14 osób. Rzutnik działał od razu, a kawa czekała na stole.</p>
-        </article>
-    </section>
+                <!-- Dni i godziny każdego trybu; pola niewybranego trybu są wyłączone (disabled), więc formularz ich nie wysyła. -->
+                <?php foreach ($venue['windows'] as $mode => $window): ?>
+                    <fieldset class="slots" data-mode="<?= $mode ?>" <?= $mode === $activeMode ? '' : 'disabled hidden' ?>>
+                        <div class="slots__header">
+                            <span id="date-<?= $mode ?>">Data</span>
+                            <span class="venue__muted"><?= $monthNames[(int) $days[0]->format('n')] ?></span>
+                        </div>
+                        <div class="day-chips" role="group" aria-labelledby="date-<?= $mode ?>" <?= $form->invalidAttributes('date') ?>>
+                            <?php foreach ($days as $day): ?>
+                                <?php $isOpen = in_array((int) $day->format('N'), $window['days'], true); ?>
+                                <label class="day-chip">
+                                    <input type="radio" name="date" value="<?= $day->format('Y-m-d') ?>" data-label="<?= $dayNames[(int) $day->format('N')] . ' ' . $day->format('d.m') ?>" <?= $isOpen ? '' : 'disabled' ?> <?= $form->date === $day->format('Y-m-d') ? 'checked' : '' ?>>
+                                    <?= $dayNames[(int) $day->format('N')] ?>
+                                    <strong><?= $day->format('j') ?></strong>
+                                    <span><?= $isOpen ? 'wolne' : '—' ?></span>
+                                </label>
+                            <?php endforeach; ?>
+                        </div>
 
-    <aside id="reservation" aria-labelledby="reservation-heading">
-        <h2 id="reservation-heading">Rezerwacja</h2>
-        <p><strong>15 zł/h</strong> za miejsce</p>
+                        <div class="slots__header">
+                            <span id="hours-<?= $mode ?>">Godziny</span>
+                            <span class="venue__muted" data-selected></span>
+                        </div>
+                        <div class="hour-list" role="group" aria-labelledby="hours-<?= $mode ?>" <?= $form->invalidAttributes('hours') ?>>
+                            <?php for ($hour = $window['from']; $hour < $window['to']; $hour++): ?>
+                                <label class="hour-row">
+                                    <input type="checkbox" name="hours[]" value="<?= $hour ?>" <?= in_array($hour, $form->hours, true) ? 'checked' : '' ?>>
+                                    <strong><?= $hour ?>:00</strong>
+                                    <span class="venue__muted">· <?= $modes[$mode]['free'] ?></span>
+                                    <span class="hour-row__bar" aria-hidden="true"></span>
+                                </label>
+                            <?php endfor; ?>
+                        </div>
 
-        <form action="/venues/<?= $venueId ?>/reservations#reservation" method="post">
-            <?php require __DIR__ . '/partials/form-errors.html.php'; ?>
+                        <?php if ($mode === 'seats'): ?>
+                            <div class="seats">
+                                <label for="seats">
+                                    Liczba miejsc: <span data-seats-label><?= htmlspecialchars($form->seats) ?></span>
+                                    <span class="venue__muted" id="seats-hint">maks. <?= $form::MAX_SEATS ?> w tym zakresie</span>
+                                </label>
+                                <div class="stepper">
+                                    <button type="button" data-step="-1" aria-label="Mniej miejsc"><i class="fa-solid fa-minus" aria-hidden="true"></i></button>
+                                    <input type="number" id="seats" name="seats" min="1" max="<?= $form::MAX_SEATS ?>" value="<?= htmlspecialchars($form->seats) ?>" <?= $form->invalidAttributes('seats', 'seats-hint') ?>>
+                                    <button type="button" data-step="1" aria-label="Więcej miejsc"><i class="fa-solid fa-plus" aria-hidden="true"></i></button>
+                                </div>
+                            </div>
+                        <?php endif; ?>
+                    </fieldset>
+                <?php endforeach; ?>
 
-            <fieldset>
-                <legend>Tryb</legend>
-                <label><input type="radio" name="mode" value="seats" <?= $form->mode === 'seats' ? 'checked' : '' ?>> Miejsce do pracy</label>
-                <label><input type="radio" name="mode" value="exclusive" <?= $form->mode === 'exclusive' ? 'checked' : '' ?>> Cały lokal</label>
-            </fieldset>
+                <div class="summary" hidden>
+                    <p><i class="fa-regular fa-calendar" aria-hidden="true"></i> <span data-term></span></p>
+                    <p><span data-calc></span> <span data-total></span></p>
+                    <p class="summary__total">Razem <span data-total></span></p>
+                </div>
 
-            <label for="purpose">Cel</label>
-            <select id="purpose" name="purpose" <?= $form->invalidAttributes('purpose') ?>>
-                <option value="work" <?= $form->purpose === 'work' ? 'selected' : '' ?>>Praca</option>
-                <option value="meetings" <?= $form->purpose === 'meetings' ? 'selected' : '' ?>>Spotkania i szkolenia</option>
-                <option value="events" <?= $form->purpose === 'events' ? 'selected' : '' ?>>Kameralne wydarzenia</option>
-            </select>
+                <p class="reservation-panel__note">
+                    <i class="fa-solid fa-circle-info" aria-hidden="true"></i>
+                    Gospodarz potwierdza w ciągu 24 h. Do tego czasu miejsce jest zarezerwowane dla Ciebie.
+                </p>
 
-            <label for="date">Data</label>
-            <input type="date" id="date" name="date" value="<?= htmlspecialchars($form->date) ?>" required <?= $form->invalidAttributes('date') ?>>
-
-            <label for="time-from">Od godziny</label>
-            <input type="time" id="time-from" name="from" value="<?= htmlspecialchars($form->from) ?>" step="3600" required <?= $form->invalidAttributes('from') ?>>
-
-            <label for="time-to">Do godziny</label>
-            <input type="time" id="time-to" name="to" value="<?= htmlspecialchars($form->to) ?>" step="3600" required <?= $form->invalidAttributes('to') ?>>
-
-            <label for="seats">Liczba miejsc</label>
-            <input type="number" id="seats" name="seats" min="1" max="4" value="<?= htmlspecialchars($form->seats) ?>" <?= $form->invalidAttributes('seats', 'seats-hint') ?>>
-            <p id="seats-hint">maks. 4 w tym zakresie</p>
-
-            <!-- TODO: Podsumowanie liczone z wybranych wartości (Laboratorium 10) -->
-            <dl>
-                <dt>Termin</dt>
-                <dd>czw 20.11, 18:00–22:00 (4 h)</dd>
-                <dt>1 × 4 h × 15 zł</dt>
-                <dd>60,00 zł</dd>
-                <dt>Razem</dt>
-                <dd><output name="total" for="seats time-from time-to">60,00 zł</output></dd>
-            </dl>
-
-            <p>Gospodarz potwierdza w ciągu 24 h. Do tego czasu miejsce jest zarezerwowane dla Ciebie.</p>
-
-            <button type="submit">Wyślij prośbę o rezerwację</button>
-        </form>
-    </aside>
+                <button class="button" type="submit">Wyślij prośbę o rezerwację</button>
+            </form>
+        </aside>
+    </div>
 </main>
 
 <?php require __DIR__ . '/partials/footer.html.php'; ?>
+
+<script src="/js/reservation.js" defer></script>
