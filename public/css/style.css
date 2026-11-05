@@ -202,6 +202,29 @@ input:focus-visible {
     font-weight: 500;
 }
 
+.field__hint {
+    margin: 0;
+    color: var(--color-muted);
+    font-size: 0.8125rem;
+}
+
+.checkbox {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.625rem;
+    font-size: 0.875rem;
+}
+
+/* Systemowe pole wyboru w kolorze marki – większe, żeby łatwiej w nie trafić. */
+.checkbox input {
+    flex: none;
+    width: 1.125rem;
+    height: 1.125rem;
+    margin: 0.125rem 0 0;
+    accent-color: var(--color-primary);
+}
+
+input[type="text"],
 input[type="email"],
 input[type="password"] {
     width: 100%;
@@ -212,6 +235,7 @@ input[type="password"] {
     background: var(--color-surface);
 }
 
+input[type="text"]:hover,
 input[type="email"]:hover,
 input[type="password"]:hover {
     border-color: var(--color-text);

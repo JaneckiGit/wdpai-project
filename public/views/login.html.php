@@ -6,6 +6,7 @@
         <p class="auth-main__lead">Przestrzeń na godziny – do pracy, spotkań, sesji i kameralnych wydarzeń</p>
 
         <form class="auth-form" action="/login" method="post">
+            <?php require __DIR__ . '/partials/status-message.html.php'; ?>
             <?php require __DIR__ . '/partials/form-errors.html.php'; ?>
 
             <div class="field">
