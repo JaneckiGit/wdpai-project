@@ -40,7 +40,8 @@ Pięć widoków, każdy w wersji na komputer (1440 px) i na telefon (390 px):
 
 | Widok | Zawartość |
 |---|---|
-| Logowanie | Wybór typu konta („Szukam przestrzeni” / „Udostępniam lokal”), formularz z komunikatem błędu |
+| Logowanie | E-mail i hasło, formularz z komunikatem błędu |
+| Rejestracja | Imię i nazwisko, e-mail, hasło z powtórzeniem, zgoda na regulamin; konto startuje jako „Szukam przestrzeni”, rolę gospodarza nadaje administrator po wniosku |
 | Odkrywaj | Rolki lokali i mapa z cenami, filtry celu, terminu, liczby osób i ceny |
 | Lokal i rezerwacja | Opis lokalu, dozwolone cele, oferta, opinie i formularz prośby o rezerwację z podsumowaniem kwoty |
 | Panel gospodarza | Statystyki, prośby o rezerwację do akceptacji, kalendarz tygodnia |
@@ -54,14 +55,15 @@ Gotowy jest szkielet MVC z laboratoriów oraz szablony HTML pięciu widoków z p
 |---|---|
 | Strona główna | Widok startowy z linkiem do listy projektów (przykład z laboratorium) |
 | Projekty | Lista projektów i widok szczegółów projektu o podanym id (przykład z laboratorium) |
-| Logowanie | Formularz z wyborem typu konta, e-mailem i hasłem; walidacja i przekierowanie zależne od typu konta (bez sprawdzania hasła, które dojdzie w Laboratorium 9) |
+| Logowanie | E-mail i hasło; walidacja i przekierowanie do Odkrywaj (bez sprawdzania hasła, które dojdzie w Laboratorium 9) |
+| Rejestracja | Formularz z walidacją po stronie serwera jak w Laboratorium 9; po poprawnym wysłaniu przekierowanie na logowanie z komunikatem (zapis konta w bazie w Laboratorium 9) |
 | Odkrywaj | Mapa Mapbox z pinezkami cen obok kolumny kart lokali; filtry celu i trybu jako linki (`?purpose=…&mode=…`) oraz fraza z wyszukiwarki w nagłówku; na telefonie przełącznik „Rolki / Mapa” |
 | Lokal i rezerwacja | Opis lokalu, cele, oferta, udogodnienia, opinie i formularz prośby o rezerwację z walidacją; id lokalu z adresu trafia do adresu formularza |
 | Panel gospodarza | Podsumowanie, prośby o rezerwację z działającymi przyciskami decyzji, kalendarz tygodnia w tabeli, komunikaty po przekierowaniu |
 | Dodaj lokal | Formularz w sześciu krokach z walidacją, w tym wykrywaniem nakładających się okien dostępności; szkic i wysłanie do weryfikacji |
 | Obsługa błędów | Kontrolowane odpowiedzi 400, 404, 422 i 500 (sekcja „Formularze i obsługa błędów”) |
 
-Widoki to semantyczny HTML. W pełni ostylowane są widoki Logowanie i Odkrywaj oraz wspólny nagłówek z nawigacją i stopka (opis w sekcji „Style CSS”), pozostałe widoki mają tylko style bazowe (kolory, fonty, linki, fokus). Na każdej stronie działa motyw jasny i ciemny (Laboratorium 5, sekcja „Motyw jasny i ciemny”). Dane w widokach są przykładowe, wzięte z prototypu – listy oznaczone komentarzem `TODO` będą wyświetlane w pętli z danych z bazy. Formularze są sprawdzane po stronie serwera, ale aplikacja nie ma jeszcze bazy, więc poprawne dane nie są nigdzie zapisywane (Laboratoria 7–8). Lokale w Odkrywaj to przykładowa tablica w `VenueController`, którą filtry naprawdę zawężają; w Laboratorium 8 zastąpi ją baza. Pliki z formularza „Dodaj lokal” nie są jeszcze przetwarzane (Laboratorium 13), a przycisk „Dodaj okno” zadziała po dodaniu JavaScriptu (Laboratorium 10) – do tego czasu formularz w przeglądarce pokazuje jedno okno, a serwer obsługuje ich dowolnie wiele. Ochrona CSRF i sprawdzanie hasła dojdą w Laboratorium 9. Linki do zaplanowanych, jeszcze nieistniejących stron (np. `/register`, `/reservations`, `/terms`) kończą się odpowiedzią 404. Przełącznika języka jeszcze nie ma.
+Widoki to semantyczny HTML. W pełni ostylowane są widoki Logowanie, Rejestracja i Odkrywaj oraz wspólny nagłówek z nawigacją i stopka (opis w sekcji „Style CSS”), pozostałe widoki mają tylko style bazowe (kolory, fonty, linki, fokus). Na każdej stronie działa motyw jasny i ciemny (Laboratorium 5, sekcja „Motyw jasny i ciemny”). Dane w widokach są przykładowe, wzięte z prototypu – listy oznaczone komentarzem `TODO` będą wyświetlane w pętli z danych z bazy. Formularze są sprawdzane po stronie serwera, ale aplikacja nie ma jeszcze bazy, więc poprawne dane nie są nigdzie zapisywane (Laboratoria 7–8). Lokale w Odkrywaj to przykładowa tablica w `VenueController`, którą filtry naprawdę zawężają; w Laboratorium 8 zastąpi ją baza. Pliki z formularza „Dodaj lokal” nie są jeszcze przetwarzane (Laboratorium 13), a przycisk „Dodaj okno” zadziała po dodaniu JavaScriptu (Laboratorium 10) – do tego czasu formularz w przeglądarce pokazuje jedno okno, a serwer obsługuje ich dowolnie wiele. Ochrona CSRF i sprawdzanie hasła dojdą w Laboratorium 9. Linki do zaplanowanych, jeszcze nieistniejących stron (np. `/reservations`, `/terms`) kończą się odpowiedzią 404. Przełącznika języka jeszcze nie ma.
 
 ## Tech stack
 
@@ -152,7 +154,7 @@ Bardziej szczegółowe reguły (`App\Controller\`, `App\Form\`) mają pierwszeń
 | Formularze | `src/forms/*Form.php` | Dane wpisane przez użytkownika i reguły ich walidacji |
 | Layout | `public/views/layout.html.php` | Wspólny dokument HTML: `<head>`, skrypt motywu, arkusze stylów (opcjonalny arkusz widoku ze zmiennej `$stylesheet`), pływający przełącznik motywu na stronach bez nagłówka, `theme.js` |
 | Widoki | `public/views/*.html.php` | Semantyczny HTML z danymi od kontrolera |
-| Wspólne fragmenty widoków | `public/views/partials/*.html.php` | Nagłówek z nawigacją, stopka, przełącznik motywu, lista błędów formularza i komunikat statusu, dołączane do widoków przez `require` |
+| Wspólne fragmenty widoków | `public/views/partials/*.html.php` | Nagłówek z nawigacją, lewa kolumna logowania i rejestracji, stopka, przełącznik motywu, lista błędów formularza i komunikat statusu, dołączane do widoków przez `require` |
 | Autoloader | `composer.json`, `vendor/autoload.php` | Wczytywanie plików klas na podstawie namespace |
 
 Nagłówek i stopka są wspólne dla wielu widoków, więc nie są kopiowane do każdego szablonu. Widok dołącza je instrukcją `<?php require __DIR__ . '/partials/header.html.php'; ?>`. Dołączony plik ma dostęp do tych samych zmiennych co widok, dlatego nagłówek korzysta ze zmiennej `$activeNav` przekazanej z kontrolera i oznacza bieżącą pozycję menu atrybutem `aria-current="page"`. Działa to też w drugą stronę: nagłówek ustawia zmienną `$themeToggleInHeader`, a layout (wykonywany po widoku w tej samej metodzie `render()`) dołącza pływający przełącznik motywu tylko wtedy, gdy tej zmiennej nie ma.
@@ -165,6 +167,7 @@ Nagłówek i stopka są wspólne dla wielu widoków, więc nie są kopiowane do 
 | GET | `/projects` | `ProjectController::index` | `projects` |
 | GET | `/projects/{id}` (`id` – tylko cyfry) | `ProjectController::show` | `project` |
 | GET, POST | `/login` | `SecurityController::login` | `login` |
+| GET, POST | `/register` | `SecurityController::register` | `register` |
 | GET | `/venues` | `VenueController::index` | `venues` (Odkrywaj) |
 | GET | `/venues/{id}` (`id` – tylko cyfry) | `VenueController::show` | `venue` (Lokal i rezerwacja) |
 | POST | `/venues/{id}/reservations` | `VenueController::requestReservation` | przekierowanie albo `venue` z błędami |
@@ -211,8 +214,9 @@ Przepływ formularza (wzorzec Post/Redirect/Get):
 
 | Klasa | Formularz | Najważniejsze reguły |
 |---|---|---|
-| `Form` | Klasa abstrakcyjna | Wspólne reguły: wybór z listy, długość tekstu, dodatnia liczba, zakres pełnych godzin, poprawna data; odporność na tablice zamiast tekstu (`email[]=x`) |
-| `LoginForm` | Logowanie | Poprawny e-mail, niepuste hasło, znany typ konta |
+| `Form` | Klasa abstrakcyjna | Wspólne reguły: poprawny e-mail, wybór z listy, długość tekstu, dodatnia liczba, zakres pełnych godzin, poprawna data; odporność na tablice zamiast tekstu (`email[]=x`) |
+| `LoginForm` | Logowanie | Poprawny e-mail, niepuste hasło |
+| `RegisterForm` | Rejestracja | Niepuste imię i nazwisko, poprawny e-mail, hasło co najmniej 8 znaków, zgodne powtórzenie hasła, zaakceptowany regulamin |
 | `ReservationForm` | Prośba o rezerwację | Znany tryb i cel, data nie z przeszłości, pełne godziny, koniec po początku, minimum 2 h, 1–4 miejsca w trybie „Miejsca do pracy” |
 | `VenueForm` | Dodaj lokal | Szkic wymaga tylko nazwy. Wysłanie do weryfikacji: typ, adres, opis, co najmniej jeden cel, poprawne okna, instrukcja wejścia przy przekazaniu klucza |
 | `AvailabilityWindowForm` | Okno dostępności | Dni, godziny, tryb, liczba miejsc, cena, minimum godzin nie dłuższe niż okno; `overlaps()` wykrywa okna o wspólnym dniu i przecinających się godzinach |
@@ -234,8 +238,8 @@ Dane wyświetlane z powrotem w HTML przechodzą przez `htmlspecialchars()`, wię
 
 | Plik | Zawartość |
 |---|---|
-| `public/css/style.css` | Zmienne CSS (tokeny projektu w wariancie jasnym i ciemnym), `box-sizing`, typografia, linki, fokus oraz wspólne komponenty: logo, przycisk, pola formularza, karty wyboru typu konta, nagłówek z nawigacją (na telefonie dolny pasek), stopka, przełącznik motywu, klasa `visually-hidden` |
-| `public/css/login.css` | Układ widoku Logowanie (dołączany przez layout, gdy kontroler przekaże `'stylesheet' => 'login'`) |
+| `public/css/style.css` | Zmienne CSS (tokeny projektu w wariancie jasnym i ciemnym), `box-sizing`, typografia, linki, fokus oraz wspólne komponenty: logo, przycisk, pola formularza z podpowiedzią, pole wyboru (checkbox), nagłówek z nawigacją (na telefonie dolny pasek), stopka, przełącznik motywu, klasa `visually-hidden` |
+| `public/css/login.css` | Układ widoków Logowanie i Rejestracja (dołączany przez layout, gdy kontroler przekaże `'stylesheet' => 'login'`) |
 | `public/css/venues.css` | Układ widoku Odkrywaj: pasek celu i trybu, mapa, karty lokali, przełącznik „Rolki / Mapa” na telefonie |
 | `public/js/theme.js` | Przełączanie i zapamiętywanie motywu |
 | `public/js/map.js` | Mapa Mapbox: pinezki z ceną z atrybutu `data-venues`, wbudowane przyciski przybliżania i lokalizacji, wyróżnienie pinezki lokalu z karty widocznej w kolumnie (`IntersectionObserver`), przeliczenie rozmiaru po pokazaniu mapy na telefonie (`ResizeObserver`) |
@@ -244,15 +248,14 @@ Dane wyświetlane z powrotem w HTML przechodzą przez `htmlspecialchars()`, wię
 
 Kolory, fonty, odstępy i zaokrąglenia są zapisane raz w `:root` jako zmienne nazwane według roli (np. `--color-primary`, `--color-muted`, `--space-2`, `--radius`), a reguły odwołują się do nich przez `var()`. Wartości pochodzą z prototypu: kolor marki `#B4532A`, tekst `#1C1917`, tło `#F4EFE9`, nagłówki w kroju Newsreader, tekst w Inter (oba z Google Fonts).
 
-Widok Logowanie jest zbudowany mobile first – reguły bez media query opisują telefon, a szersze ekrany je rozszerzają:
+Widoki Logowanie i Rejestracja mają wspólną lewą kolumnę z ilustracją (`partials/auth-hero.html.php`) i są zbudowane mobile first – reguły bez media query opisują telefon, a szersze ekrany je rozszerzają:
 
 | Szerokość | Układ |
 |---|---|
-| poniżej 48rem (768 px) | Jedna kolumna: ilustracja jako baner z hasłem, pod nią formularz; karty typu konta jedna pod drugą, ikona obok tekstu |
-| od 48rem | Karty typu konta obok siebie (Grid, dwie kolumny), ikona nad tytułem |
+| poniżej 64rem (1024 px) | Jedna kolumna: ilustracja jako baner z hasłem, pod nią formularz |
 | od 64rem (1024 px) | Dwie kolumny strony (Grid z `grid-template-areas`): ilustracja z hasłem, opisem i celami po lewej, formularz i stopka po prawej |
 
-Stany interfejsu: `:hover` dla linków, przycisku, pól i kart; `:focus-visible` z obrysem 3 px w kolorze marki dla linków, przycisków i pól. Karty typu konta to etykiety z ukrytymi polami `radio` – zaznaczenie i fokus pokazuje karta dzięki `:has(input:checked)` i `:has(input:focus-visible)`, a wybór działa myszą i strzałkami.
+Stany interfejsu: `:hover` dla linków, przycisku i pól; `:focus-visible` z obrysem 3 px w kolorze marki dla linków, przycisków i pól. Pole regulaminu to systemowy checkbox w kolorze marki (`accent-color`).
 
 Sprawdzone w przeglądarce na szerokościach 360, 768 i 1440 px – bez poziomego przewijania.
 
@@ -324,6 +327,7 @@ Motyw z Laboratorium 5 korzysta 1:1 z kodu instrukcji: skrypt w `<head>`, znaczn
 Materiały Laboratorium 6 omawiają podstawy PHP i programowanie obiektowe, ale nie zawierają kodu formularzy, więc jego struktura (`src/forms/`, klasa abstrakcyjna `Form`, stałe klas, dziedziczenie) jest własnym rozwiązaniem. Elementy z późniejszych instrukcji użyte wcześniej, żeby nie zmieniać ich potem:
 
 - `isPost()` i `redirect()` w `AppController` oraz wzorzec jednej akcji dla `GET` i `POST` są 1:1 z Laboratorium 9;
+- rejestracja ma pola i reguły z Laboratorium 9 (`name`, `email`, `password`, `passwordConfirmation`, hasło co najmniej 8 znaków), sprawdzane w klasie `RegisterForm` zamiast w kontrolerze; doszła tylko zgoda na regulamin z projektu interfejsu; token CSRF i zapis w bazie dojdą razem z resztą Laboratorium 9;
 - lista błędów w `partials/form-errors.html.php` powstała z bloku z Laboratorium 9, a klasa `auth-form__errors` jest zastąpiona wspólną `form-errors`, bo lista działa w każdym formularzu;
 - błędy walidacji dostają status 422, podczas gdy kod z Laboratorium 9 zwraca wtedy domyślne 200;
 - katalog `src/forms/` i wpis w `composer.json` naśladują konwencję `src/models/` i `src/repositories/` z Laboratorium 7.
@@ -354,7 +358,7 @@ Wynikają z konfiguracji z laboratorium, do rozwiązania w kolejnych etapach:
 │   └── php/              # obraz PHP-FPM z rozszerzeniami
 ├── public/               # katalog publiczny (document root Nginx)
 │   ├── index.php         # Front Controller – jedyny punkt wejścia
-│   ├── css/              # arkusze stylów (style.css – wspólny, login.css – logowanie, venues.css – Odkrywaj)
+│   ├── css/              # arkusze stylów (style.css – wspólny, login.css – logowanie i rejestracja, venues.css – Odkrywaj)
 │   ├── js/               # skrypty (theme.js – motyw, map.js – mapa w Odkrywaj)
 │   ├── images/           # ikony (icons.svg) i ilustracje lokali (venues/)
 │   └── views/            # layout.html.php i szablony widoków (*.html.php)

@@ -30,6 +30,8 @@ $routing->get('/projects/{id}', ProjectController::class, 'show');
 $routing->get('/', DefaultController::class, 'index');
 $routing->get('/login', SecurityController::class, 'login');
 $routing->post('/login', SecurityController::class, 'login');
+$routing->get('/register', SecurityController::class, 'register');
+$routing->post('/register', SecurityController::class, 'register');
 $routing->get('/venues', VenueController::class, 'index');
 $routing->get('/venues/{id}', VenueController::class, 'show');
 $routing->post('/venues/{id}/reservations', VenueController::class, 'requestReservation');

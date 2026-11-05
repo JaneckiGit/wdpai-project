@@ -226,6 +226,29 @@ input:focus-visible {
     font-weight: 500;
 }
 
+.field__hint {
+    margin: 0;
+    color: var(--color-muted);
+    font-size: 0.8125rem;
+}
+
+.checkbox {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.625rem;
+    font-size: 0.875rem;
+}
+
+/* Systemowe pole wyboru w kolorze marki – większe, żeby łatwiej w nie trafić. */
+.checkbox input {
+    flex: none;
+    width: 1.125rem;
+    height: 1.125rem;
+    margin: 0.125rem 0 0;
+    accent-color: var(--color-primary);
+}
+
+input[type="text"],
 input[type="email"],
 input[type="password"] {
     width: 100%;
@@ -236,6 +259,7 @@ input[type="password"] {
     background: var(--color-surface);
 }
 
+input[type="text"]:hover,
 input[type="email"]:hover,
 input[type="password"]:hover {
     border-color: var(--color-text);
@@ -243,108 +267,6 @@ input[type="password"]:hover {
 
 input:focus {
     border-color: var(--color-primary);
-}
-
-.choice-group {
-    min-width: 0;
-    margin: 0;
-    padding: 0;
-    border: 0;
-}
-
-.choice-group legend {
-    margin-bottom: 0.625rem;
-    padding: 0;
-    font-size: 0.875rem;
-    font-weight: 600;
-}
-
-.choice-group__options {
-    display: grid;
-    gap: 0.75rem;
-}
-
-/* Na telefonie ikona stoi po lewej, a tytuł i opis obok niej. */
-.choice-card {
-    position: relative;
-    display: grid;
-    grid-template-columns: auto 1fr;
-    gap: 0.25rem 0.875rem;
-    align-items: start;
-    padding: var(--space-2) 3rem var(--space-2) var(--space-2);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius);
-    background: var(--color-surface-muted);
-    cursor: pointer;
-}
-
-/* Pole radio jest niewidoczne, ale nadal działa z klawiatury i czytnikiem ekranu – wygląd przejmuje karta. */
-.choice-card input {
-    position: absolute;
-    opacity: 0;
-    pointer-events: none;
-}
-
-.choice-card:hover {
-    border-color: var(--color-primary);
-}
-
-/* Cień wewnętrzny pogrubia ramkę do 2 px bez przesuwania zawartości karty. */
-.choice-card:has(input:checked) {
-    border-color: var(--color-primary);
-    background: var(--color-surface-selected);
-    box-shadow: inset 0 0 0 1px var(--color-primary), var(--shadow-selected);
-}
-
-/* Zapis "✓" / "" pokazuje znak, ale ukrywa go przed czytnikiem ekranu – zaznaczenie ogłasza samo pole radio. */
-.choice-card:has(input:checked)::after {
-    content: "✓";
-    content: "✓" / "";
-    position: absolute;
-    top: 0.875rem;
-    right: 0.875rem;
-    display: grid;
-    place-items: center;
-    width: 1.625rem;
-    height: 1.625rem;
-    border-radius: 50%;
-    background: var(--color-primary);
-    color: var(--color-on-brand);
-    font-size: 0.875rem;
-    font-weight: 700;
-    line-height: 1;
-}
-
-.choice-card:has(input:focus-visible) {
-    outline: 3px solid var(--color-focus);
-    outline-offset: 3px;
-}
-
-.choice-card__icon {
-    grid-row: span 2;
-    display: grid;
-    place-items: center;
-    width: 2.75rem;
-    height: 2.75rem;
-    border-radius: var(--radius-sm);
-    background: var(--color-chip);
-    color: var(--color-muted);
-}
-
-.choice-card:has(input:checked) .choice-card__icon {
-    background: var(--color-primary);
-    color: var(--color-on-brand);
-}
-
-.choice-card__title {
-    font-weight: 600;
-    line-height: 1.4;
-}
-
-.choice-card__text {
-    color: var(--color-muted);
-    font-size: 0.875rem;
-    line-height: 1.45;
 }
 
 .site-footer {
@@ -376,30 +298,6 @@ input:focus {
 
 .site-footer a {
     color: inherit;
-}
-
-@media (min-width: 48rem) {
-    .choice-group__options {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 0.875rem;
-    }
-
-    .choice-card {
-        grid-template-columns: 1fr;
-        gap: 0.625rem;
-        padding: 1.25rem;
-    }
-
-    .choice-card__icon {
-        grid-row: auto;
-        width: 3rem;
-        height: 3rem;
-        border-radius: 0.875rem;
-    }
-
-    .choice-card__title {
-        font-size: 1.0625rem;
-    }
 }
 
 .theme-toggle {
