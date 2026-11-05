@@ -1,6 +1,6 @@
 <?php
 $purposes = require __DIR__ . '/partials/purposes.php';
-$types = ['cafe' => 'Kawiarnia', 'bar' => 'Bar koktajlowy', 'restaurant' => 'Restauracja', 'studio' => 'Pracownia'];
+$types = require __DIR__ . '/partials/venue-types.php';
 $daySets = ['mon-fri' => 'pon–pt', 'mon-thu' => 'pon–czw', 'mon' => 'pon', 'tue' => 'wt', 'wed' => 'śr', 'thu' => 'czw', 'fri' => 'pt', 'sat' => 'sob', 'sun' => 'nd'];
 
 // Kroki formularza: kotwica sekcji => [nazwa, pola, których błędy należą do sekcji].
@@ -93,8 +93,8 @@ $failedSteps = array_filter($steps, static fn (array $step): bool => array_inter
 
                     <div class="field form-grid__wide">
                         <label for="description">Opis</label>
-                        <textarea id="description" name="description" rows="4" maxlength="600" required <?= $form->invalidAttributes('description', 'description-count') ?>><?= htmlspecialchars($form->description) ?></textarea>
-                        <p class="field__hint field__count" id="description-count"><span data-count><?= mb_strlen($form->description) ?></span> / 600</p>
+                        <textarea id="description" name="description" rows="4" maxlength="600" data-counter="description-length" required <?= $form->invalidAttributes('description', 'description-count') ?>><?= htmlspecialchars($form->description) ?></textarea>
+                        <p class="field__hint field__count" id="description-count"><span id="description-length"><?= mb_strlen($form->description) ?></span> / 600</p>
                     </div>
                 </div>
             </section>
@@ -102,7 +102,7 @@ $failedSteps = array_filter($steps, static fn (array $step): bool => array_inter
             <section class="card form-section" id="purposes">
                 <h2><span>2</span> Dozwolone cele</h2>
                 <p class="field__hint">Najemca wybierze jeden z zaznaczonych celów przy rezerwacji.</p>
-                <div class="option-grid">
+                <div class="form-grid">
                     <?php foreach ($purposes as $value => [$label, $icon, $hint]): ?>
                         <label class="option-card">
                             <input type="checkbox" name="purposes[]" value="<?= $value ?>" <?= in_array($value, $form->purposes, true) ? 'checked' : '' ?>>
@@ -175,7 +175,7 @@ $failedSteps = array_filter($steps, static fn (array $step): bool => array_inter
 
             <section class="card form-section" id="entry">
                 <h2><span>6</span> Wejście do lokalu</h2>
-                <div class="option-grid">
+                <div class="form-grid">
                     <label class="option-card">
                         <input type="radio" name="entryMode" value="staff" <?= $form->entryMode === 'staff' ? 'checked' : '' ?>>
                         <span><strong><i class="fa-solid fa-user-check" aria-hidden="true"></i> Pracownik na miejscu</strong>Ktoś z obsługi wpuści najemcę i będzie dostępny w lokalu.</span>
@@ -212,4 +212,5 @@ $failedSteps = array_filter($steps, static fn (array $step): bool => array_inter
     <link rel="stylesheet" href="https://api.mapbox.com/mapbox-gl-js/v3.16.0/mapbox-gl.css">
     <script src="https://api.mapbox.com/mapbox-gl-js/v3.16.0/mapbox-gl.js" defer></script>
 <?php endif; ?>
+<script src="/js/char-count.js" defer></script>
 <script src="/js/add-venue.js" defer></script>

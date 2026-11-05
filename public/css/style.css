@@ -241,6 +241,12 @@ input:focus-visible {
     font-weight: 500;
 }
 
+/* Licznik znaków pod polem, np. „169 / 600” (char-count.js). */
+.field__count {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+}
+
 .field__hint {
     margin: 0;
     color: var(--color-muted);
@@ -265,6 +271,7 @@ input:focus-visible {
 
 input[type="text"],
 input[type="email"],
+input[type="tel"],
 input[type="password"],
 input[type="date"],
 input[type="time"],
@@ -281,6 +288,7 @@ textarea {
 
 input[type="text"]:hover,
 input[type="email"]:hover,
+input[type="tel"]:hover,
 input[type="password"]:hover,
 input[type="date"]:hover,
 input[type="time"]:hover,
@@ -308,11 +316,11 @@ textarea {
 
 /* Formularze w aplikacji (panel rezerwacji, Dodaj lokal) mają niższe pola z cieńszą ramką niż logowanie.
    Pole z błędem zostawia czerwoną ramkę z reguły aria-invalid. */
-.app-form :is(input[type="text"], input[type="time"], input[type="number"], select, textarea):not([aria-invalid="true"]) {
+.app-form :is(input[type="text"], input[type="email"], input[type="tel"], input[type="time"], input[type="number"], select, textarea):not([aria-invalid="true"]) {
     border: 1px solid var(--color-border);
 }
 
-.app-form input:is([type="text"], [type="time"], [type="number"]),
+.app-form input:is([type="text"], [type="email"], [type="tel"], [type="time"], [type="number"]),
 .app-form select {
     height: 3rem;
 }
@@ -605,6 +613,35 @@ input:focus {
     padding: 0 var(--space-2);
 }
 
+/* Karta sekcji formularza z numerem przed tytułem (Dodaj lokal, wniosek o rolę gospodarza) i siatka pól. */
+.form-section {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    padding: 1.25rem;
+    border-radius: 1.25rem;
+    scroll-margin-top: var(--space-2);
+}
+
+.form-section h2 {
+    display: flex;
+    align-items: baseline;
+    gap: 0.75rem;
+    font-size: 1.75rem;
+}
+
+.form-section h2 > span:first-child {
+    color: var(--color-link);
+    font-family: var(--font-body);
+    font-size: 0.8125rem;
+    font-weight: 700;
+}
+
+.form-grid {
+    display: grid;
+    gap: 1.125rem 1.25rem;
+}
+
 /* Pole wyszukiwania z lupą: lokale w nagłówku i użytkownicy w panelu administratora. */
 .search {
     position: relative;
@@ -841,6 +878,18 @@ body > .site-footer {
     .page {
         padding-right: var(--space-4);
         padding-left: var(--space-4);
+    }
+
+    .form-section {
+        padding: 1.75rem;
+    }
+
+    .form-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .form-grid__wide {
+        grid-column: 1 / -1;
     }
 
     .site-header {
