@@ -62,9 +62,10 @@ Gotowy jest szkielet MVC z laboratoriów oraz szablony HTML pięciu widoków z p
 | Lokal i rezerwacja | Lokal o id z adresu: ścieżka, zdjęcie, gospodarz, opis, cele, oferta, udogodnienia, wejście i podpisy rolek „Nagrane tutaj”; panel rezerwacji jak w prototypie: tryb, cel, 7 kafelków dni i lista godzin z okien dostępności gospodarza, liczba miejsc z przyciskami −/+ i podsumowanie kwoty (`reservation.js`); nieznane id daje 404 |
 | Panel gospodarza | Powitanie zalogowanego gospodarza i przycisk „Dodaj lokal”; wszystkie oczekujące prośby o rezerwację (lista przewijana w karcie) z terminem, wygasaniem, celem, trybem, kwotą i działającymi przyciskami Akceptuj / Odrzuć (komunikat po przekierowaniu); karty lokali gospodarza z cenami trybów |
 | Dodaj lokal | Formularz według prototypu: kroki po lewej (po wysłaniu „!” przy sekcji z błędem i „✓” przy pozostałych), nazwa, typ, adres z mapą Mapbox i pinezką do przeciągnięcia (współrzędne trafiają do formularza), opis z licznikiem znaków, karty celów, pola zdjęć i rolki, tabela okien dostępności z przyciskami „Dodaj okno” i usuwania, sposób wejścia, pasek z przyciskami; walidacja wykrywa nakładające się okna; szkic i wysłanie do weryfikacji |
+| Panel administratora | Adres `/admin` (link i dostęp tylko dla administratora dojdą z rolami w Laboratorium 9): wnioski o rolę gospodarza z danymi firmy i lokalu, lokale do akceptacji, tabela użytkowników z działającą wyszukiwarką (`?q=`) i filtrami grup (`?group=hosts`, `?group=blocked`); przyciski decyzji mają na razie tylko wygląd |
 | Obsługa błędów | Kontrolowane odpowiedzi 400, 404, 422 i 500 (sekcja „Formularze i obsługa błędów”) |
 
-Widoki to semantyczny HTML. W pełni ostylowane są widoki Logowanie, Rejestracja, Odkrywaj, Lokal i rezerwacja, Moje rezerwacje, Panel gospodarza oraz Dodaj lokal, a także wspólny nagłówek z nawigacją i menu konta i stopka (opis w sekcji „Style CSS”), pozostałe widoki mają tylko style bazowe (kolory, fonty, linki, fokus). Na każdej stronie działa motyw jasny i ciemny (Laboratorium 5, sekcja „Motyw jasny i ciemny”). Dane w widokach są przykładowe, wzięte z prototypu – listy oznaczone komentarzem `TODO` będą wyświetlane w pętli z danych z bazy. Formularze są sprawdzane po stronie serwera, ale aplikacja nie ma jeszcze bazy, więc poprawne dane nie są nigdzie zapisywane (Laboratoria 7–8). Lokale w Odkrywaj i na stronie lokalu to przykładowa tablica w `VenueController`, którą filtry naprawdę zawężają; w Laboratorium 8 zastąpi ją baza. Pliki z formularza „Dodaj lokal” nie są jeszcze zapisywane (Laboratorium 13); przesuwanie pinezki po wpisaniu adresu (geokodowanie przez Fetch API) dojdzie w Laboratorium 11. Ochrona CSRF i sprawdzanie hasła dojdą w Laboratorium 9. Linki do zaplanowanych, jeszcze nieistniejących stron (np. `/terms`, a w menu konta „Zmień hasło” i „Usuń konto”, które zadziałają w Laboratorium 9) kończą się odpowiedzią 404. Przełącznika języka jeszcze nie ma.
+Widoki to semantyczny HTML. W pełni ostylowane są widoki Logowanie, Rejestracja, Odkrywaj, Lokal i rezerwacja, Moje rezerwacje, Panel gospodarza, Dodaj lokal oraz Panel administratora, a także wspólny nagłówek z nawigacją i menu konta i stopka (opis w sekcji „Style CSS”), pozostałe widoki mają tylko style bazowe (kolory, fonty, linki, fokus). Na każdej stronie działa motyw jasny i ciemny (Laboratorium 5, sekcja „Motyw jasny i ciemny”). Dane w widokach są przykładowe, wzięte z prototypu – listy oznaczone komentarzem `TODO` będą wyświetlane w pętli z danych z bazy. Formularze są sprawdzane po stronie serwera, ale aplikacja nie ma jeszcze bazy, więc poprawne dane nie są nigdzie zapisywane (Laboratoria 7–8). Lokale w Odkrywaj i na stronie lokalu to przykładowa tablica w `VenueController`, którą filtry naprawdę zawężają; w Laboratorium 8 zastąpi ją baza. Pliki z formularza „Dodaj lokal” nie są jeszcze zapisywane (Laboratorium 13); przesuwanie pinezki po wpisaniu adresu (geokodowanie przez Fetch API) dojdzie w Laboratorium 11. Ochrona CSRF i sprawdzanie hasła dojdą w Laboratorium 9. Linki do zaplanowanych, jeszcze nieistniejących stron (np. `/terms`, a w menu konta „Zmień hasło” i „Usuń konto”, które zadziałają w Laboratorium 9) kończą się odpowiedzią 404. Przełącznika języka jeszcze nie ma.
 
 ## Tech stack
 
@@ -173,6 +174,7 @@ Nagłówek i stopka są wspólne dla wielu widoków, więc nie są kopiowane do 
 | GET | `/venues/{id}` (`id` – tylko cyfry) | `VenueController::show` | `venue` (Lokal i rezerwacja) |
 | POST | `/venues/{id}/reservations` | `VenueController::requestReservation` | przekierowanie albo `venue` z błędami |
 | GET | `/reservations` | `ReservationController::index` | `reservations` (Moje rezerwacje) |
+| GET | `/admin` | `AdminController::dashboard` | `admin` (Panel administratora) |
 | POST | `/reservations/{id}/cancel` | `ReservationController::cancel` | przekierowanie albo `error` (404) |
 | GET | `/host` | `HostController::dashboard` | `host-dashboard` (Panel gospodarza) |
 | GET, POST | `/host/venues/new` | `HostController::addVenue` | `add-venue` (Dodaj lokal) |
@@ -184,6 +186,7 @@ Parametry zapytania (query parameters):
 | Adres | Parametry | Znaczenie |
 |---|---|---|
 | `/venues` | `q`, `purpose`, `mode` | Wyszukiwanie i filtry, np. `/venues?q=Kazimierz&purpose=meetings`; niepoprawne wartości dają status 400 i listę błędów |
+| `/admin` | `q`, `group` | Wyszukiwanie użytkowników po imieniu lub e-mailu i grupa (`all`, `hosts`, `blocked`); nieznana grupa daje status 400 |
 | `/host`, `/venues/{id}`, `/reservations` | `status` | Komunikat po przekierowaniu, wybierany z listy dozwolonych; nieznana wartość jest ignorowana |
 
 Sprawdzenie z terminala:
@@ -224,6 +227,7 @@ Przepływ formularza (wzorzec Post/Redirect/Get):
 | `VenueForm` | Dodaj lokal | Szkic wymaga tylko nazwy. Wysłanie do weryfikacji: typ, adres, współrzędne pinezki (liczby w zakresie szerokości i długości geograficznej), opis, co najmniej jeden cel, poprawne okna, instrukcja wejścia przy przekazaniu klucza |
 | `AvailabilityWindowForm` | Okno dostępności | Dni, godziny, tryb, liczba miejsc, cena, minimum godzin nie dłuższe niż okno; `overlaps()` wykrywa okna o wspólnym dniu i przecinających się godzinach |
 | `VenueFilterForm` | Filtry w Odkrywaj (GET) | Fraza do 100 znaków, cel i tryb z listy (domyślnie praca i miejsce do pracy) |
+| `UserFilterForm` | Filtry użytkowników w panelu administratora (GET) | Fraza do 100 znaków, grupa z listy (domyślnie wszyscy) |
 
 | Status | Kiedy |
 |---|---|
@@ -241,13 +245,14 @@ Dane wyświetlane z powrotem w HTML przechodzą przez `htmlspecialchars()`, wię
 
 | Plik | Zawartość |
 |---|---|
-| `public/css/style.css` | Zmienne CSS (tokeny projektu w wariancie jasnym i ciemnym), `box-sizing`, typografia, linki, fokus oraz wspólne komponenty: logo, przycisk, pola formularza z podpowiedzią, pole wyboru (checkbox), pole opisu (textarea), niższe pola w formularzach aplikacji (`.app-form`), przycisk drugorzędny (`.button--secondary`), ścieżka (`.breadcrumbs`), karta (`.card`), plakietka celu (`.chip`) i plakietka trybu lub statusu (`.badge`), kontener strony (`.page`), szary podpis (`.muted`), kwadrat z ikoną (`.icon-tile`) i kółko z inicjałami (`.initials`) używane w kilku widokach, pola liczb bez strzałek w formularzach aplikacji, nagłówek z nawigacją (na telefonie dolny pasek) i menu konta pod avatarem (atrybut `popover` – otwieranie i zamykanie bez JavaScriptu), stopka, przełącznik motywu, klasa `visually-hidden` |
+| `public/css/style.css` | Zmienne CSS (tokeny projektu w wariancie jasnym i ciemnym), `box-sizing`, typografia, linki, fokus oraz wspólne komponenty: logo, przycisk, pola formularza z podpowiedzią, pole wyboru (checkbox), pole opisu (textarea), niższe pola w formularzach aplikacji (`.app-form`), przycisk drugorzędny (`.button--secondary`), ścieżka (`.breadcrumbs`), karta (`.card`), plakietka celu (`.chip`) i plakietka trybu lub statusu (`.badge`), kontener strony (`.page`), szary podpis (`.muted`), kwadrat z ikoną (`.icon-tile`) kółko z inicjałami (`.initials`), wybrany filtr (`.chip[aria-current]`), plakietki statusu (`.badge--success`, `--warning`, `--danger`, `--muted`), karta z listą i licznikiem (`.panel`, `.count`, `.list-item`), przyciski decyzji (`.actions`, `.button--outline`) i pole wyszukiwania (`.search`) używane w kilku widokach, pola liczb bez strzałek w formularzach aplikacji, nagłówek z nawigacją (na telefonie dolny pasek) i menu konta pod avatarem (atrybut `popover` – otwieranie i zamykanie bez JavaScriptu), stopka, przełącznik motywu, klasa `visually-hidden` |
 | `public/css/login.css` | Układ widoków Logowanie i Rejestracja (dołączany przez layout, gdy kontroler przekaże `'stylesheet' => 'login'`) |
 | `public/css/venues.css` | Układ widoku Odkrywaj: pasek celu i trybu, mapa, karty lokali, przełącznik „Rolki / Mapa” na telefonie |
 | `public/css/venue.css` | Widok Lokal i rezerwacja według prototypu: rolka i „Nagrane tutaj”, karta gospodarza, cele, karty ofert z plakietkami, udogodnienia, wejście i panel rezerwacji: przełącznik trybu, kafelki dni i lista godzin (ukryte pola radio i checkbox, wybór wyróżnia `:has(:checked)`), licznik miejsc i podsumowanie; na telefonie jedna kolumna, od 1024 px panel obok treści (`position: sticky`), od 1280 px trzy kolumny |
 | `public/css/add-venue.css` | Widok Dodaj lokal według prototypu: kroki ze stanami, karty sekcji z numerami, karty wyboru (`:has(:checked)`), pola plików w ramce, tabela okien z jednostkami pól (miejsc / osób zależnie od trybu, `zł/h`, `h`), pasek z przyciskami przyklejony od 768 px |
 | `public/css/reservations.css` | Lista kart w Moich rezerwacjach i kolory statusów |
-| `public/css/host.css` | Panel gospodarza: powitanie, karta próśb (od 1024 px lista przewija się z cienkim paskiem przewijania), karta lokali z miniaturami; na telefonie karty jedna pod drugą |
+| `public/css/host.css` | Panel gospodarza: powitanie, dwie kolumny, przewijana lista próśb (od 1024 px z cienkim paskiem przewijania), karty lokali z miniaturami |
+| `public/css/admin.css` | Panel administratora: szare pole z danymi wniosku, kafelki lokali do akceptacji, nagłówek tabeli z wyszukiwarką i filtrami, tabela użytkowników przewijana w poziomie na telefonie |
 | `public/js/theme.js` | Przełączanie i zapamiętywanie motywu |
 | `public/js/map.js` | Mapa Mapbox: pinezki z ceną z atrybutu `data-venues`, wbudowane przyciski przybliżania i lokalizacji, wyróżnienie pinezki lokalu z karty widocznej w kolumnie (`IntersectionObserver`), przeliczenie rozmiaru po pokazaniu mapy na telefonie (`ResizeObserver`) |
 | `public/js/reservation.js` | Panel rezerwacji: przy zmianie trybu pokazuje jego dni i godziny, a pola drugiego trybu wyłącza (`disabled`), więc formularz ich nie wysyła; zaznacza godziny między pierwszą a ostatnią wybraną, obsługuje −/+ i liczy kwotę. Serwer i tak sprawdza dane w `ReservationForm` |
@@ -366,7 +371,7 @@ Wynikają z konfiguracji z laboratorium, do rozwiązania w kolejnych etapach:
 │   └── php/              # obraz PHP-FPM z rozszerzeniami
 ├── public/               # katalog publiczny (document root Nginx)
 │   ├── index.php         # Front Controller – jedyny punkt wejścia
-│   ├── css/              # arkusze stylów (style.css – wspólny, login.css – logowanie i rejestracja, venues.css – Odkrywaj, venue.css – Lokal, add-venue.css – Dodaj lokal, reservations.css – Moje rezerwacje, host.css – Panel gospodarza)
+│   ├── css/              # arkusze stylów (style.css – wspólny, login.css – logowanie i rejestracja, venues.css – Odkrywaj, venue.css – Lokal, add-venue.css – Dodaj lokal, reservations.css – Moje rezerwacje, host.css – Panel gospodarza, admin.css – Panel administratora)
 │   ├── js/               # skrypty (theme.js – motyw, map.js – mapa w Odkrywaj, reservation.js – panel rezerwacji, add-venue.js – Dodaj lokal)
 │   ├── images/           # obrazy używane w stylach
 │   └── views/            # layout.html.php i szablony widoków (*.html.php)
