@@ -6,6 +6,9 @@ namespace App\Controller;
 
 abstract class AppController
 {
+    // TODO: Laboratorium 9 – zalogowany użytkownik z sesji zamiast przykładowego gospodarza.
+    protected const CURRENT_USER = ['name' => 'Piotr Nowak', 'email' => 'piotr.nowak@example.com', 'role' => 'Gospodarz'];
+
     protected function render(string $template, array $variables = []): void
     {
         $templatePath = dirname(__DIR__, 2) . '/public/views/' . $template . '.html.php';
@@ -14,7 +17,8 @@ abstract class AppController
             throw new \RuntimeException('View not found: ' . $template);
         }
 
-        extract($variables, EXTR_SKIP);
+        // Każdy widok dostaje zalogowanego użytkownika (nagłówek, menu konta, powitanie w panelu).
+        extract($variables + ['currentUser' => self::CURRENT_USER], EXTR_SKIP);
 
         // Widok trafia do bufora, a wspólny layout wstawia go do <body> jako $content.
         ob_start();

@@ -15,7 +15,8 @@ final class VenueController extends AppController
 
     // TODO: Laboratorium 8 – lokale z bazy (repozytorium) zamiast przykładowych danych.
     // Okna gospodarza: dni tygodnia (1 = poniedziałek … 7 = niedziela) i godziny od–do dla każdego trybu.
-    private const SAMPLE_VENUES = [
+    // Publiczna, bo panel gospodarza pokazuje te same lokale (do czasu repozytorium z Laboratorium 8).
+    public const SAMPLE_VENUES = [
         ['id' => 1, 'name' => 'Bar Lampion', 'district' => 'Stare Miasto', 'address' => 'ul. Szpitalna 9',
             'lat' => 50.0623, 'lng' => 19.9343, 'seatPrice' => 15, 'exclusivePrice' => 160,
             'seatCount' => 10, 'capacity' => 25,
@@ -23,7 +24,7 @@ final class VenueController extends AppController
                 'seats' => ['label' => 'pn–pt', 'days' => [1, 2, 3, 4, 5], 'from' => 9, 'to' => 15],
                 'exclusive' => ['label' => 'niedziele', 'days' => [7], 'from' => 10, 'to' => 16],
             ],
-            'purposes' => ['work', 'meetings', 'shoots'], 'host' => 'Ewa Mazur', 'reelTitle' => 'Poranek pod lampami',
+            'purposes' => ['work', 'meetings', 'shoots'], 'host' => 'Piotr Nowak', 'reelTitle' => 'Poranek pod lampami',
             'description' => 'Bar z lampami nad długim stołem i ceglaną ścianą. Do popołudnia, zanim zaczyna się wieczorna obsługa, sala jest cicha i jasna, a w niedziele można ją wynająć na wyłączność, np. na sesję zdjęciową.',
             'amenities' => [['fa-wifi', 'Wi-Fi', 'hasło w instrukcji po akceptacji'], ['fa-plug', 'Gniazdka', 'przy stołach'], ['fa-sun', 'Duże okno', 'dobre światło do zdjęć']],
             'entry' => 'klucz w sklepie obok',
