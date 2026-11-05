@@ -49,24 +49,22 @@ $hostInitials = implode('', array_map(static fn (string $word): string => mb_sub
 
     <div class="venue__layout">
         <section class="venue__media" aria-label="Zdjęcia i rolki">
-            <!-- TODO: Laboratorium 13 – wideo rolki gospodarza i rolek najemców zamiast samej ilustracji. -->
+            <!-- TODO: Laboratorium 13 – wideo rolki gospodarza zamiast ilustracji. -->
             <figure class="reel reel--host">
                 <img src="/images/login-hero.svg" alt="">
                 <figcaption><?= htmlspecialchars($venue['reelTitle']) ?></figcaption>
             </figure>
 
-            <?php if ($venue['reels'] !== []): ?>
-                <h2>Nagrane tutaj</h2>
-                <p class="venue__muted">Rolki najemców po wizycie</p>
-                <ul class="reels-grid">
-                    <?php foreach ($venue['reels'] as [$purpose, $author]): ?>
-                        <li class="reel">
-                            <img src="/images/login-hero.svg" alt="">
-                            <span><strong><?= htmlspecialchars($purpose) ?></strong><?= htmlspecialchars($author) ?></span>
-                        </li>
-                    <?php endforeach; ?>
-                </ul>
-            <?php endif; ?>
+            <ul class="venue-photos" aria-label="Zdjęcia lokalu dodane przez gospodarza">
+                <li class="venue-photos__reel">
+                    <img src="/images/login-hero.svg" alt="Podgląd głównej rolki">
+                </li>
+                <?php foreach ($venue['photos'] as $photo): ?>
+                    <li>
+                        <img src="<?= htmlspecialchars($photo) ?>" alt="Zdjęcie lokalu">
+                    </li>
+                <?php endforeach; ?>
+            </ul>
         </section>
 
         <div class="venue__details">

@@ -27,7 +27,7 @@ final class VenueController extends AppController
             'description' => 'Bar z lampami nad długim stołem i ceglaną ścianą. Do popołudnia, zanim zaczyna się wieczorna obsługa, sala jest cicha i jasna, a w niedziele można ją wynająć na wyłączność, np. na sesję zdjęciową.',
             'amenities' => [['fa-wifi', 'Wi-Fi', 'hasło w instrukcji po akceptacji'], ['fa-plug', 'Gniazdka', 'przy stołach'], ['fa-sun', 'Duże okno', 'dobre światło do zdjęć']],
             'entry' => 'klucz w sklepie obok',
-            'reels' => [['Sesja foto', 'Marta Z. · 0:24']]],
+            'photos' => ['/images/login-hero.svg', '/images/login-hero.svg', '/images/login-hero.svg', '/images/login-hero.svg']],
         ['id' => 2, 'name' => 'Kawiarnia Ziarno', 'district' => 'Kazimierz', 'address' => 'ul. Estery 8',
             'lat' => 50.0512, 'lng' => 19.9466, 'seatPrice' => 15, 'exclusivePrice' => 150,
             'seatCount' => 12, 'capacity' => 20,
@@ -39,7 +39,7 @@ final class VenueController extends AppController
             'description' => 'Kameralna kawiarnia na Kazimierzu z długim dębowym stołem, ceglaną ścianą i oknem na podwórko. Wieczorami, gdy kończymy obsługę gości, oddajemy salę do cichej pracy, a w poniedziałki – gdy kawiarnia jest nieczynna – cały lokal na wyłączność.',
             'amenities' => [['fa-wifi', 'Wi-Fi', 'hasło w instrukcji po akceptacji'], ['fa-plug', 'Gniazdka', 'przy każdym miejscu'], ['fa-display', 'Rzutnik', 'na spotkania i szkolenia'], ['fa-mug-hot', 'Ekspres do kawy', 'do dyspozycji najemców']],
             'entry' => 'na miejscu będzie pracownik',
-            'reels' => [['Praca', 'Kuba W. · 0:18'], ['Spotkanie', 'Ola M. · 0:31']]],
+            'photos' => ['/images/login-hero.svg', '/images/login-hero.svg', '/images/login-hero.svg', '/images/login-hero.svg']],
         ['id' => 3, 'name' => 'Kawiarnia Pod Zegarem', 'district' => 'Kleparz', 'address' => 'ul. Długa 15',
             'lat' => 50.0668, 'lng' => 19.9420, 'seatPrice' => 20, 'exclusivePrice' => null,
             'seatCount' => 8, 'capacity' => null,
@@ -50,7 +50,7 @@ final class VenueController extends AppController
             'description' => 'Jasna kawiarnia z dużym zegarem nad barem i stołami przy oknach. Od rana do popołudnia jest tu miejsce do cichej pracy i krótkich spotkań.',
             'amenities' => [['fa-wifi', 'Wi-Fi', 'hasło w instrukcji po akceptacji'], ['fa-plug', 'Gniazdka', 'przy oknach']],
             'entry' => 'na miejscu będzie pracownik',
-            'reels' => []],
+            'photos' => ['/images/login-hero.svg', '/images/login-hero.svg', '/images/login-hero.svg', '/images/login-hero.svg']],
     ];
 
     public function index(): void

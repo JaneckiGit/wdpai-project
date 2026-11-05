@@ -117,21 +117,26 @@
     font-weight: 600;
 }
 
-.venue__media h2 {
-    margin-top: 1.25rem;
-    font-size: 1.375rem;
-}
-
-.reels-grid {
+.venue-photos {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: var(--space-1);
     padding: 0;
     list-style: none;
 }
 
-.reels-grid .reel {
-    aspect-ratio: 9 / 16;
+.venue-photos li {
+    overflow: hidden;
+    aspect-ratio: 1;
+    border-radius: 0.75rem;
+    background: var(--color-surface-muted);
+}
+
+.venue-photos img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
 }
 
 .venue__details .host-card {
