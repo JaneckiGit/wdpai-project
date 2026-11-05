@@ -25,8 +25,7 @@ foreach ($purposes as $value => [$label]) {
     }
 }
 
-// Inicjały gospodarza w kółku: pierwsza litera każdego słowa.
-$hostInitials = implode('', array_map(static fn (string $word): string => mb_substr($word, 0, 1), explode(' ', $venue['host'])));
+$initials = require __DIR__ . '/partials/initials.php';
 ?>
 <?php require __DIR__ . '/partials/header.html.php'; ?>
 
@@ -66,7 +65,7 @@ $hostInitials = implode('', array_map(static fn (string $word): string => mb_sub
 
         <div class="venue__details">
             <section class="card host-card">
-                <span class="host-card__avatar" aria-hidden="true"><?= htmlspecialchars($hostInitials) ?></span>
+                <span class="host-card__avatar" aria-hidden="true"><?= htmlspecialchars($initials($venue['host'])) ?></span>
                 <div>
                     <p class="venue__muted">Gospodarz</p>
                     <h2><?= htmlspecialchars($venue['host']) ?></h2>
