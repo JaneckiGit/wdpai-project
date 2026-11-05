@@ -29,7 +29,7 @@ $initials = require __DIR__ . '/partials/initials.php';
 ?>
 <?php require __DIR__ . '/partials/header.html.php'; ?>
 
-<main class="venue">
+<main class="page venue">
     <?php require __DIR__ . '/partials/status-message.html.php'; ?>
 
     <nav class="breadcrumbs" aria-label="Ścieżka">
@@ -65,11 +65,11 @@ $initials = require __DIR__ . '/partials/initials.php';
 
         <div class="venue__details">
             <section class="card host-card">
-                <span class="host-card__avatar" aria-hidden="true"><?= htmlspecialchars($initials($venue['host'])) ?></span>
+                <span class="initials" aria-hidden="true"><?= htmlspecialchars($initials($venue['host'])) ?></span>
                 <div>
-                    <p class="venue__muted">Gospodarz</p>
+                    <p class="muted">Gospodarz</p>
                     <h2><?= htmlspecialchars($venue['host']) ?></h2>
-                    <p class="venue__muted">potwierdza prośby w ciągu 24 h</p>
+                    <p class="muted">potwierdza prośby w ciągu 24 h</p>
                 </div>
             </section>
 
@@ -86,7 +86,7 @@ $initials = require __DIR__ . '/partials/initials.php';
                     <?php endforeach; ?>
                 </ul>
                 <?php if ($deniedPurposes !== []): ?>
-                    <p class="venue__muted">Gospodarz nie zezwala na: <?= implode(', ', $deniedPurposes) ?>.</p>
+                    <p class="muted">Gospodarz nie zezwala na: <?= implode(', ', $deniedPurposes) ?>.</p>
                 <?php endif; ?>
             </section>
 
@@ -97,7 +97,7 @@ $initials = require __DIR__ . '/partials/initials.php';
                         <div>
                             <span class="badge badge--<?= $mode ?>"><i class="fa-solid <?= $modes[$mode]['icon'] ?>" aria-hidden="true"></i> <?= $modes[$mode]['name'] ?></span>
                             <h3><?= htmlspecialchars($window['label']) ?> <?= $window['from'] ?>:00–<?= $window['to'] ?>:00</h3>
-                            <p class="venue__muted"><?= $modes[$mode]['details'] ?></p>
+                            <p class="muted"><?= $modes[$mode]['details'] ?></p>
                         </div>
                         <p class="offer__price"><strong><?= $modes[$mode]['price'] ?> zł/h</strong> <?= $modes[$mode]['unit'] ?></p>
                     </article>
@@ -159,7 +159,7 @@ $initials = require __DIR__ . '/partials/initials.php';
                     <fieldset class="slots" data-mode="<?= $mode ?>" <?= $mode === $activeMode ? '' : 'disabled hidden' ?>>
                         <div class="slots__header">
                             <span id="date-<?= $mode ?>">Data</span>
-                            <span class="venue__muted"><?= $monthNames[(int) $days[0]->format('n')] ?></span>
+                            <span class="muted"><?= $monthNames[(int) $days[0]->format('n')] ?></span>
                         </div>
                         <div class="day-chips" role="group" aria-labelledby="date-<?= $mode ?>" <?= $form->invalidAttributes('date') ?>>
                             <?php foreach ($days as $day): ?>
@@ -175,14 +175,14 @@ $initials = require __DIR__ . '/partials/initials.php';
 
                         <div class="slots__header">
                             <span id="hours-<?= $mode ?>">Godziny</span>
-                            <span class="venue__muted" data-selected></span>
+                            <span class="muted" data-selected></span>
                         </div>
                         <div class="hour-list" role="group" aria-labelledby="hours-<?= $mode ?>" <?= $form->invalidAttributes('hours') ?>>
                             <?php for ($hour = $window['from']; $hour < $window['to']; $hour++): ?>
                                 <label class="hour-row">
                                     <input type="checkbox" name="hours[]" value="<?= $hour ?>" <?= in_array($hour, $form->hours, true) ? 'checked' : '' ?>>
                                     <strong><?= $hour ?>:00</strong>
-                                    <span class="venue__muted">· <?= $modes[$mode]['free'] ?></span>
+                                    <span class="muted">· <?= $modes[$mode]['free'] ?></span>
                                     <span class="hour-row__bar" aria-hidden="true"></span>
                                 </label>
                             <?php endfor; ?>
@@ -192,7 +192,7 @@ $initials = require __DIR__ . '/partials/initials.php';
                             <div class="seats">
                                 <label for="seats">
                                     Liczba miejsc: <span data-seats-label><?= htmlspecialchars($form->seats) ?></span>
-                                    <span class="venue__muted" id="seats-hint">maks. <?= $form::MAX_SEATS ?> w tym zakresie</span>
+                                    <span class="muted" id="seats-hint">maks. <?= $form::MAX_SEATS ?> w tym zakresie</span>
                                 </label>
                                 <div class="stepper">
                                     <button type="button" data-step="-1" aria-label="Mniej miejsc"><i class="fa-solid fa-minus" aria-hidden="true"></i></button>

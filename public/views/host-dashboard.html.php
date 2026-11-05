@@ -6,7 +6,7 @@ $money = static fn (float $amount): string => number_format($amount, 2, ',', ' '
 ?>
 <?php require __DIR__ . '/partials/header.html.php'; ?>
 
-<main class="host">
+<main class="page host">
     <?php require __DIR__ . '/partials/status-message.html.php'; ?>
 
     <div class="host__header">
@@ -19,16 +19,16 @@ $money = static fn (float $amount): string => number_format($amount, 2, ',', ' '
             <h2 id="requests-heading">Prośby o rezerwację <span class="host__count"><?= count($requests) ?></span></h2>
 
             <?php if ($requests === []): ?>
-                <p class="host__muted">Brak próśb do decyzji.</p>
+                <p class="muted">Brak próśb do decyzji.</p>
             <?php endif; ?>
 
             <ul class="request-list">
                 <?php foreach ($requests as $request): ?>
                     <li class="request">
-                        <span class="request__avatar" aria-hidden="true"><?= htmlspecialchars($initials($request['guest'])) ?></span>
+                        <span class="initials" aria-hidden="true"><?= htmlspecialchars($initials($request['guest'])) ?></span>
                         <div>
                             <h3><?= htmlspecialchars($request['guest'] . ($request['company'] !== '' ? ' · ' . $request['company'] : '')) ?></h3>
-                            <p class="host__muted"><?= htmlspecialchars($request['venueName']) ?> · <?= $request['date'] ?>, <?= $request['from'] ?>:00–<?= $request['to'] ?>:00</p>
+                            <p class="muted"><?= htmlspecialchars($request['venueName']) ?> · <?= $request['date'] ?>, <?= $request['from'] ?>:00–<?= $request['to'] ?>:00</p>
                         </div>
                         <span class="badge request__expiry <?= $request['expiresInHours'] <= 6 ? 'request__expiry--soon' : '' ?>">
                             <i class="fa-regular fa-clock" aria-hidden="true"></i> wygasa za <?= $request['expiresInHours'] ?> h
@@ -37,13 +37,13 @@ $money = static fn (float $amount): string => number_format($amount, 2, ',', ' '
                         <p class="request__tags">
                             <span class="chip"><i class="fa-solid <?= $purposes[$request['purpose']][1] ?>" aria-hidden="true"></i> <?= $purposes[$request['purpose']][0] ?></span>
                             <span class="badge badge--<?= $request['mode'] ?>"><i class="fa-solid <?= $modes[$request['mode']][1] ?>" aria-hidden="true"></i> <?= $modes[$request['mode']][0] ?></span>
-                            <span class="host__muted">· <?= $request['mode'] === 'seats' ? $request['people'] . ($request['people'] === 1 ? ' miejsce' : ' miejsca') : $request['people'] . ' osób' ?></span>
+                            <span class="muted">· <?= $request['mode'] === 'seats' ? $request['people'] . ($request['people'] === 1 ? ' miejsce' : ' miejsca') : $request['people'] . ' osób' ?></span>
                         </p>
 
                         <div class="request__footer">
                             <p>
                                 <strong><?= $money($request['total']) ?></strong>
-                                <span class="host__muted"><?= $request['mode'] === 'seats' ? $request['count'] . ' × ' : '' ?><?= $request['hours'] ?> h × <?= $request['price'] ?> zł</span>
+                                <span class="muted"><?= $request['mode'] === 'seats' ? $request['count'] . ' × ' : '' ?><?= $request['hours'] ?> h × <?= $request['price'] ?> zł</span>
                             </p>
                             <form action="/host/requests/<?= $request['id'] ?>" method="post">
                                 <button class="button request__reject" type="submit" name="decision" value="reject">Odrzuć</button>
@@ -54,7 +54,7 @@ $money = static fn (float $amount): string => number_format($amount, 2, ',', ' '
                 <?php endforeach; ?>
             </ul>
 
-            <p class="host__muted host__note">Prośby bez decyzji wygasają po 24 h, a zarezerwowane miejsca wracają do puli.</p>
+            <p class="muted host__note">Prośby bez decyzji wygasają po 24 h, a zarezerwowane miejsca wracają do puli.</p>
         </section>
 
         <section class="card host__panel" aria-labelledby="venues-heading">
@@ -69,7 +69,7 @@ $money = static fn (float $amount): string => number_format($amount, 2, ',', ' '
                                 <h3><?= htmlspecialchars($venue['name']) ?></h3>
                                 <!-- TODO: Laboratorium 8 – status lokalu z bazy (szkic, czeka na weryfikację, opublikowany). -->
                                 <span class="badge venue-tile__status">Opublikowany</span>
-                                <p class="host__muted"><?= htmlspecialchars($venue['district'] . ' · ' . $venue['address']) ?></p>
+                                <p class="muted"><?= htmlspecialchars($venue['district'] . ' · ' . $venue['address']) ?></p>
                                 <p class="venue-tile__offers">
                                     <?php if ($venue['seatPrice'] !== null): ?>
                                         <span class="badge badge--seats">Miejsca do pracy · <?= $venue['seatPrice'] ?> zł/h</span>
