@@ -1,10 +1,5 @@
 /* Panel gospodarza: powitanie z przyciskiem „Dodaj lokal”, prośby o rezerwację i lokale gospodarza.
    Na telefonie karty leżą jedna pod drugą, od 1024 px obok siebie, a lista próśb przewija się wewnątrz karty. */
-.host ul {
-    padding: 0;
-    list-style: none;
-}
-
 .host__header {
     display: flex;
     flex-wrap: wrap;
@@ -24,82 +19,12 @@
     align-items: start;
 }
 
-.host__panel {
-    padding: 1.25rem 0;
-    border-radius: 1.25rem;
-}
-
-.host__panel h2 {
-    display: flex;
-    align-items: center;
-    gap: 0.625rem;
-    padding: 0 1.25rem var(--space-2);
-    font-size: 1.625rem;
-}
-
-.host__count {
-    display: grid;
-    place-items: center;
-    width: 1.625rem;
-    height: 1.625rem;
-    border-radius: 50%;
-    background: var(--color-exclusive-bg);
-    color: var(--color-exclusive-text);
-    font-family: var(--font-body);
-    font-size: 0.8125rem;
-    font-weight: 700;
-}
-
-.host__panel > .muted {
-    padding: 0 1.25rem;
-}
-
 .host__note {
     padding-top: var(--space-2);
     border-top: 1px solid var(--color-border-subtle);
 }
 
-/* Prośba: kółko z inicjałami, osoba i termin, plakietka wygasania, cel i tryb, kwota z przyciskami. */
-.request {
-    display: grid;
-    grid-template-columns: auto minmax(0, 1fr) auto;
-    gap: 0.75rem;
-    align-items: start;
-    padding: var(--space-2) 1.25rem;
-    border-top: 1px solid var(--color-border-subtle);
-}
-
-.request h3 {
-    font-family: var(--font-body);
-    font-size: 0.9375rem;
-    font-weight: 600;
-}
-
-.request__expiry {
-    background: var(--color-chip);
-    color: var(--color-muted);
-    font-size: 0.75rem;
-}
-
-.request__expiry--soon {
-    background: var(--color-exclusive-bg);
-    color: var(--color-exclusive-text);
-}
-
-.request__tags,
-.request__footer {
-    grid-column: 1 / -1;
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: var(--space-1);
-}
-
-.request__tags .chip {
-    height: 1.875rem;
-    font-size: 0.8125rem;
-}
-
+/* Wiersz z kwotą prośby po lewej i przyciskami decyzji po prawej. */
 .request__footer {
     justify-content: space-between;
 }
@@ -107,23 +32,6 @@
 .request__footer strong {
     margin-right: 0.5rem;
     font-size: 1.125rem;
-}
-
-.request__footer form {
-    display: flex;
-    gap: var(--space-1);
-}
-
-.request__footer .button {
-    gap: 0.375rem;
-    min-height: 2.5rem;
-    padding: 0 var(--space-2);
-}
-
-.request__footer .request__reject {
-    border: 1px solid var(--color-text);
-    background: var(--color-surface);
-    color: var(--color-text);
 }
 
 .venue-tiles {
@@ -165,12 +73,6 @@
 
 .venue-tile h3 {
     font-size: 1.25rem;
-}
-
-.venue-tile__status {
-    background: var(--color-success-bg);
-    color: var(--color-success-text);
-    font-size: 0.75rem;
 }
 
 .venue-tile .muted {

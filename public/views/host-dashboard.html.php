@@ -15,8 +15,8 @@ $money = static fn (float $amount): string => number_format($amount, 2, ',', ' '
     </div>
 
     <div class="host__columns">
-        <section class="card host__panel" aria-labelledby="requests-heading">
-            <h2 id="requests-heading">Prośby o rezerwację <span class="host__count"><?= count($requests) ?></span></h2>
+        <section class="card panel" aria-labelledby="requests-heading">
+            <h2 id="requests-heading">Prośby o rezerwację <span class="count"><?= count($requests) ?></span></h2>
 
             <?php if ($requests === []): ?>
                 <p class="muted">Brak próśb do decyzji.</p>
@@ -24,29 +24,29 @@ $money = static fn (float $amount): string => number_format($amount, 2, ',', ' '
 
             <ul class="request-list">
                 <?php foreach ($requests as $request): ?>
-                    <li class="request">
+                    <li class="list-item">
                         <span class="initials" aria-hidden="true"><?= htmlspecialchars($initials($request['guest'])) ?></span>
                         <div>
                             <h3><?= htmlspecialchars($request['guest'] . ($request['company'] !== '' ? ' · ' . $request['company'] : '')) ?></h3>
                             <p class="muted"><?= htmlspecialchars($request['venueName']) ?> · <?= $request['date'] ?>, <?= $request['from'] ?>:00–<?= $request['to'] ?>:00</p>
                         </div>
-                        <span class="badge request__expiry <?= $request['expiresInHours'] <= 6 ? 'request__expiry--soon' : '' ?>">
+                        <span class="badge <?= $request['expiresInHours'] <= 6 ? 'badge--warning' : 'badge--muted' ?>">
                             <i class="fa-regular fa-clock" aria-hidden="true"></i> wygasa za <?= $request['expiresInHours'] ?> h
                         </span>
 
-                        <p class="request__tags">
-                            <span class="chip"><i class="fa-solid <?= $purposes[$request['purpose']][1] ?>" aria-hidden="true"></i> <?= $purposes[$request['purpose']][0] ?></span>
+                        <p class="list-item__row">
+                            <span class="chip chip--small"><i class="fa-solid <?= $purposes[$request['purpose']][1] ?>" aria-hidden="true"></i> <?= $purposes[$request['purpose']][0] ?></span>
                             <span class="badge badge--<?= $request['mode'] ?>"><i class="fa-solid <?= $modes[$request['mode']][1] ?>" aria-hidden="true"></i> <?= $modes[$request['mode']][0] ?></span>
                             <span class="muted">· <?= $request['mode'] === 'seats' ? $request['people'] . ($request['people'] === 1 ? ' miejsce' : ' miejsca') : $request['people'] . ' osób' ?></span>
                         </p>
 
-                        <div class="request__footer">
+                        <div class="list-item__row request__footer">
                             <p>
                                 <strong><?= $money($request['total']) ?></strong>
                                 <span class="muted"><?= $request['mode'] === 'seats' ? $request['count'] . ' × ' : '' ?><?= $request['hours'] ?> h × <?= $request['price'] ?> zł</span>
                             </p>
-                            <form action="/host/requests/<?= $request['id'] ?>" method="post">
-                                <button class="button request__reject" type="submit" name="decision" value="reject">Odrzuć</button>
+                            <form class="actions" action="/host/requests/<?= $request['id'] ?>" method="post">
+                                <button class="button button--outline" type="submit" name="decision" value="reject">Odrzuć</button>
                                 <button class="button" type="submit" name="decision" value="accept"><i class="fa-solid fa-check" aria-hidden="true"></i> Akceptuj</button>
                             </form>
                         </div>
@@ -57,7 +57,7 @@ $money = static fn (float $amount): string => number_format($amount, 2, ',', ' '
             <p class="muted host__note">Prośby bez decyzji wygasają po 24 h, a zarezerwowane miejsca wracają do puli.</p>
         </section>
 
-        <section class="card host__panel" aria-labelledby="venues-heading">
+        <section class="card panel" aria-labelledby="venues-heading">
             <h2 id="venues-heading">Twoje lokale</h2>
 
             <ul class="venue-tiles">
@@ -68,7 +68,7 @@ $money = static fn (float $amount): string => number_format($amount, 2, ',', ' '
                             <div>
                                 <h3><?= htmlspecialchars($venue['name']) ?></h3>
                                 <!-- TODO: Laboratorium 8 – status lokalu z bazy (szkic, czeka na weryfikację, opublikowany). -->
-                                <span class="badge venue-tile__status">Opublikowany</span>
+                                <span class="badge badge--success">Opublikowany</span>
                                 <p class="muted"><?= htmlspecialchars($venue['district'] . ' · ' . $venue['address']) ?></p>
                                 <p class="venue-tile__offers">
                                     <?php if ($venue['seatPrice'] !== null): ?>

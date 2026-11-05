@@ -34,14 +34,6 @@
     white-space: nowrap;
 }
 
-/* Wybrany cel ma odwrócone kolory – w obu motywach tło w kolorze tekstu. */
-.chip[aria-current] {
-    border-color: var(--color-text);
-    background: var(--color-text);
-    color: var(--color-bg);
-    font-weight: 600;
-}
-
 .segmented,
 .view-switch {
     display: flex;

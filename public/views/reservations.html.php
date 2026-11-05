@@ -1,8 +1,9 @@
 <?php
+// Status rezerwacji: etykieta i kolor plakietki ze wspólnych klas badge--….
 $statusLabels = [
-    'pending' => 'Oczekuje na akceptację',
-    'accepted' => 'Potwierdzona',
-    'rejected' => 'Odrzucona',
+    'pending' => ['Oczekuje na akceptację', 'warning'],
+    'accepted' => ['Potwierdzona', 'success'],
+    'rejected' => ['Odrzucona', 'danger'],
 ];
 ?>
 <?php require __DIR__ . '/partials/header.html.php'; ?>
@@ -17,7 +18,7 @@ $statusLabels = [
             <li class="card reservation">
                 <a href="/venues/<?= $reservation['venueId'] ?>"><?= htmlspecialchars($reservation['venueName']) ?></a>
                 <span class="muted"><?= $reservation['date'] ?>, <?= $reservation['hours'] ?></span>
-                <span class="badge reservation__status--<?= $reservation['status'] ?>"><?= $statusLabels[$reservation['status']] ?></span>
+                <span class="badge badge--<?= $statusLabels[$reservation['status']][1] ?>"><?= $statusLabels[$reservation['status']][0] ?></span>
                 <?php if ($reservation['status'] !== 'rejected'): ?>
                     <form method="post" action="/reservations/<?= $reservation['id'] ?>/cancel">
                         <button type="submit">Anuluj rezerwację</button>
