@@ -15,7 +15,7 @@ final class SecurityController extends AppController
         if ($this->isPost()) {
             if ($form->isValid()) {
                 // TODO: Laboratorium 9 – sprawdzenie hasła w bazie i zapis użytkownika w sesji.
-                $this->redirect($form->accountType === 'host' ? '/host' : '/venues');
+                $this->redirect('/venues');
             }
 
             http_response_code(422);
