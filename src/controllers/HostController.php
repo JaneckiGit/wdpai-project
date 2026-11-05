@@ -54,7 +54,9 @@ final class HostController extends AppController
 
         $this->render('add-venue', [
             'pageTitle' => 'Dodaj lokal – PoGodzinach',
+            'stylesheet' => 'add-venue',
             'activeNav' => 'host',
+            'mapbox' => $this->mapbox(),
             'form' => $form,
             'errors' => $form->errors(),
         ]);

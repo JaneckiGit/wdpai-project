@@ -8,10 +8,15 @@ final class VenueForm extends Form
 {
     private const TYPES = ['cafe', 'bar', 'restaurant', 'studio'];
     private const ENTRY_MODES = ['staff', 'key'];
+    // Pinezka startuje w centrum Krakowa, gospodarz przeciąga ją na swój lokal.
+    private const DEFAULT_LATITUDE = '50.0614';
+    private const DEFAULT_LONGITUDE = '19.9372';
 
     public readonly string $name;
     public readonly string $type;
     public readonly string $address;
+    public readonly string $latitude;
+    public readonly string $longitude;
     public readonly string $description;
     public readonly string $entryMode;
     public readonly string $entryInstructions;
@@ -28,6 +33,8 @@ final class VenueForm extends Form
         $this->name = self::text($input, 'name');
         $this->type = self::text($input, 'type');
         $this->address = self::text($input, 'address');
+        $this->latitude = self::textOr($input, 'latitude', self::DEFAULT_LATITUDE);
+        $this->longitude = self::textOr($input, 'longitude', self::DEFAULT_LONGITUDE);
         $this->description = self::text($input, 'description');
         $this->entryMode = self::textOr($input, 'entryMode', 'staff');
         $this->entryInstructions = self::text($input, 'entryInstructions');
@@ -58,6 +65,10 @@ final class VenueForm extends Form
 
         if ($this->address === '') {
             $this->addError('address', 'Podaj adres lokalu.');
+        }
+
+        if (!self::isCoordinate($this->latitude, 90) || !self::isCoordinate($this->longitude, 180)) {
+            $this->addError('location', 'Zaznacz lokal pinezką na mapie.');
         }
 
         if ($this->description === '') {
@@ -112,6 +123,11 @@ final class VenueForm extends Form
         if ($this->entryMode === 'key' && $this->entryInstructions === '') {
             $this->addError('entryInstructions', 'Przy przekazaniu klucza podaj instrukcję wejścia.');
         }
+    }
+
+    private static function isCoordinate(string $value, int $limit): bool
+    {
+        return is_numeric($value) && abs((float) $value) <= $limit;
     }
 
     /** @return string[] */
