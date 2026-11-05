@@ -430,7 +430,7 @@ textarea[aria-invalid="true"] {
     display: none;
 }
 
-/* Avatar to twarz Anny z ilustracji logowania: obraz 3:4 w rozmiarze 300×400 px przesunięty tak, że w kółku widać twarz. */
+/* Avatar to twarz Piotra (postać po lewej) z ilustracji logowania: obraz 3:4 w rozmiarze 300×400 px przesunięty tak, że w kółku widać twarz. */
 .avatar {
     flex: none;
     width: 2.5rem;
@@ -438,7 +438,7 @@ textarea[aria-invalid="true"] {
     padding: 0;
     border: 0;
     border-radius: 50%;
-    background: url("/images/login-hero.svg") -130px -210px / 300px 400px;
+    background: url("/images/login-hero.svg") -63px -210px / 300px 400px;
     cursor: pointer;
 }
 
