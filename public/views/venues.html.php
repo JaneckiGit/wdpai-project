@@ -1,87 +1,105 @@
+<?php
+$purposes = [
+    'work' => ['Praca', 'laptop'],
+    'meetings' => ['Spotkania i szkolenia', 'people'],
+    'shoots' => ['Sesje foto i wideo', 'camera'],
+    'events' => ['Kameralne wydarzenia', 'glass'],
+];
+$modes = [
+    'seats' => ['Miejsce do pracy', 'laptop'],
+    'exclusive' => ['Cały lokal', 'key'],
+];
+// Link filtra zmienia jeden parametr i zachowuje pozostałe (pusta fraza nie trafia do adresu).
+$filterUrl = static fn (array $change): string => '/venues?' . http_build_query(array_filter(
+    array_merge(['q' => $form->query, 'purpose' => $form->purpose, 'mode' => $form->mode], $change)
+));
+$pins = array_map(static fn (array $venue): array => [
+    'id' => $venue['id'],
+    'name' => $venue['name'],
+    'lat' => $venue['lat'],
+    'lng' => $venue['lng'],
+    'price' => $form->mode === 'seats' ? $venue['seatPrice'] . ' zł/h · miejsce' : $venue['exclusivePrice'] . ' zł/h',
+], $venues);
+?>
 <?php require __DIR__ . '/partials/header.html.php'; ?>
 
-<main>
-    <h1>Odkrywaj lokale</h1>
+<main class="discover">
+    <h1 class="visually-hidden">Odkrywaj lokale</h1>
 
-    <form action="/venues" method="get" aria-label="Filtry">
-        <?php require __DIR__ . '/partials/form-errors.html.php'; ?>
+    <?php require __DIR__ . '/partials/form-errors.html.php'; ?>
 
-        <input type="hidden" name="q" value="<?= htmlspecialchars($form->query) ?>">
-
-        <fieldset>
-            <legend>Cel</legend>
-            <label><input type="radio" name="purpose" value="work" <?= $form->purpose === 'work' ? 'checked' : '' ?>> Praca</label>
-            <label><input type="radio" name="purpose" value="meetings" <?= $form->purpose === 'meetings' ? 'checked' : '' ?>> Spotkania i szkolenia</label>
-            <label><input type="radio" name="purpose" value="shoots" <?= $form->purpose === 'shoots' ? 'checked' : '' ?>> Sesje foto i wideo</label>
-            <label><input type="radio" name="purpose" value="events" <?= $form->purpose === 'events' ? 'checked' : '' ?>> Kameralne wydarzenia</label>
-        </fieldset>
-
-        <fieldset>
-            <legend>Tryb</legend>
-            <label><input type="radio" name="mode" value="seats" <?= $form->mode === 'seats' ? 'checked' : '' ?>> Miejsce do pracy</label>
-            <label><input type="radio" name="mode" value="exclusive" <?= $form->mode === 'exclusive' ? 'checked' : '' ?>> Cały lokal</label>
-        </fieldset>
-
-        <label for="date">Data</label>
-        <input type="date" id="date" name="date" value="<?= htmlspecialchars($form->date) ?>" <?= $form->invalidAttributes('date') ?>>
-
-        <label for="time-from">Od godziny</label>
-        <input type="time" id="time-from" name="from" value="<?= htmlspecialchars($form->from) ?>" step="3600" <?= $form->invalidAttributes('from') ?>>
-
-        <label for="time-to">Do godziny</label>
-        <input type="time" id="time-to" name="to" value="<?= htmlspecialchars($form->to) ?>" step="3600" <?= $form->invalidAttributes('to') ?>>
-
-        <label for="guests">Liczba osób</label>
-        <input type="number" id="guests" name="guests" min="1" value="<?= htmlspecialchars($form->guests) ?>" <?= $form->invalidAttributes('guests') ?>>
-
-        <label for="max-price">Cena do (zł/h)</label>
-        <input type="number" id="max-price" name="maxPrice" value="<?= htmlspecialchars($form->maxPrice) ?>" min="0" <?= $form->invalidAttributes('maxPrice') ?>>
-
-        <button type="submit">Pokaż lokale</button>
-        <a href="/venues">Wyczyść filtry</a>
-    </form>
-
-    <!-- TODO: Lokale z bazy filtrowane według wartości z formularza (Laboratorium 8) -->
-    <p>8 lokali w tym obszarze</p>
-
-    <section aria-labelledby="map-heading">
-        <h2 id="map-heading">Mapa</h2>
-        <!-- TODO: Mapa z pinezkami cen lokali -->
-        <p>Ceny za godzinę:</p>
-        <ul>
-            <li><strong>15 zł/h · miejsce</strong> – jedno miejsce do pracy</li>
-            <li><strong>150 zł/h</strong> – cały lokal na wyłączność</li>
+    <nav class="filters" aria-label="Filtry">
+        <ul class="filters__purposes">
+            <?php foreach ($purposes as $value => [$label, $icon]): ?>
+                <li>
+                    <a class="chip" href="<?= htmlspecialchars($filterUrl(['purpose' => $value])) ?>"<?= $form->purpose === $value ? ' aria-current="true"' : '' ?>>
+                        <svg class="icon" width="16" height="16" aria-hidden="true"><use href="/images/icons.svg#<?= $icon ?>"></use></svg>
+                        <?= $label ?>
+                    </a>
+                </li>
+            <?php endforeach; ?>
         </ul>
-    </section>
+        <ul class="segmented">
+            <?php foreach ($modes as $value => [$label, $icon]): ?>
+                <li>
+                    <a href="<?= htmlspecialchars($filterUrl(['mode' => $value])) ?>"<?= $form->mode === $value ? ' aria-current="true"' : '' ?>>
+                        <svg class="icon" width="16" height="16" aria-hidden="true"><use href="/images/icons.svg#<?= $icon ?>"></use></svg>
+                        <?= $label ?>
+                    </a>
+                </li>
+            <?php endforeach; ?>
+        </ul>
+    </nav>
 
-    <section aria-labelledby="reels-heading">
-        <h2 id="reels-heading">Rolki lokali</h2>
-        <p>Przewijaj rolki – mapa podąża za Tobą</p>
+    <!-- Na telefonie widać rolki albo mapę – mapę pokazuje link do kotwicy #map (selektor :target w CSS). -->
+    <nav class="view-switch" aria-label="Widok">
+        <a class="view-switch__reels" href="#reels">Rolki</a>
+        <a class="view-switch__map" href="#map">Mapa</a>
+    </nav>
 
-        <!-- TODO: Lista lokali z bazy wyświetlona w pętli -->
-        <article>
-            <!-- TODO: Rolka gospodarza (wideo) -->
-            <h3>Bar Lampion</h3>
-            <p>Stare Miasto · 0,8 km</p>
-            <ul>
-                <li>Miejsca do pracy · 15 zł/h</li>
-                <li>Na wyłączność · 160 zł/h</li>
-            </ul>
-            <p>Dziś 8:00–14:00 · wolne 5 z 12 miejsc</p>
-            <a href="/venues/1">Zarezerwuj</a>
-        </article>
+    <div class="discover__results">
+        <section class="map" id="map" aria-label="Mapa lokali">
+            <?php if ($mapbox['token'] !== ''): ?>
+                <div class="map__canvas" data-token="<?= htmlspecialchars($mapbox['token']) ?>" data-style="<?= htmlspecialchars($mapbox['style']) ?>" data-venues="<?= htmlspecialchars(json_encode($pins, JSON_UNESCAPED_UNICODE)) ?>"></div>
+            <?php else: ?>
+                <p class="map__missing">Mapa pojawi się po ustawieniu MAPBOX_TOKEN w pliku .env.</p>
+            <?php endif; ?>
+        </section>
 
-        <article>
-            <h3>Kawiarnia Ziarno</h3>
-            <p>Kazimierz · 1,2 km</p>
-            <ul>
-                <li>Miejsca do pracy · 15 zł/h</li>
-                <li>Na wyłączność · 150 zł/h</li>
-            </ul>
-            <p>Najbliżej: wt 18:00–22:00 · miejsca do pracy</p>
-            <a href="/venues/2">Zarezerwuj</a>
-        </article>
-    </section>
+        <section class="reels" id="reels" aria-label="Lokale">
+            <?php foreach ($venues as $venue): ?>
+                <article class="venue-card" data-venue-id="<?= $venue['id'] ?>">
+                    <img class="venue-card__image" src="/images/venues/<?= $venue['image'] ?>" alt="">
+                    <div class="venue-card__info">
+                        <h2><?= htmlspecialchars($venue['name']) ?></h2>
+                        <p>
+                            <svg class="icon" width="15" height="15" aria-hidden="true"><use href="/images/icons.svg#pin"></use></svg>
+                            <?= htmlspecialchars($venue['district']) ?>
+                        </p>
+                        <ul class="venue-card__offers">
+                            <?php if ($venue['seatPrice'] !== null): ?>
+                                <li class="badge badge--seats">Miejsca do pracy · <?= $venue['seatPrice'] ?> zł/h</li>
+                            <?php endif; ?>
+                            <?php if ($venue['exclusivePrice'] !== null): ?>
+                                <li class="badge badge--exclusive">Na wyłączność · <?= $venue['exclusivePrice'] ?> zł/h</li>
+                            <?php endif; ?>
+                        </ul>
+                        <a class="button" href="/venues/<?= $venue['id'] ?>">Zarezerwuj</a>
+                    </div>
+                </article>
+            <?php endforeach; ?>
+
+            <?php if ($venues === []): ?>
+                <p class="reels__empty">Brak lokali dla wybranych filtrów.</p>
+            <?php endif; ?>
+        </section>
+    </div>
 </main>
 
 <?php require __DIR__ . '/partials/footer.html.php'; ?>
+
+<?php if ($mapbox['token'] !== ''): ?>
+    <link rel="stylesheet" href="https://api.mapbox.com/mapbox-gl-js/v3.16.0/mapbox-gl.css">
+    <script src="https://api.mapbox.com/mapbox-gl-js/v3.16.0/mapbox-gl.js" defer></script>
+    <script src="/js/map.js" defer></script>
+<?php endif; ?>
