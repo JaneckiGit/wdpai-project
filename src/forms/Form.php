@@ -81,6 +81,13 @@ abstract class Form
         }
     }
 
+    protected function requireEmail(string $field, string $value): void
+    {
+        if (filter_var($value, FILTER_VALIDATE_EMAIL) === false) {
+            $this->addError($field, 'Podaj poprawny adres e-mail.');
+        }
+    }
+
     protected function requirePositiveInt(string $field, string $value, string $message): void
     {
         if (!ctype_digit($value) || (int) $value < 1) {

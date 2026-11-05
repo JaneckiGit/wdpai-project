@@ -17,9 +17,7 @@ final class LoginForm extends Form
 
     protected function validate(): void
     {
-        if (filter_var($this->email, FILTER_VALIDATE_EMAIL) === false) {
-            $this->addError('email', 'Podaj poprawny adres e-mail.');
-        }
+        $this->requireEmail('email', $this->email);
 
         if ($this->password === '') {
             $this->addError('password', 'Podaj hasło.');
