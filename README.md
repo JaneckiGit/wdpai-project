@@ -59,12 +59,12 @@ Gotowy jest szkielet MVC z laboratoriów oraz szablony HTML pięciu widoków z p
 | Rejestracja | Formularz z walidacją po stronie serwera jak w Laboratorium 9; po poprawnym wysłaniu przekierowanie na logowanie z komunikatem (zapis konta w bazie w Laboratorium 9) |
 | Odkrywaj | Mapa Mapbox z pinezkami cen obok kolumny kart lokali; filtry celu i trybu jako linki (`?purpose=…&mode=…`) oraz fraza z wyszukiwarki w nagłówku; na telefonie przełącznik „Rolki / Mapa” |
 | Moje rezerwacje | Lista rezerwacji (lokal, termin, status) z przykładowych danych w `ReservationController`; „Anuluj rezerwację” wysyła POST i wraca z komunikatem |
-| Lokal i rezerwacja | Opis lokalu, cele, oferta, udogodnienia, opinie i formularz prośby o rezerwację z walidacją; id lokalu z adresu trafia do adresu formularza |
+| Lokal i rezerwacja | Lokal o id z adresu: ścieżka, zdjęcie, gospodarz, opis, cele, oferta, udogodnienia, wejście i podpisy rolek „Nagrane tutaj”; formularz prośby o rezerwację z walidacją pokazuje tylko tryby i cele tego lokalu; nieznane id daje 404 |
 | Panel gospodarza | Podsumowanie, prośby o rezerwację z działającymi przyciskami decyzji, kalendarz tygodnia w tabeli, komunikaty po przekierowaniu |
 | Dodaj lokal | Formularz w sześciu krokach z walidacją, w tym wykrywaniem nakładających się okien dostępności; szkic i wysłanie do weryfikacji |
 | Obsługa błędów | Kontrolowane odpowiedzi 400, 404, 422 i 500 (sekcja „Formularze i obsługa błędów”) |
 
-Widoki to semantyczny HTML. W pełni ostylowane są widoki Logowanie, Rejestracja, Odkrywaj i Moje rezerwacje oraz wspólny nagłówek z nawigacją i menu konta i stopka (opis w sekcji „Style CSS”), pozostałe widoki mają tylko style bazowe (kolory, fonty, linki, fokus). Na każdej stronie działa motyw jasny i ciemny (Laboratorium 5, sekcja „Motyw jasny i ciemny”). Dane w widokach są przykładowe, wzięte z prototypu – listy oznaczone komentarzem `TODO` będą wyświetlane w pętli z danych z bazy. Formularze są sprawdzane po stronie serwera, ale aplikacja nie ma jeszcze bazy, więc poprawne dane nie są nigdzie zapisywane (Laboratoria 7–8). Lokale w Odkrywaj to przykładowa tablica w `VenueController`, którą filtry naprawdę zawężają; w Laboratorium 8 zastąpi ją baza. Pliki z formularza „Dodaj lokal” nie są jeszcze przetwarzane (Laboratorium 13), a przycisk „Dodaj okno” zadziała po dodaniu JavaScriptu (Laboratorium 10) – do tego czasu formularz w przeglądarce pokazuje jedno okno, a serwer obsługuje ich dowolnie wiele. Ochrona CSRF i sprawdzanie hasła dojdą w Laboratorium 9. Linki do zaplanowanych, jeszcze nieistniejących stron (np. `/terms`, a w menu konta „Zmień hasło” i „Usuń konto”, które zadziałają w Laboratorium 9) kończą się odpowiedzią 404. Przełącznika języka jeszcze nie ma.
+Widoki to semantyczny HTML. W pełni ostylowane są widoki Logowanie, Rejestracja, Odkrywaj, Lokal i rezerwacja oraz Moje rezerwacje, a także wspólny nagłówek z nawigacją i menu konta i stopka (opis w sekcji „Style CSS”), pozostałe widoki mają tylko style bazowe (kolory, fonty, linki, fokus). Na każdej stronie działa motyw jasny i ciemny (Laboratorium 5, sekcja „Motyw jasny i ciemny”). Dane w widokach są przykładowe, wzięte z prototypu – listy oznaczone komentarzem `TODO` będą wyświetlane w pętli z danych z bazy. Formularze są sprawdzane po stronie serwera, ale aplikacja nie ma jeszcze bazy, więc poprawne dane nie są nigdzie zapisywane (Laboratoria 7–8). Lokale w Odkrywaj i na stronie lokalu to przykładowa tablica w `VenueController`, którą filtry naprawdę zawężają; w Laboratorium 8 zastąpi ją baza. Pliki z formularza „Dodaj lokal” nie są jeszcze przetwarzane (Laboratorium 13), a przycisk „Dodaj okno” zadziała po dodaniu JavaScriptu (Laboratorium 10) – do tego czasu formularz w przeglądarce pokazuje jedno okno, a serwer obsługuje ich dowolnie wiele. Ochrona CSRF i sprawdzanie hasła dojdą w Laboratorium 9. Linki do zaplanowanych, jeszcze nieistniejących stron (np. `/terms`, a w menu konta „Zmień hasło” i „Usuń konto”, które zadziałają w Laboratorium 9) kończą się odpowiedzią 404. Przełącznika języka jeszcze nie ma.
 
 ## Tech stack
 
@@ -183,7 +183,7 @@ Parametry zapytania (query parameters):
 
 | Adres | Parametry | Znaczenie |
 |---|---|---|
-| `/venues` | `q`, `purpose`, `mode`, `date`, `from`, `to`, `guests`, `maxPrice` | Wyszukiwanie i filtry, np. `/venues?q=Kazimierz&purpose=meetings&guests=4`; niepoprawne wartości dają status 400 i listę błędów |
+| `/venues` | `q`, `purpose`, `mode` | Wyszukiwanie i filtry, np. `/venues?q=Kazimierz&purpose=meetings`; niepoprawne wartości dają status 400 i listę błędów |
 | `/host`, `/venues/{id}`, `/reservations` | `status` | Komunikat po przekierowaniu, wybierany z listy dozwolonych; nieznana wartość jest ignorowana |
 
 Sprawdzenie z terminala:
@@ -201,10 +201,10 @@ curl -i http://localhost:8080/venues/abc
 ```
 
 ```bash
-curl -i "http://localhost:8080/venues?guests=0"
+curl -i "http://localhost:8080/venues?purpose=zzz"
 ```
 
-Pierwszy i trzeci adres zwracają 404, bo `{id}` przyjmuje tylko cyfry. Drugi wyświetla widok lokalu, a formularz rezerwacji wysyła dane na `/venues/2/reservations`. Czwarty zwraca 400, bo liczba osób musi być dodatnia.
+Pierwszy i trzeci adres zwracają 404, bo `{id}` przyjmuje tylko cyfry. Drugi wyświetla widok lokalu, a formularz rezerwacji wysyła dane na `/venues/2/reservations`. Czwarty zwraca 400, bo cel spoza listy jest błędem. Lokal o id spoza przykładowych danych (np. `/venues/9`) też zwraca 404.
 
 ## Formularze i obsługa błędów
 
@@ -244,6 +244,7 @@ Dane wyświetlane z powrotem w HTML przechodzą przez `htmlspecialchars()`, wię
 | `public/css/style.css` | Zmienne CSS (tokeny projektu w wariancie jasnym i ciemnym), `box-sizing`, typografia, linki, fokus oraz wspólne komponenty: logo, przycisk, pola formularza z podpowiedzią, pole wyboru (checkbox), nagłówek z nawigacją (na telefonie dolny pasek) i menu konta pod avatarem (atrybut `popover` – otwieranie i zamykanie bez JavaScriptu), stopka, przełącznik motywu, klasa `visually-hidden` |
 | `public/css/login.css` | Układ widoków Logowanie i Rejestracja (dołączany przez layout, gdy kontroler przekaże `'stylesheet' => 'login'`) |
 | `public/css/venues.css` | Układ widoku Odkrywaj: pasek celu i trybu, mapa, karty lokali, przełącznik „Rolki / Mapa” na telefonie |
+| `public/css/venue.css` | Układ widoku Lokal i rezerwacja: na telefonie jedna kolumna, na komputerze opis obok formularza, który zostaje widoczny przy przewijaniu (`position: sticky`) |
 | `public/css/reservations.css` | Lista kart w Moich rezerwacjach i kolory statusów |
 | `public/js/theme.js` | Przełączanie i zapamiętywanie motywu |
 | `public/js/map.js` | Mapa Mapbox: pinezki z ceną z atrybutu `data-venues`, wbudowane przyciski przybliżania i lokalizacji, wyróżnienie pinezki lokalu z karty widocznej w kolumnie (`IntersectionObserver`), przeliczenie rozmiaru po pokazaniu mapy na telefonie (`ResizeObserver`) |
@@ -361,7 +362,7 @@ Wynikają z konfiguracji z laboratorium, do rozwiązania w kolejnych etapach:
 │   └── php/              # obraz PHP-FPM z rozszerzeniami
 ├── public/               # katalog publiczny (document root Nginx)
 │   ├── index.php         # Front Controller – jedyny punkt wejścia
-│   ├── css/              # arkusze stylów (style.css – wspólny, login.css – logowanie i rejestracja, venues.css – Odkrywaj, reservations.css – Moje rezerwacje)
+│   ├── css/              # arkusze stylów (style.css – wspólny, login.css – logowanie i rejestracja, venues.css – Odkrywaj, venue.css – Lokal, reservations.css – Moje rezerwacje)
 │   ├── js/               # skrypty (theme.js – motyw, map.js – mapa w Odkrywaj)
 │   ├── images/           # obrazy używane w stylach
 │   └── views/            # layout.html.php i szablony widoków (*.html.php)
