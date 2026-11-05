@@ -15,13 +15,13 @@ final class VenueController extends AppController
 
     // TODO: Laboratorium 8 – lokale z bazy (repozytorium) zamiast przykładowych danych.
     private const SAMPLE_VENUES = [
-        ['id' => 1, 'name' => 'Bar Lampion', 'district' => 'Stare Miasto', 'image' => 'bar-lampion.svg',
+        ['id' => 1, 'name' => 'Bar Lampion', 'district' => 'Stare Miasto',
             'lat' => 50.0623, 'lng' => 19.9343, 'seatPrice' => 15, 'exclusivePrice' => 160,
             'purposes' => ['work', 'meetings', 'shoots']],
-        ['id' => 2, 'name' => 'Kawiarnia Ziarno', 'district' => 'Kazimierz', 'image' => 'kawiarnia-ziarno.svg',
+        ['id' => 2, 'name' => 'Kawiarnia Ziarno', 'district' => 'Kazimierz',
             'lat' => 50.0512, 'lng' => 19.9466, 'seatPrice' => 15, 'exclusivePrice' => 150,
             'purposes' => ['work', 'meetings', 'events']],
-        ['id' => 3, 'name' => 'Kawiarnia Pod Zegarem', 'district' => 'Kleparz', 'image' => 'pod-zegarem.svg',
+        ['id' => 3, 'name' => 'Kawiarnia Pod Zegarem', 'district' => 'Kleparz',
             'lat' => 50.0668, 'lng' => 19.9420, 'seatPrice' => 20, 'exclusivePrice' => null,
             'purposes' => ['work', 'meetings']],
     ];

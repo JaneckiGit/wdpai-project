@@ -1,13 +1,13 @@
 <?php
 $purposes = [
-    'work' => ['Praca', 'laptop'],
-    'meetings' => ['Spotkania i szkolenia', 'people'],
-    'shoots' => ['Sesje foto i wideo', 'camera'],
-    'events' => ['Kameralne wydarzenia', 'glass'],
+    'work' => ['Praca', 'fa-laptop'],
+    'meetings' => ['Spotkania i szkolenia', 'fa-users'],
+    'shoots' => ['Sesje foto i wideo', 'fa-camera'],
+    'events' => ['Kameralne wydarzenia', 'fa-champagne-glasses'],
 ];
 $modes = [
-    'seats' => ['Miejsce do pracy', 'laptop'],
-    'exclusive' => ['Cały lokal', 'key'],
+    'seats' => ['Miejsce do pracy', 'fa-laptop'],
+    'exclusive' => ['Cały lokal', 'fa-key'],
 ];
 // Link filtra zmienia jeden parametr i zachowuje pozostałe (pusta fraza nie trafia do adresu).
 $filterUrl = static fn (array $change): string => '/venues?' . http_build_query(array_filter(
@@ -33,7 +33,7 @@ $pins = array_map(static fn (array $venue): array => [
             <?php foreach ($purposes as $value => [$label, $icon]): ?>
                 <li>
                     <a class="chip" href="<?= htmlspecialchars($filterUrl(['purpose' => $value])) ?>"<?= $form->purpose === $value ? ' aria-current="true"' : '' ?>>
-                        <svg class="icon" width="16" height="16" aria-hidden="true"><use href="/images/icons.svg#<?= $icon ?>"></use></svg>
+                        <i class="fa-solid <?= $icon ?>" aria-hidden="true"></i>
                         <?= $label ?>
                     </a>
                 </li>
@@ -43,7 +43,7 @@ $pins = array_map(static fn (array $venue): array => [
             <?php foreach ($modes as $value => [$label, $icon]): ?>
                 <li>
                     <a href="<?= htmlspecialchars($filterUrl(['mode' => $value])) ?>"<?= $form->mode === $value ? ' aria-current="true"' : '' ?>>
-                        <svg class="icon" width="16" height="16" aria-hidden="true"><use href="/images/icons.svg#<?= $icon ?>"></use></svg>
+                        <i class="fa-solid <?= $icon ?>" aria-hidden="true"></i>
                         <?= $label ?>
                     </a>
                 </li>
@@ -69,11 +69,11 @@ $pins = array_map(static fn (array $venue): array => [
         <section class="reels" id="reels" aria-label="Lokale">
             <?php foreach ($venues as $venue): ?>
                 <article class="venue-card" data-venue-id="<?= $venue['id'] ?>">
-                    <img class="venue-card__image" src="/images/venues/<?= $venue['image'] ?>" alt="">
+                    <img class="venue-card__image" src="/images/login-hero.svg" alt="">
                     <div class="venue-card__info">
                         <h2><?= htmlspecialchars($venue['name']) ?></h2>
                         <p>
-                            <svg class="icon" width="15" height="15" aria-hidden="true"><use href="/images/icons.svg#pin"></use></svg>
+                            <i class="fa-solid fa-location-dot" aria-hidden="true"></i>
                             <?= htmlspecialchars($venue['district']) ?>
                         </p>
                         <ul class="venue-card__offers">

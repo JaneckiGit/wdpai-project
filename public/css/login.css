@@ -15,7 +15,7 @@
     border-radius: var(--radius);
     background:
         linear-gradient(180deg, rgb(28 25 23 / 62%) 0%, rgb(28 25 23 / 0%) 30%, rgb(28 25 23 / 0%) 45%, rgb(28 25 23 / 92%) 100%),
-        url("/images/venues/bar-lampion.svg") center 60% / cover,
+        url("/images/login-hero.svg") center 60% / cover,
         var(--color-dark);
     color: var(--color-on-dark);
 }
