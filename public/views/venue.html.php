@@ -56,9 +56,6 @@ $hostInitials = implode('', array_map(static fn (string $word): string => mb_sub
             </figure>
 
             <ul class="venue-photos" aria-label="Zdjęcia lokalu dodane przez gospodarza">
-                <li class="venue-photos__reel">
-                    <img src="/images/login-hero.svg" alt="Podgląd głównej rolki">
-                </li>
                 <?php foreach ($venue['photos'] as $photo): ?>
                     <li>
                         <img src="<?= htmlspecialchars($photo) ?>" alt="Zdjęcie lokalu">
