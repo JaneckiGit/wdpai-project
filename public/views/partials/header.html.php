@@ -7,9 +7,9 @@
         PoGodzinach
     </a>
 
-    <form class="site-search" action="/venues" method="get" role="search">
+    <form class="site-search search" action="/venues" method="get" role="search">
         <label class="visually-hidden" for="site-search">Szukaj lokalu</label>
-        <i class="fa-solid fa-magnifying-glass site-search__icon" aria-hidden="true"></i>
+        <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
         <input type="search" id="site-search" name="q" value="<?= htmlspecialchars($searchQuery ?? '') ?>" placeholder="Dzielnica, nazwa lokalu…">
     </form>
 

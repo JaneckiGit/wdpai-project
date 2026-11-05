@@ -42,18 +42,3 @@
     text-decoration: underline;
     cursor: pointer;
 }
-
-.reservation__status--pending {
-    background: var(--color-exclusive-bg);
-    color: var(--color-exclusive-text);
-}
-
-.reservation__status--accepted {
-    background: var(--color-success-bg);
-    color: var(--color-success-text);
-}
-
-.reservation__status--rejected {
-    background: var(--color-danger-bg);
-    color: var(--color-danger-text);
-}

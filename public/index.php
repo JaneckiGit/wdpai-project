@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Controller\AdminController;
 use App\Controller\DefaultController;
 use App\Controller\HostController;
 use App\Controller\ProjectController;
@@ -42,6 +43,7 @@ $routing->get('/host', HostController::class, 'dashboard');
 $routing->get('/host/venues/new', HostController::class, 'addVenue');
 $routing->post('/host/venues/new', HostController::class, 'addVenue');
 $routing->post('/host/requests/{id}', HostController::class, 'decideRequest');
+$routing->get('/admin', AdminController::class, 'dashboard');
 
 try {
     $routeFound = $routing->dispatch(
