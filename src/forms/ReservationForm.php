@@ -6,61 +6,80 @@ namespace App\Form;
 
 final class ReservationForm extends Form
 {
-    // TODO: Laboratorium 8 – limity i dozwolone cele z danych konkretnego lokalu.
-    private const MIN_HOURS = 2;
-    private const MAX_SEATS = 4;
+    private const DAYS_AHEAD = 7;
+    public const MIN_HOURS = 2;
+    // TODO: Laboratorium 8 – limit miejsc liczony z wolnych miejsc w wybranych godzinach.
+    public const MAX_SEATS = 4;
 
     public readonly string $mode;
     public readonly string $purpose;
     public readonly string $date;
-    public readonly string $from;
-    public readonly string $to;
+    /** @var int[] zaznaczone godziny rozpoczęcia, np. [18, 19, 20] = 18:00–21:00 */
+    public readonly array $hours;
     public readonly string $seats;
 
-    public function __construct(array $input = [])
+    /* Lokal podaje okna gospodarza i dozwolone cele, z którymi porównujemy wybór najemcy. */
+    public function __construct(private readonly array $venue, array $input = [])
     {
-        $this->mode = self::textOr($input, 'mode', 'seats');
-        $this->purpose = self::textOr($input, 'purpose', 'work');
+        $this->mode = self::textOr($input, 'mode', array_key_first($venue['windows']));
+        $this->purpose = self::textOr($input, 'purpose', $venue['purposes'][0]);
         $this->date = self::text($input, 'date');
-        $this->from = self::text($input, 'from');
-        $this->to = self::text($input, 'to');
+        $hours = is_array($input['hours'] ?? null) ? array_map('intval', $input['hours']) : [];
+        sort($hours);
+        $this->hours = $hours;
         $this->seats = self::textOr($input, 'seats', '1');
+    }
+
+    /** @return \DateTimeImmutable[] dzisiaj i kolejne dni, które można zarezerwować */
+    public static function bookableDays(): array
+    {
+        return array_map(
+            static fn (int $offset): \DateTimeImmutable => new \DateTimeImmutable('today +' . $offset . ' days'),
+            range(0, self::DAYS_AHEAD - 1),
+        );
     }
 
     protected function validate(): void
     {
-        $this->requireChoice('mode', $this->mode, self::MODES, 'Wybierz tryb rezerwacji.');
-        $this->requireChoice('purpose', $this->purpose, self::PURPOSES, 'Wybierz cel rezerwacji.');
-        $this->validateDate();
-        $this->requireHourRange('from', $this->from, 'to', $this->to);
-        $this->validateDuration();
+        $this->requireChoice('purpose', $this->purpose, $this->venue['purposes'], 'Wybierz cel dozwolony w tym lokalu.');
+        $window = $this->venue['windows'][$this->mode] ?? null;
+
+        if ($window === null) {
+            $this->addError('mode', 'Wybierz tryb rezerwacji.');
+            return;
+        }
+
+        $this->validateDate($window);
+        $this->validateHours($window);
 
         if ($this->mode === 'seats') {
             $this->validateSeats();
         }
     }
 
-    private function validateDate(): void
+    private function validateDate(array $window): void
     {
         $date = self::parseDate($this->date);
+        $bookable = array_map(static fn (\DateTimeImmutable $day): string => $day->format('Y-m-d'), self::bookableDays());
 
-        if ($date === null) {
-            $this->addError('date', 'Podaj poprawną datę.');
-        } elseif ($date < new \DateTimeImmutable('today')) {
-            $this->addError('date', 'Data rezerwacji nie może być w przeszłości.');
+        if ($date === null || !in_array($this->date, $bookable, true)) {
+            $this->addError('date', 'Wybierz dzień z najbliższego tygodnia.');
+        } elseif (!in_array((int) $date->format('N'), $window['days'], true)) {
+            $this->addError('date', 'Gospodarz nie udostępnia lokalu w tym dniu.');
         }
     }
 
-    private function validateDuration(): void
+    /* Godziny muszą leżeć w oknie gospodarza i iść jedna po drugiej, np. 18, 19, 20. */
+    private function validateHours(array $window): void
     {
-        if (!self::isFullHour($this->from) || !self::isFullHour($this->to)) {
-            return;
-        }
+        $count = count($this->hours);
 
-        $hours = self::hour($this->to) - self::hour($this->from);
-
-        if ($hours > 0 && $hours < self::MIN_HOURS) {
-            $this->addError('to', 'Minimalny czas rezerwacji to ' . self::MIN_HOURS . ' h.');
+        if ($count < self::MIN_HOURS) {
+            $this->addError('hours', 'Wybierz co najmniej ' . self::MIN_HOURS . ' godziny.');
+        } elseif ($this->hours[0] < $window['from'] || $this->hours[$count - 1] >= $window['to']) {
+            $this->addError('hours', 'Wybierz godziny z okna gospodarza.');
+        } elseif ($this->hours[$count - 1] - $this->hours[0] + 1 !== $count) {
+            $this->addError('hours', 'Wybierz godziny jedna po drugiej.');
         }
     }
 
