@@ -23,6 +23,11 @@
     --color-bg: #f4efe9;
     --color-dark: #1c1917;
     --color-tertiary: #3f5b2a;
+    /* Plakietki trybów leżą na ciemnym zdjęciu lokalu, więc mają te same kolory w obu motywach. */
+    --color-seats-bg: #e7eddf;
+    --color-seats-text: #3f5b2a;
+    --color-exclusive-bg: #f6e3d9;
+    --color-exclusive-text: #8f4122;
     --color-on-dark: #ffffff;
     --color-on-dark-muted: #e7e1d9;
     --color-focus: #b4532a;

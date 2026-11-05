@@ -1,0 +1,286 @@
+/* Odkrywaj: pasek celu i trybu, pod nim mapa obok kolumny kart lokali. Na telefonie rolki albo mapa. */
+
+.filters {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem 1.25rem;
+    padding: 0.875rem var(--space-2);
+    border-bottom: 1px solid var(--color-border-subtle);
+    background: var(--color-surface-muted);
+}
+
+.filters ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-1);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.chip,
+.segmented a,
+.view-switch a {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    height: 2.25rem;
+    padding: 0 0.875rem;
+    border-radius: var(--radius-pill);
+    color: var(--color-text);
+    font-size: 0.875rem;
+    font-weight: 500;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.chip {
+    border: 1px solid var(--color-border);
+    background: var(--color-surface);
+}
+
+/* Wybrany cel ma odwrócone kolory – w obu motywach tło w kolorze tekstu. */
+.chip[aria-current] {
+    border-color: var(--color-text);
+    background: var(--color-text);
+    color: var(--color-bg);
+    font-weight: 600;
+}
+
+.segmented,
+.view-switch {
+    display: flex;
+    gap: 0;
+    padding: 3px;
+    border-radius: var(--radius-pill);
+    background: var(--color-chip);
+}
+
+.segmented a {
+    height: 2rem;
+    color: var(--color-muted);
+}
+
+.segmented a[aria-current] {
+    background: var(--color-surface);
+    color: var(--color-text);
+    font-weight: 600;
+}
+
+.map {
+    background: var(--color-chip);
+}
+
+.map__canvas {
+    height: 100%;
+}
+
+.map__missing {
+    margin: 0;
+    padding: var(--space-3);
+    color: var(--color-muted);
+}
+
+.map-pin {
+    padding: 0.4375rem 0.75rem;
+    border: 1px solid var(--color-border-subtle);
+    border-radius: var(--radius-pill);
+    background: var(--color-surface);
+    color: var(--color-text);
+    box-shadow: var(--shadow-selected);
+    font-size: 0.8125rem;
+    font-weight: 600;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+/* „Ogonek” pinezki wskazuje miejsce na mapie. */
+.map-pin::after {
+    content: "";
+    position: absolute;
+    bottom: -5px;
+    left: calc(50% - 5px);
+    width: 10px;
+    height: 10px;
+    background: inherit;
+    transform: rotate(45deg);
+}
+
+.map-pin:hover,
+.map-pin--active {
+    z-index: 1;
+    background: var(--color-primary);
+    color: var(--color-on-brand);
+}
+
+.reels {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-2);
+    background: var(--color-dark);
+}
+
+.reels__empty {
+    color: var(--color-on-dark-muted);
+}
+
+.venue-card {
+    position: relative;
+    flex: none;
+    width: min(100%, 22rem);
+    height: 34rem;
+    overflow: hidden;
+    border-radius: 1.25rem;
+    color: var(--color-on-dark);
+    scroll-snap-align: start;
+}
+
+.venue-card__image {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Gradient przyciemnia dół zdjęcia, żeby biały tekst miał wystarczający kontrast. */
+.venue-card::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgb(28 25 23 / 0%) 40%, rgb(28 25 23 / 95%) 100%);
+}
+
+.venue-card__info {
+    position: absolute;
+    right: var(--space-2);
+    bottom: var(--space-2);
+    left: var(--space-2);
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+}
+
+.venue-card__info h2 {
+    font-size: 1.875rem;
+}
+
+.venue-card__info p {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    margin: 0;
+    color: var(--color-on-dark-muted);
+    font-size: 0.875rem;
+}
+
+.venue-card__offers {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.375rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.badge {
+    padding: 0.3125rem 0.625rem;
+    border-radius: var(--radius-pill);
+    font-size: 0.8125rem;
+    font-weight: 600;
+}
+
+.badge--seats {
+    background: var(--color-seats-bg);
+    color: var(--color-seats-text);
+}
+
+.badge--exclusive {
+    background: var(--color-exclusive-bg);
+    color: var(--color-exclusive-text);
+}
+
+.venue-card .button {
+    min-height: 3rem;
+}
+
+/* Telefon: przełącznik „Rolki / Mapa”, a mapa jest widoczna tylko po kliknięciu „Mapa” (#map w adresie). */
+@media (max-width: 47.9375rem) {
+    .filters {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        scrollbar-width: none;
+    }
+
+    .filters ul {
+        flex-wrap: nowrap;
+    }
+
+    .view-switch {
+        width: max-content;
+        margin: var(--space-2) auto 0;
+    }
+
+    .view-switch__reels,
+    .discover:has(.map:target) .view-switch__map {
+        background: var(--color-surface);
+        font-weight: 600;
+    }
+
+    .discover:has(.map:target) .view-switch__reels {
+        background: none;
+        font-weight: 500;
+    }
+
+    .map {
+        display: none;
+        height: calc(100svh - 14rem);
+        margin-top: var(--space-2);
+    }
+
+    .map:target {
+        display: block;
+    }
+
+    .discover:has(.map:target) .reels {
+        display: none;
+    }
+
+    .reels {
+        margin-top: var(--space-2);
+    }
+}
+
+/* Komputer i tablet: mapa (3 części szerokości) obok przewijanej kolumny kart (2 części). */
+@media (min-width: 48rem) {
+    .filters {
+        padding: 0.875rem var(--space-4);
+    }
+
+    .view-switch {
+        display: none;
+    }
+
+    .discover__results {
+        display: flex;
+        height: 48.75rem;
+    }
+
+    .map {
+        flex: 3;
+    }
+
+    .reels {
+        flex: 2;
+        overflow-y: auto;
+        scroll-snap-type: y mandatory;
+    }
+
+    .venue-card {
+        height: 38.75rem;
+    }
+}
