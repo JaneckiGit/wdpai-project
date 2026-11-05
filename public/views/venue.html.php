@@ -1,10 +1,16 @@
 <?php
-$purposeLabels = [
-    'work' => 'Praca',
-    'meetings' => 'Spotkania i szkolenia',
-    'shoots' => 'Sesje foto i wideo',
-    'events' => 'Kameralne wydarzenia',
-];
+$purposes = require __DIR__ . '/partials/purposes.php';
+
+// Cele, na które gospodarz nie pozwala – do zdania pod listą dozwolonych celów.
+$deniedPurposes = [];
+foreach ($purposes as $value => [$label]) {
+    if (!in_array($value, $venue['purposes'], true)) {
+        $deniedPurposes[] = mb_strtolower($label);
+    }
+}
+
+// Inicjały gospodarza w kółku: pierwsza litera każdego słowa.
+$hostInitials = implode('', array_map(static fn (string $word): string => mb_substr($word, 0, 1), explode(' ', $venue['host'])));
 ?>
 <?php require __DIR__ . '/partials/header.html.php'; ?>
 
@@ -19,18 +25,42 @@ $purposeLabels = [
         </ol>
     </nav>
 
+    <h1><?= htmlspecialchars($venue['name']) ?></h1>
+    <p class="venue__address">
+        <i class="fa-solid fa-location-dot" aria-hidden="true"></i>
+        <?= htmlspecialchars($venue['district'] . ', ' . $venue['address']) ?>
+    </p>
+
     <div class="venue__layout">
+        <section class="venue__media" aria-label="Zdjęcia i rolki">
+            <!-- TODO: Laboratorium 13 – wideo rolki gospodarza i rolek najemców zamiast samej ilustracji. -->
+            <figure class="reel reel--host">
+                <img src="/images/login-hero.svg" alt="">
+                <figcaption><?= htmlspecialchars($venue['reelTitle']) ?></figcaption>
+            </figure>
+
+            <?php if ($venue['reels'] !== []): ?>
+                <h2>Nagrane tutaj</h2>
+                <p class="venue__muted">Rolki najemców po wizycie</p>
+                <ul class="reels-grid">
+                    <?php foreach ($venue['reels'] as [$purpose, $author]): ?>
+                        <li class="reel">
+                            <img src="/images/login-hero.svg" alt="">
+                            <span><strong><?= htmlspecialchars($purpose) ?></strong><?= htmlspecialchars($author) ?></span>
+                        </li>
+                    <?php endforeach; ?>
+                </ul>
+            <?php endif; ?>
+        </section>
+
         <div class="venue__details">
-            <header>
-                <h1><?= htmlspecialchars($venue['name']) ?></h1>
-                <p><?= htmlspecialchars($venue['district'] . ', ' . $venue['address']) ?></p>
-            </header>
-
-            <img class="venue__image" src="/images/login-hero.svg" alt="">
-
-            <section>
-                <h2>Gospodarz</h2>
-                <p><strong><?= htmlspecialchars($venue['host']) ?></strong> · potwierdza prośby w ciągu 24 h</p>
+            <section class="host-card">
+                <span class="host-card__avatar" aria-hidden="true"><?= htmlspecialchars($hostInitials) ?></span>
+                <div>
+                    <p class="venue__muted">Gospodarz</p>
+                    <h2><?= htmlspecialchars($venue['host']) ?></h2>
+                    <p class="venue__muted">potwierdza prośby w ciągu 24 h</p>
+                </div>
             </section>
 
             <section>
@@ -40,74 +70,77 @@ $purposeLabels = [
 
             <section>
                 <h2>Dozwolone cele</h2>
-                <ul>
+                <ul class="purpose-list">
                     <?php foreach ($venue['purposes'] as $purpose): ?>
-                        <li><?= $purposeLabels[$purpose] ?></li>
+                        <li><i class="fa-solid <?= $purposes[$purpose][1] ?>" aria-hidden="true"></i> <?= $purposes[$purpose][0] ?></li>
                     <?php endforeach; ?>
                 </ul>
+                <?php if ($deniedPurposes !== []): ?>
+                    <p class="venue__muted">Gospodarz nie zezwala na: <?= implode(', ', $deniedPurposes) ?>.</p>
+                <?php endif; ?>
             </section>
 
             <section>
                 <h2>Oferta</h2>
-                <div class="offers">
-                    <?php if ($venue['seatPrice'] !== null): ?>
-                        <article class="offer">
-                            <h3>Miejsca do pracy</h3>
-                            <p><?= htmlspecialchars($venue['seatHours']) ?></p>
-                            <p><strong><?= $venue['seatPrice'] ?> zł/h</strong> za miejsce</p>
-                        </article>
-                    <?php endif; ?>
-                    <?php if ($venue['exclusivePrice'] !== null): ?>
-                        <article class="offer">
-                            <h3>Na wyłączność</h3>
-                            <p><?= htmlspecialchars($venue['exclusiveHours']) ?></p>
-                            <p><strong><?= $venue['exclusivePrice'] ?> zł/h</strong> za cały lokal</p>
-                        </article>
-                    <?php endif; ?>
-                </div>
+                <?php if ($venue['seatPrice'] !== null): ?>
+                    <article class="offer">
+                        <div>
+                            <span class="offer__badge offer__badge--seats"><i class="fa-solid fa-laptop" aria-hidden="true"></i> Miejsca do pracy</span>
+                            <h3><?= htmlspecialchars($venue['seatHours']) ?></h3>
+                            <p class="venue__muted"><?= $venue['seatCount'] ?> miejsc · rezerwujesz pojedyncze miejsca</p>
+                        </div>
+                        <p class="offer__price"><strong><?= $venue['seatPrice'] ?> zł/h</strong> za miejsce</p>
+                    </article>
+                <?php endif; ?>
+                <?php if ($venue['exclusivePrice'] !== null): ?>
+                    <article class="offer">
+                        <div>
+                            <span class="offer__badge offer__badge--exclusive"><i class="fa-solid fa-key" aria-hidden="true"></i> Na wyłączność</span>
+                            <h3><?= htmlspecialchars($venue['exclusiveHours']) ?></h3>
+                            <p class="venue__muted">do <?= $venue['capacity'] ?> osób · min. 2 h</p>
+                        </div>
+                        <p class="offer__price"><strong><?= $venue['exclusivePrice'] ?> zł/h</strong> za cały lokal</p>
+                    </article>
+                <?php endif; ?>
             </section>
 
             <section>
                 <h2>Udogodnienia</h2>
-                <ul>
-                    <?php foreach ($venue['amenities'] as $amenity): ?>
-                        <li><?= htmlspecialchars($amenity) ?></li>
+                <ul class="amenities">
+                    <?php foreach ($venue['amenities'] as [$icon, $name, $note]): ?>
+                        <li>
+                            <span class="icon-tile"><i class="fa-solid <?= $icon ?>" aria-hidden="true"></i></span>
+                            <span><strong><?= htmlspecialchars($name) ?></strong><?= htmlspecialchars($note) ?></span>
+                        </li>
                     <?php endforeach; ?>
                 </ul>
             </section>
 
-            <section>
-                <h2>Wejście do lokalu</h2>
-                <p><?= htmlspecialchars($venue['entry']) ?></p>
+            <section class="entry">
+                <span class="icon-tile"><i class="fa-solid fa-user-check" aria-hidden="true"></i></span>
+                <p><strong>Wejście: <?= htmlspecialchars($venue['entry']) ?></strong> Szczegóły wejścia zobaczysz po akceptacji rezerwacji.</p>
             </section>
-
-            <?php if ($venue['reels'] !== []): ?>
-                <section>
-                    <h2>Nagrane tutaj</h2>
-                    <p>Rolki najemców po wizycie</p>
-                    <!-- TODO: Laboratorium 13 – wideo rolek zamiast samych podpisów. -->
-                    <ul>
-                        <?php foreach ($venue['reels'] as $reel): ?>
-                            <li><?= htmlspecialchars($reel) ?></li>
-                        <?php endforeach; ?>
-                    </ul>
-                </section>
-            <?php endif; ?>
         </div>
 
         <aside class="reservation-panel" id="reservation" aria-labelledby="reservation-heading">
-            <h2 id="reservation-heading">Rezerwacja</h2>
+            <div class="reservation-panel__title">
+                <h2 id="reservation-heading">Rezerwacja</h2>
+                <?php if ($venue['seatPrice'] !== null): ?>
+                    <p><strong><?= $venue['seatPrice'] ?> zł/h</strong> za miejsce</p>
+                <?php endif; ?>
+            </div>
 
             <form action="/venues/<?= $venue['id'] ?>/reservations#reservation" method="post">
                 <?php require __DIR__ . '/partials/form-errors.html.php'; ?>
 
-                <fieldset>
-                    <legend>Tryb</legend>
+                <!-- Przełącznik trybu to dwa pola radio; wybrane pole wyróżnia selektor :has(:checked). -->
+                <fieldset class="mode-switch">
+                    <legend class="visually-hidden">Tryb rezerwacji</legend>
                     <?php if ($venue['seatPrice'] !== null): ?>
-                        <label class="checkbox"><input type="radio" name="mode" value="seats" <?= $form->mode === 'seats' ? 'checked' : '' ?>> Miejsce do pracy · <?= $venue['seatPrice'] ?> zł/h</label>
+                        <label><input type="radio" name="mode" value="seats" <?= $form->mode === 'seats' ? 'checked' : '' ?>> <i class="fa-solid fa-laptop" aria-hidden="true"></i> Miejsce do pracy</label>
                     <?php endif; ?>
                     <?php if ($venue['exclusivePrice'] !== null): ?>
-                        <label class="checkbox"><input type="radio" name="mode" value="exclusive" <?= $form->mode === 'exclusive' ? 'checked' : '' ?>> Cały lokal · <?= $venue['exclusivePrice'] ?> zł/h</label>
+                        <label><input type="radio" name="mode" value="exclusive" <?= $form->mode === 'exclusive' ? 'checked' : '' ?>> <i class="fa-solid fa-key" aria-hidden="true"></i> Cały lokal</label>
                     <?php endif; ?>
                 </fieldset>
 
@@ -115,7 +148,7 @@ $purposeLabels = [
                     <label for="purpose">Cel</label>
                     <select id="purpose" name="purpose" <?= $form->invalidAttributes('purpose') ?>>
                         <?php foreach ($venue['purposes'] as $purpose): ?>
-                            <option value="<?= $purpose ?>" <?= $form->purpose === $purpose ? 'selected' : '' ?>><?= $purposeLabels[$purpose] ?></option>
+                            <option value="<?= $purpose ?>" <?= $form->purpose === $purpose ? 'selected' : '' ?>><?= $purposes[$purpose][0] ?></option>
                         <?php endforeach; ?>
                     </select>
                 </div>
@@ -125,24 +158,26 @@ $purposeLabels = [
                     <input type="date" id="date" name="date" value="<?= htmlspecialchars($form->date) ?>" min="<?= date('Y-m-d') ?>" required <?= $form->invalidAttributes('date') ?>>
                 </div>
 
-                <div class="reservation-panel__hours">
-                    <div class="field">
-                        <label for="time-from">Od godziny</label>
+                <fieldset class="field">
+                    <legend>Godziny</legend>
+                    <div class="reservation-panel__hours">
+                        <label class="visually-hidden" for="time-from">Od godziny</label>
                         <input type="time" id="time-from" name="from" value="<?= htmlspecialchars($form->from) ?>" step="3600" required <?= $form->invalidAttributes('from') ?>>
-                    </div>
-                    <div class="field">
-                        <label for="time-to">Do godziny</label>
+                        <span aria-hidden="true">–</span>
+                        <label class="visually-hidden" for="time-to">Do godziny</label>
                         <input type="time" id="time-to" name="to" value="<?= htmlspecialchars($form->to) ?>" step="3600" required <?= $form->invalidAttributes('to') ?>>
                     </div>
-                </div>
+                </fieldset>
 
-                <div class="field">
-                    <label for="seats">Liczba miejsc</label>
+                <div class="reservation-panel__seats">
+                    <label for="seats">Liczba miejsc <span class="venue__muted" id="seats-hint">maks. 4, tylko przy miejscach do pracy</span></label>
                     <input type="number" id="seats" name="seats" min="1" max="4" value="<?= htmlspecialchars($form->seats) ?>" <?= $form->invalidAttributes('seats', 'seats-hint') ?>>
-                    <p class="field__hint" id="seats-hint">Tylko przy miejscach do pracy, maks. 4</p>
                 </div>
 
-                <p class="field__hint">Gospodarz potwierdza w ciągu 24 h. Do tego czasu termin jest zarezerwowany dla Ciebie.</p>
+                <p class="reservation-panel__note">
+                    <i class="fa-solid fa-circle-info" aria-hidden="true"></i>
+                    Gospodarz potwierdza w ciągu 24 h. Do tego czasu termin jest zarezerwowany dla Ciebie.
+                </p>
 
                 <button class="button" type="submit">Wyślij prośbę o rezerwację</button>
             </form>
