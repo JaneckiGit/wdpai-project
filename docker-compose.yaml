@@ -31,6 +31,9 @@ services:
     build:
       context: .
       dockerfile: docker/php/Dockerfile
+    environment:
+      MAPBOX_TOKEN: ${MAPBOX_TOKEN:-}
+      MAPBOX_STYLE: ${MAPBOX_STYLE:-}
     volumes:
       - .:/app
     networks:

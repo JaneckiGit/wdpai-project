@@ -57,13 +57,14 @@ Gotowy jest szkielet MVC z laboratoriów oraz szablony HTML pięciu widoków z p
 | Projekty | Lista projektów i widok szczegółów projektu o podanym id (przykład z laboratorium) |
 | Logowanie | E-mail i hasło; walidacja i przekierowanie do Odkrywaj (bez sprawdzania hasła, które dojdzie w Laboratorium 9) |
 | Rejestracja | Formularz z walidacją po stronie serwera jak w Laboratorium 9; po poprawnym wysłaniu przekierowanie na logowanie z komunikatem (zapis konta w bazie w Laboratorium 9) |
-| Odkrywaj | Filtry w parametrach adresu (fraza, cel, tryb, data, godziny, liczba osób, cena) z walidacją, legenda mapy i rolki lokali |
+| Odkrywaj | Mapa Mapbox z pinezkami cen obok kolumny kart lokali; filtry celu i trybu jako linki (`?purpose=…&mode=…`) oraz fraza z wyszukiwarki w nagłówku; na telefonie przełącznik „Rolki / Mapa” |
+| Moje rezerwacje | Lista rezerwacji (lokal, termin, status) z przykładowych danych w `ReservationController`; „Anuluj rezerwację” wysyła POST i wraca z komunikatem |
 | Lokal i rezerwacja | Opis lokalu, cele, oferta, udogodnienia, opinie i formularz prośby o rezerwację z walidacją; id lokalu z adresu trafia do adresu formularza |
 | Panel gospodarza | Podsumowanie, prośby o rezerwację z działającymi przyciskami decyzji, kalendarz tygodnia w tabeli, komunikaty po przekierowaniu |
 | Dodaj lokal | Formularz w sześciu krokach z walidacją, w tym wykrywaniem nakładających się okien dostępności; szkic i wysłanie do weryfikacji |
 | Obsługa błędów | Kontrolowane odpowiedzi 400, 404, 422 i 500 (sekcja „Formularze i obsługa błędów”) |
 
-Widoki to semantyczny HTML. W pełni ostylowane są na razie widoki Logowanie i Rejestracja (Laboratorium 3, opis w sekcji „Style CSS”), pozostałe widoki mają tylko style bazowe (kolory, fonty, linki, fokus). Na każdej stronie działa motyw jasny i ciemny (Laboratorium 5, sekcja „Motyw jasny i ciemny”). Dane w widokach są przykładowe, wzięte z prototypu – listy oznaczone komentarzem `TODO` będą wyświetlane w pętli z danych z bazy. Formularze są sprawdzane po stronie serwera, ale aplikacja nie ma jeszcze bazy, więc poprawne dane nie są nigdzie zapisywane, a filtry nie zawężają listy lokali (Laboratoria 7–8). Pliki z formularza „Dodaj lokal” nie są jeszcze przetwarzane (Laboratorium 13), a przycisk „Dodaj okno” zadziała po dodaniu JavaScriptu (Laboratorium 10) – do tego czasu formularz w przeglądarce pokazuje jedno okno, a serwer obsługuje ich dowolnie wiele. Ochrona CSRF i sprawdzanie hasła dojdą w Laboratorium 9. Linki do zaplanowanych, jeszcze nieistniejących stron (np. `/reservations`, `/terms`) kończą się odpowiedzią 404. Przełącznika języka jeszcze nie ma.
+Widoki to semantyczny HTML. W pełni ostylowane są widoki Logowanie, Rejestracja, Odkrywaj i Moje rezerwacje oraz wspólny nagłówek z nawigacją i menu konta i stopka (opis w sekcji „Style CSS”), pozostałe widoki mają tylko style bazowe (kolory, fonty, linki, fokus). Na każdej stronie działa motyw jasny i ciemny (Laboratorium 5, sekcja „Motyw jasny i ciemny”). Dane w widokach są przykładowe, wzięte z prototypu – listy oznaczone komentarzem `TODO` będą wyświetlane w pętli z danych z bazy. Formularze są sprawdzane po stronie serwera, ale aplikacja nie ma jeszcze bazy, więc poprawne dane nie są nigdzie zapisywane (Laboratoria 7–8). Lokale w Odkrywaj to przykładowa tablica w `VenueController`, którą filtry naprawdę zawężają; w Laboratorium 8 zastąpi ją baza. Pliki z formularza „Dodaj lokal” nie są jeszcze przetwarzane (Laboratorium 13), a przycisk „Dodaj okno” zadziała po dodaniu JavaScriptu (Laboratorium 10) – do tego czasu formularz w przeglądarce pokazuje jedno okno, a serwer obsługuje ich dowolnie wiele. Ochrona CSRF i sprawdzanie hasła dojdą w Laboratorium 9. Linki do zaplanowanych, jeszcze nieistniejących stron (np. `/terms`, a w menu konta „Zmień hasło” i „Usuń konto”, które zadziałają w Laboratorium 9) kończą się odpowiedzią 404. Przełącznika języka jeszcze nie ma.
 
 ## Tech stack
 
@@ -90,6 +91,8 @@ docker compose exec php composer dump-autoload   # generuje vendor/autoload.php
 Katalog `vendor/` nie jest w repozytorium, więc bez `composer dump-autoload` aplikacja kończy się błędem `Fatal error` (brak `vendor/autoload.php`).
 
 Bez pliku `.env` zmienne `POSTGRES_*` i `PGADMIN_*` są puste (Docker Compose pokazuje tylko ostrzeżenia), więc baza i pgAdmin nie wystartują.
+
+**Mapa (Mapbox)** – mapa w Odkrywaj potrzebuje publicznego tokenu Mapbox (`pk.…`). Wpisz go w `.env` jako `MAPBOX_TOKEN`, a w `MAPBOX_STYLE` adres stylu z Mapbox Studio (domyślnie `mapbox://styles/mapbox/light-v11`), potem `docker compose up -d php`. Token jest widoczny w przeglądarce, więc w panelu Mapbox ogranicz go do adresów aplikacji (*URL restrictions*). Bez tokenu w miejscu mapy jest komunikat.
 
 ## Usługi
 
@@ -152,10 +155,10 @@ Bardziej szczegółowe reguły (`App\Controller\`, `App\Form\`) mają pierwszeń
 | Formularze | `src/forms/*Form.php` | Dane wpisane przez użytkownika i reguły ich walidacji |
 | Layout | `public/views/layout.html.php` | Wspólny dokument HTML: `<head>`, skrypt motywu, arkusze stylów (opcjonalny arkusz widoku ze zmiennej `$stylesheet`), przełącznik motywu, `theme.js` |
 | Widoki | `public/views/*.html.php` | Semantyczny HTML z danymi od kontrolera |
-| Wspólne fragmenty widoków | `public/views/partials/*.html.php` | Nagłówek z nawigacją, lewa kolumna logowania i rejestracji, stopka, lista błędów formularza i komunikat statusu, dołączane do widoków przez `require` |
+| Wspólne fragmenty widoków | `public/views/partials/*.html.php` | Nagłówek z nawigacją i menu konta, lewa kolumna logowania i rejestracji, stopka, lista błędów formularza i komunikat statusu, dołączane do widoków przez `require` |
 | Autoloader | `composer.json`, `vendor/autoload.php` | Wczytywanie plików klas na podstawie namespace |
 
-Nagłówek i stopka są wspólne dla wielu widoków, więc nie są kopiowane do każdego szablonu. Widok dołącza je instrukcją `<?php require __DIR__ . '/partials/header.html.php'; ?>`. Dołączony plik ma dostęp do tych samych zmiennych co widok, dlatego nagłówek korzysta ze zmiennej `$activeNav` przekazanej z kontrolera i oznacza bieżącą pozycję menu atrybutem `aria-current="page"`.
+Nagłówek i stopka są wspólne dla wielu widoków, więc nie są kopiowane do każdego szablonu. Widok dołącza je instrukcją `<?php require __DIR__ . '/partials/header.html.php'; ?>`. Dołączony plik ma dostęp do tych samych zmiennych co widok, dlatego nagłówek korzysta ze zmiennej `$activeNav` przekazanej z kontrolera i oznacza bieżącą pozycję menu atrybutem `aria-current="page"`. Działa to też w drugą stronę: nagłówek ustawia zmienną `$themeToggleInHeader`, a layout (wykonywany po widoku w tej samej metodzie `render()`) dołącza pływający przełącznik motywu tylko wtedy, gdy tej zmiennej nie ma.
 
 ## Routing
 
@@ -169,6 +172,8 @@ Nagłówek i stopka są wspólne dla wielu widoków, więc nie są kopiowane do 
 | GET | `/venues` | `VenueController::index` | `venues` (Odkrywaj) |
 | GET | `/venues/{id}` (`id` – tylko cyfry) | `VenueController::show` | `venue` (Lokal i rezerwacja) |
 | POST | `/venues/{id}/reservations` | `VenueController::requestReservation` | przekierowanie albo `venue` z błędami |
+| GET | `/reservations` | `ReservationController::index` | `reservations` (Moje rezerwacje) |
+| POST | `/reservations/{id}/cancel` | `ReservationController::cancel` | przekierowanie albo `error` (404) |
 | GET | `/host` | `HostController::dashboard` | `host-dashboard` (Panel gospodarza) |
 | GET, POST | `/host/venues/new` | `HostController::addVenue` | `add-venue` (Dodaj lokal) |
 | POST | `/host/requests/{id}` | `HostController::decideRequest` | przekierowanie albo `error` (400) |
@@ -179,7 +184,7 @@ Parametry zapytania (query parameters):
 | Adres | Parametry | Znaczenie |
 |---|---|---|
 | `/venues` | `q`, `purpose`, `mode`, `date`, `from`, `to`, `guests`, `maxPrice` | Wyszukiwanie i filtry, np. `/venues?q=Kazimierz&purpose=meetings&guests=4`; niepoprawne wartości dają status 400 i listę błędów |
-| `/host`, `/venues/{id}` | `status` | Komunikat po przekierowaniu, wybierany z listy dozwolonych; nieznana wartość jest ignorowana |
+| `/host`, `/venues/{id}`, `/reservations` | `status` | Komunikat po przekierowaniu, wybierany z listy dozwolonych; nieznana wartość jest ignorowana |
 
 Sprawdzenie z terminala:
 
@@ -218,7 +223,7 @@ Przepływ formularza (wzorzec Post/Redirect/Get):
 | `ReservationForm` | Prośba o rezerwację | Znany tryb i cel, data nie z przeszłości, pełne godziny, koniec po początku, minimum 2 h, 1–4 miejsca w trybie „Miejsca do pracy” |
 | `VenueForm` | Dodaj lokal | Szkic wymaga tylko nazwy. Wysłanie do weryfikacji: typ, adres, opis, co najmniej jeden cel, poprawne okna, instrukcja wejścia przy przekazaniu klucza |
 | `AvailabilityWindowForm` | Okno dostępności | Dni, godziny, tryb, liczba miejsc, cena, minimum godzin nie dłuższe niż okno; `overlaps()` wykrywa okna o wspólnym dniu i przecinających się godzinach |
-| `VenueFilterForm` | Filtry w Odkrywaj (GET) | Sprawdza tylko podane parametry: cel, tryb, data, godziny, liczba osób, cena |
+| `VenueFilterForm` | Filtry w Odkrywaj (GET) | Fraza do 100 znaków, cel i tryb z listy (domyślnie praca i miejsce do pracy) |
 
 | Status | Kiedy |
 |---|---|
@@ -236,10 +241,13 @@ Dane wyświetlane z powrotem w HTML przechodzą przez `htmlspecialchars()`, wię
 
 | Plik | Zawartość |
 |---|---|
-| `public/css/style.css` | Zmienne CSS (tokeny projektu w wariancie jasnym i ciemnym), `box-sizing`, typografia, linki, fokus oraz wspólne komponenty: logo, przycisk, pola formularza z podpowiedzią, pole wyboru (checkbox), stopka, przełącznik motywu |
+| `public/css/style.css` | Zmienne CSS (tokeny projektu w wariancie jasnym i ciemnym), `box-sizing`, typografia, linki, fokus oraz wspólne komponenty: logo, przycisk, pola formularza z podpowiedzią, pole wyboru (checkbox), nagłówek z nawigacją (na telefonie dolny pasek) i menu konta pod avatarem (atrybut `popover` – otwieranie i zamykanie bez JavaScriptu), stopka, przełącznik motywu, klasa `visually-hidden` |
 | `public/css/login.css` | Układ widoków Logowanie i Rejestracja (dołączany przez layout, gdy kontroler przekaże `'stylesheet' => 'login'`) |
+| `public/css/venues.css` | Układ widoku Odkrywaj: pasek celu i trybu, mapa, karty lokali, przełącznik „Rolki / Mapa” na telefonie |
+| `public/css/reservations.css` | Lista kart w Moich rezerwacjach i kolory statusów |
 | `public/js/theme.js` | Przełączanie i zapamiętywanie motywu |
-| `public/images/login-hero.svg` | Ilustracja z prototypu w lewej kolumnie logowania |
+| `public/js/map.js` | Mapa Mapbox: pinezki z ceną z atrybutu `data-venues`, wbudowane przyciski przybliżania i lokalizacji, wyróżnienie pinezki lokalu z karty widocznej w kolumnie (`IntersectionObserver`), przeliczenie rozmiaru po pokazaniu mapy na telefonie (`ResizeObserver`) |
+| `public/images/login-hero.svg` | Ilustracja z prototypu w lewej kolumnie logowania; na razie także obraz każdego lokalu w Odkrywaj i avatar (twarz Anny wycięta przez `background-position`) |
 
 Kolory, fonty, odstępy i zaokrąglenia są zapisane raz w `:root` jako zmienne nazwane według roli (np. `--color-primary`, `--color-muted`, `--space-2`, `--radius`), a reguły odwołują się do nich przez `var()`. Wartości pochodzą z prototypu: kolor marki `#B4532A`, tekst `#1C1917`, tło `#F4EFE9`, nagłówki w kroju Newsreader, tekst w Inter (oba z Google Fonts).
 
@@ -292,9 +300,10 @@ Obraz PHP zawiera moduły `pdo_pgsql`, `pgsql`, `gd` (z JPEG), `zip`, `bcmath`, 
 
 ## Różnice względem konfiguracji z laboratorium
 
-Pliki `docker-compose.yaml`, `docker/php/Dockerfile` i `docker/nginx/*` są zgodne z instrukcjami z laboratorium, z dwoma wyjątkami:
+Pliki `docker-compose.yaml`, `docker/php/Dockerfile` i `docker/nginx/*` są zgodne z instrukcjami z laboratorium, z trzema wyjątkami:
 
 - z usługi `ollama` usunięto `gpus: all`, bo Docker Desktop na macOS zwraca błąd `could not select device driver "" with capabilities: [[gpu]]` i kontener nie startuje;
+- usługa `php` dostaje `MAPBOX_TOKEN` i `MAPBOX_STYLE` z `.env` (`environment`, jak `db` dostaje `POSTGRES_*`); PHP odczytuje je przez `getenv()`, więc token nie trafia do repozytorium;
 - usługa `ollama` i wolumen `ollama_data` są zakomentowane – uruchamianie modeli językowych w kontenerze (na CPU) wymaga kilku GB pamięci RAM, a Docker ma na tym komputerze do dyspozycji 7,7 GB. Usługa została dodana i uruchomiona zgodnie z zadaniem, a następnie wyłączona.
 
 `docker/db/Dockerfile` (`FROM postgres:17-alpine`) jest wymagany przez `docker-compose.yaml`, ale instrukcja nie podaje jego treści.
@@ -316,7 +325,7 @@ Motyw z Laboratorium 5 korzysta 1:1 z kodu instrukcji: skrypt w `<head>`, znaczn
 - przełącznik używa ikon Font Awesome (`fa-moon`, `fa-sun`), więc layout dołącza Font Awesome 6.7.2 z cdnjs;
 - wartości tokenów pochodzą z palety PoGodzinach, nie z projektu referencyjnego; `--color-focus` jest pełnym kolorem zamiast koloru z 35% krycia (ten miał na tle kontrast poniżej 3:1), a `--color-primary` jest taki sam w obu motywach, bo biały tekst na `#B4532A` ma 5:1;
 - ogólnej reguły `button { background: var(--color-primary) }` z kroku 4 nie dodano – przyciski są stylowane klasami (`.button`, `.theme-toggle`), a reguła zmieniłaby też np. przycisk wyszukiwarki;
-- przełącznik ma na razie `position: fixed` (wariant z instrukcji dla projektu bez ostylowanej nawigacji); po ostylowaniu nagłówka trafi do nawigacji.
+- przełącznik ma `position: fixed` (wariant z instrukcji) na wszystkich stronach – nagłówek zostawia mu miejsce z prawej strony.
 
 Materiały Laboratorium 6 omawiają podstawy PHP i programowanie obiektowe, ale nie zawierają kodu formularzy, więc jego struktura (`src/forms/`, klasa abstrakcyjna `Form`, stałe klas, dziedziczenie) jest własnym rozwiązaniem. Elementy z późniejszych instrukcji użyte wcześniej, żeby nie zmieniać ich potem:
 
@@ -352,8 +361,8 @@ Wynikają z konfiguracji z laboratorium, do rozwiązania w kolejnych etapach:
 │   └── php/              # obraz PHP-FPM z rozszerzeniami
 ├── public/               # katalog publiczny (document root Nginx)
 │   ├── index.php         # Front Controller – jedyny punkt wejścia
-│   ├── css/              # arkusze stylów (style.css – wspólny, login.css – logowanie i rejestracja)
-│   ├── js/               # skrypty (theme.js – motyw jasny i ciemny)
+│   ├── css/              # arkusze stylów (style.css – wspólny, login.css – logowanie i rejestracja, venues.css – Odkrywaj, reservations.css – Moje rezerwacje)
+│   ├── js/               # skrypty (theme.js – motyw, map.js – mapa w Odkrywaj)
 │   ├── images/           # obrazy używane w stylach
 │   └── views/            # layout.html.php i szablony widoków (*.html.php)
 │       └── partials/     # wspólny nagłówek i stopka

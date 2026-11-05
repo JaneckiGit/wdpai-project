@@ -18,9 +18,15 @@
     --color-surface-selected: #fcf3ee;
     --color-chip: #ece6df;
     --color-border: #ddd5cc;
+    --color-border-subtle: #e7e1d9;
     --color-border-strong: #8a837c;
     --color-bg: #f4efe9;
     --color-dark: #1c1917;
+    /* Plakietki trybów leżą na ciemnym zdjęciu lokalu, więc mają te same kolory w obu motywach. */
+    --color-seats-bg: #e7eddf;
+    --color-seats-text: #3f5b2a;
+    --color-exclusive-bg: #f6e3d9;
+    --color-exclusive-text: #8f4122;
     --color-on-dark: #ffffff;
     --color-on-dark-muted: #e7e1d9;
     --color-focus: #b4532a;
@@ -54,6 +60,7 @@ html[data-theme="dark"] {
     --color-surface-selected: #3a2417;
     --color-chip: #2e2925;
     --color-border: #3d3631;
+    --color-border-subtle: #332d29;
     --color-bg: #161311;
     --color-focus: #e8916a;
     --color-danger-bg: #3f1515;
@@ -151,6 +158,19 @@ input:focus-visible {
     stroke-linejoin: round;
 }
 
+/* Tekst tylko dla czytnika ekranu – np. etykieta pola, które w prototypie opisuje ikona. */
+.visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+    border: 0;
+}
+
 .icon {
     flex: none;
     fill: none;
@@ -171,11 +191,14 @@ input:focus-visible {
     background: var(--color-primary);
     color: var(--color-on-brand);
     font-weight: 600;
+    text-decoration: none;
     cursor: pointer;
 }
 
+/* Kolor tekstu jest powtórzony, bo przycisk może być linkiem, a a:hover zmienia kolor linków. */
 .button:hover {
     background: var(--color-primary-hover);
+    color: var(--color-on-brand);
 }
 
 .field {
@@ -333,4 +356,272 @@ input[aria-invalid="true"],
 select[aria-invalid="true"],
 textarea[aria-invalid="true"] {
     border-color: var(--color-danger-text);
+}
+
+/* Nagłówek strony – na telefonie logo i avatar, a nawigacja jest dolnym paskiem z ikonami.
+   Prawy margines zostawia miejsce na pływający przełącznik motywu. */
+.site-header {
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+    min-height: 4.75rem;
+    padding: 0 4.5rem 0 var(--space-2);
+    border-bottom: 1px solid var(--color-border-subtle);
+    background: var(--color-surface-muted);
+}
+
+.site-header__brand {
+    margin-right: auto;
+}
+
+.site-search {
+    display: none;
+}
+
+/* Avatar to twarz Anny z ilustracji logowania: obraz 3:4 w rozmiarze 300×400 px przesunięty tak, że w kółku widać twarz. */
+.avatar {
+    flex: none;
+    width: 2.5rem;
+    height: 2.5rem;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: url("/images/login-hero.svg") -130px -210px / 300px 400px;
+    cursor: pointer;
+}
+
+/* Menu konta (popover) przeglądarka wyświetla nad stroną – ustawiamy je pod avatarem. */
+.account-menu {
+    position: absolute;
+    inset: 4rem 1rem auto auto;
+    width: 17rem;
+    margin: 0;
+    padding: 0.5rem;
+    border: 1px solid var(--color-border-subtle);
+    border-radius: var(--radius);
+    background: var(--color-surface);
+    color: var(--color-text);
+    box-shadow: var(--shadow-soft);
+}
+
+.account-menu__user {
+    display: flex;
+    gap: 0.75rem;
+    padding: 0.5rem 0.5rem 0.75rem;
+    border-bottom: 1px solid var(--color-border-subtle);
+}
+
+.account-menu p {
+    margin: 0;
+}
+
+.account-menu__name {
+    font-weight: 600;
+}
+
+.account-menu__email {
+    color: var(--color-muted);
+    font-size: 0.8125rem;
+}
+
+.account-menu__role {
+    display: inline-block;
+    margin-top: 0.375rem;
+    padding: 0.125rem 0.5rem;
+    border-radius: var(--radius-pill);
+    background: var(--color-chip);
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.account-menu a {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    height: 2.75rem;
+    padding: 0 0.625rem;
+    border-radius: 0.625rem;
+    color: var(--color-text);
+    font-size: 0.875rem;
+    font-weight: 500;
+    text-decoration: none;
+}
+
+.account-menu a:hover {
+    background: var(--color-surface-muted);
+}
+
+.account-menu .account-menu__danger {
+    color: var(--color-danger-text);
+}
+
+.account-menu hr {
+    margin: 0.375rem 0;
+    border: 0;
+    border-top: 1px solid var(--color-border-subtle);
+}
+
+.site-nav {
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 20;
+    border-top: 1px solid var(--color-border-subtle);
+    background: var(--color-surface-muted);
+}
+
+.site-nav ul {
+    display: flex;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.site-nav li {
+    flex: 1;
+}
+
+.site-nav__link {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25rem;
+    height: 4.5rem;
+    color: var(--color-muted);
+    font-size: 0.75rem;
+    font-weight: 500;
+    text-decoration: none;
+}
+
+.site-nav__icon {
+    display: grid;
+    place-items: center;
+    width: 3.5rem;
+    height: 1.875rem;
+    border-radius: var(--radius-pill);
+    font-size: 1.125rem;
+}
+
+.site-nav__link[aria-current="page"] {
+    color: var(--color-text);
+    font-weight: 600;
+}
+
+.site-nav__link[aria-current="page"] .site-nav__icon {
+    background: var(--color-primary);
+    color: var(--color-on-brand);
+}
+
+/* display: none ukrywa też przed czytnikiem ekranu, więc pełna i krótka etykieta nie są czytane razem. */
+.site-nav__label-long {
+    display: none;
+}
+
+/* Dolny pasek nawigacji nie może zasłaniać końca strony. */
+body:has(.site-nav) {
+    padding-bottom: 4.5rem;
+}
+
+body > .site-footer {
+    padding: var(--space-2) 1.25rem;
+    border-top: 1px solid var(--color-border-subtle);
+    background: var(--color-surface-muted);
+}
+
+/* Od 48rem (768 px) nawigacja wraca do nagłówka, obok wyszukiwarki. */
+@media (min-width: 48rem) {
+    .site-header {
+        flex-wrap: wrap;
+        gap: 0.75rem 1.75rem;
+        padding: 0.875rem 4.5rem 0.875rem var(--space-4);
+    }
+
+    .site-header__brand {
+        margin-right: 0;
+        font-size: 1.5625rem;
+    }
+
+    .site-header__brand .brand__mark {
+        width: 2rem;
+        height: 2rem;
+    }
+
+    .site-search {
+        position: relative;
+        display: block;
+        flex: 1 1 16.25rem;
+        max-width: 25rem;
+    }
+
+    .site-search__icon {
+        position: absolute;
+        top: 0.8125rem;
+        left: var(--space-2);
+        color: var(--color-muted);
+    }
+
+    .site-search input {
+        width: 100%;
+        height: 2.75rem;
+        padding: 0 var(--space-2) 0 2.75rem;
+        border: 1px solid var(--color-border);
+        border-radius: var(--radius-pill);
+        background: var(--color-chip);
+        font-size: 0.9375rem;
+    }
+
+    .site-search input::placeholder {
+        color: var(--color-muted);
+        opacity: 1;
+    }
+
+    .site-nav {
+        position: static;
+        margin-left: auto;
+        border: 0;
+        background: none;
+    }
+
+    .site-nav ul {
+        flex-wrap: wrap;
+        gap: 0.25rem;
+    }
+
+    .site-nav__link {
+        display: block;
+        height: auto;
+        padding: 0.625rem 0.875rem;
+        color: var(--color-text);
+        font-size: 0.9375rem;
+        line-height: 1.5;
+        white-space: nowrap;
+    }
+
+    .site-nav__link:hover {
+        color: var(--color-link);
+    }
+
+    .site-nav__link[aria-current="page"] {
+        color: var(--color-link);
+        box-shadow: inset 0 -2px 0 var(--color-primary);
+    }
+
+    .site-nav__icon,
+    .site-nav__label-short {
+        display: none;
+    }
+
+    .site-nav__label-long {
+        display: inline;
+    }
+
+    body:has(.site-nav) {
+        padding-bottom: 0;
+    }
+
+    body > .site-footer {
+        padding: var(--space-2) var(--space-4);
+    }
 }

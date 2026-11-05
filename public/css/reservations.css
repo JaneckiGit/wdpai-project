@@ -1,0 +1,74 @@
+/* Moje rezerwacje: lista kart z nazwą lokalu, terminem i statusem jeden pod drugim. */
+.reservations {
+    max-width: 45rem;
+    margin: 0 auto;
+    padding: var(--space-3) var(--space-2);
+}
+
+.reservation-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    margin: var(--space-2) 0 0;
+    padding: 0;
+    list-style: none;
+}
+
+.reservations .status-message {
+    margin-top: var(--space-2);
+}
+
+.reservation {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.375rem;
+    padding: var(--space-2);
+    border: 1px solid var(--color-border-subtle);
+    border-radius: var(--radius);
+    background: var(--color-surface);
+}
+
+.reservation a {
+    font-weight: 600;
+}
+
+.reservation__date {
+    color: var(--color-muted);
+    font-size: 0.875rem;
+}
+
+.reservation__status {
+    padding: 0.375rem 0.75rem;
+    border-radius: var(--radius-pill);
+    font-size: 0.8125rem;
+    font-weight: 600;
+}
+
+/* Przycisk anulowania wygląda jak link, żeby nie konkurował z kartą. */
+.reservation button {
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--color-danger-text);
+    font: inherit;
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.reservation__status--pending {
+    background: var(--color-exclusive-bg);
+    color: var(--color-exclusive-text);
+}
+
+.reservation__status--accepted {
+    background: var(--color-success-bg);
+    color: var(--color-success-text);
+}
+
+.reservation__status--rejected {
+    background: var(--color-danger-bg);
+    color: var(--color-danger-text);
+}
