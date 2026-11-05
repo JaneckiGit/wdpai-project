@@ -58,12 +58,13 @@ Gotowy jest szkielet MVC z laboratoriów oraz szablony HTML pięciu widoków z p
 | Logowanie | E-mail i hasło; walidacja i przekierowanie do Odkrywaj (bez sprawdzania hasła, które dojdzie w Laboratorium 9) |
 | Rejestracja | Formularz z walidacją po stronie serwera jak w Laboratorium 9; po poprawnym wysłaniu przekierowanie na logowanie z komunikatem (zapis konta w bazie w Laboratorium 9) |
 | Odkrywaj | Mapa Mapbox z pinezkami cen obok kolumny kart lokali; filtry celu i trybu jako linki (`?purpose=…&mode=…`) oraz fraza z wyszukiwarki w nagłówku; na telefonie przełącznik „Rolki / Mapa” |
+| Moje rezerwacje | Lista rezerwacji (lokal, termin, status) z przykładowych danych w `ReservationController`; „Anuluj rezerwację” wysyła POST i wraca z komunikatem |
 | Lokal i rezerwacja | Opis lokalu, cele, oferta, udogodnienia, opinie i formularz prośby o rezerwację z walidacją; id lokalu z adresu trafia do adresu formularza |
 | Panel gospodarza | Podsumowanie, prośby o rezerwację z działającymi przyciskami decyzji, kalendarz tygodnia w tabeli, komunikaty po przekierowaniu |
 | Dodaj lokal | Formularz w sześciu krokach z walidacją, w tym wykrywaniem nakładających się okien dostępności; szkic i wysłanie do weryfikacji |
 | Obsługa błędów | Kontrolowane odpowiedzi 400, 404, 422 i 500 (sekcja „Formularze i obsługa błędów”) |
 
-Widoki to semantyczny HTML. W pełni ostylowane są widoki Logowanie, Rejestracja i Odkrywaj oraz wspólny nagłówek z nawigacją i stopka (opis w sekcji „Style CSS”), pozostałe widoki mają tylko style bazowe (kolory, fonty, linki, fokus). Na każdej stronie działa motyw jasny i ciemny (Laboratorium 5, sekcja „Motyw jasny i ciemny”). Dane w widokach są przykładowe, wzięte z prototypu – listy oznaczone komentarzem `TODO` będą wyświetlane w pętli z danych z bazy. Formularze są sprawdzane po stronie serwera, ale aplikacja nie ma jeszcze bazy, więc poprawne dane nie są nigdzie zapisywane (Laboratoria 7–8). Lokale w Odkrywaj to przykładowa tablica w `VenueController`, którą filtry naprawdę zawężają; w Laboratorium 8 zastąpi ją baza. Pliki z formularza „Dodaj lokal” nie są jeszcze przetwarzane (Laboratorium 13), a przycisk „Dodaj okno” zadziała po dodaniu JavaScriptu (Laboratorium 10) – do tego czasu formularz w przeglądarce pokazuje jedno okno, a serwer obsługuje ich dowolnie wiele. Ochrona CSRF i sprawdzanie hasła dojdą w Laboratorium 9. Linki do zaplanowanych, jeszcze nieistniejących stron (np. `/reservations`, `/terms`) kończą się odpowiedzią 404. Przełącznika języka jeszcze nie ma.
+Widoki to semantyczny HTML. W pełni ostylowane są widoki Logowanie, Rejestracja, Odkrywaj i Moje rezerwacje oraz wspólny nagłówek z nawigacją i menu konta i stopka (opis w sekcji „Style CSS”), pozostałe widoki mają tylko style bazowe (kolory, fonty, linki, fokus). Na każdej stronie działa motyw jasny i ciemny (Laboratorium 5, sekcja „Motyw jasny i ciemny”). Dane w widokach są przykładowe, wzięte z prototypu – listy oznaczone komentarzem `TODO` będą wyświetlane w pętli z danych z bazy. Formularze są sprawdzane po stronie serwera, ale aplikacja nie ma jeszcze bazy, więc poprawne dane nie są nigdzie zapisywane (Laboratoria 7–8). Lokale w Odkrywaj to przykładowa tablica w `VenueController`, którą filtry naprawdę zawężają; w Laboratorium 8 zastąpi ją baza. Pliki z formularza „Dodaj lokal” nie są jeszcze przetwarzane (Laboratorium 13), a przycisk „Dodaj okno” zadziała po dodaniu JavaScriptu (Laboratorium 10) – do tego czasu formularz w przeglądarce pokazuje jedno okno, a serwer obsługuje ich dowolnie wiele. Ochrona CSRF i sprawdzanie hasła dojdą w Laboratorium 9. Linki do zaplanowanych, jeszcze nieistniejących stron (np. `/terms`, a w menu konta „Zmień hasło” i „Usuń konto”, które zadziałają w Laboratorium 9) kończą się odpowiedzią 404. Przełącznika języka jeszcze nie ma.
 
 ## Tech stack
 
@@ -152,9 +153,9 @@ Bardziej szczegółowe reguły (`App\Controller\`, `App\Form\`) mają pierwszeń
 | Kontroler bazowy | `src/controllers/AppController.php` | Wspólne renderowanie widoków i stron błędów, `isPost()`, `redirect()`, komunikaty statusu |
 | Kontrolery | `src/controllers/*Controller.php` | Wybór widoku i danych dla danej trasy, koordynacja formularza i przekierowania |
 | Formularze | `src/forms/*Form.php` | Dane wpisane przez użytkownika i reguły ich walidacji |
-| Layout | `public/views/layout.html.php` | Wspólny dokument HTML: `<head>`, skrypt motywu, arkusze stylów (opcjonalny arkusz widoku ze zmiennej `$stylesheet`), pływający przełącznik motywu na stronach bez nagłówka, `theme.js` |
+| Layout | `public/views/layout.html.php` | Wspólny dokument HTML: `<head>`, skrypt motywu, arkusze stylów (opcjonalny arkusz widoku ze zmiennej `$stylesheet`), przełącznik motywu, `theme.js` |
 | Widoki | `public/views/*.html.php` | Semantyczny HTML z danymi od kontrolera |
-| Wspólne fragmenty widoków | `public/views/partials/*.html.php` | Nagłówek z nawigacją, lewa kolumna logowania i rejestracji, stopka, przełącznik motywu, lista błędów formularza i komunikat statusu, dołączane do widoków przez `require` |
+| Wspólne fragmenty widoków | `public/views/partials/*.html.php` | Nagłówek z nawigacją i menu konta, lewa kolumna logowania i rejestracji, stopka, lista błędów formularza i komunikat statusu, dołączane do widoków przez `require` |
 | Autoloader | `composer.json`, `vendor/autoload.php` | Wczytywanie plików klas na podstawie namespace |
 
 Nagłówek i stopka są wspólne dla wielu widoków, więc nie są kopiowane do każdego szablonu. Widok dołącza je instrukcją `<?php require __DIR__ . '/partials/header.html.php'; ?>`. Dołączony plik ma dostęp do tych samych zmiennych co widok, dlatego nagłówek korzysta ze zmiennej `$activeNav` przekazanej z kontrolera i oznacza bieżącą pozycję menu atrybutem `aria-current="page"`. Działa to też w drugą stronę: nagłówek ustawia zmienną `$themeToggleInHeader`, a layout (wykonywany po widoku w tej samej metodzie `render()`) dołącza pływający przełącznik motywu tylko wtedy, gdy tej zmiennej nie ma.
@@ -171,6 +172,8 @@ Nagłówek i stopka są wspólne dla wielu widoków, więc nie są kopiowane do 
 | GET | `/venues` | `VenueController::index` | `venues` (Odkrywaj) |
 | GET | `/venues/{id}` (`id` – tylko cyfry) | `VenueController::show` | `venue` (Lokal i rezerwacja) |
 | POST | `/venues/{id}/reservations` | `VenueController::requestReservation` | przekierowanie albo `venue` z błędami |
+| GET | `/reservations` | `ReservationController::index` | `reservations` (Moje rezerwacje) |
+| POST | `/reservations/{id}/cancel` | `ReservationController::cancel` | przekierowanie albo `error` (404) |
 | GET | `/host` | `HostController::dashboard` | `host-dashboard` (Panel gospodarza) |
 | GET, POST | `/host/venues/new` | `HostController::addVenue` | `add-venue` (Dodaj lokal) |
 | POST | `/host/requests/{id}` | `HostController::decideRequest` | przekierowanie albo `error` (400) |
@@ -181,7 +184,7 @@ Parametry zapytania (query parameters):
 | Adres | Parametry | Znaczenie |
 |---|---|---|
 | `/venues` | `q`, `purpose`, `mode`, `date`, `from`, `to`, `guests`, `maxPrice` | Wyszukiwanie i filtry, np. `/venues?q=Kazimierz&purpose=meetings&guests=4`; niepoprawne wartości dają status 400 i listę błędów |
-| `/host`, `/venues/{id}` | `status` | Komunikat po przekierowaniu, wybierany z listy dozwolonych; nieznana wartość jest ignorowana |
+| `/host`, `/venues/{id}`, `/reservations` | `status` | Komunikat po przekierowaniu, wybierany z listy dozwolonych; nieznana wartość jest ignorowana |
 
 Sprawdzenie z terminala:
 
@@ -238,13 +241,13 @@ Dane wyświetlane z powrotem w HTML przechodzą przez `htmlspecialchars()`, wię
 
 | Plik | Zawartość |
 |---|---|
-| `public/css/style.css` | Zmienne CSS (tokeny projektu w wariancie jasnym i ciemnym), `box-sizing`, typografia, linki, fokus oraz wspólne komponenty: logo, przycisk, pola formularza z podpowiedzią, pole wyboru (checkbox), nagłówek z nawigacją (na telefonie dolny pasek), stopka, przełącznik motywu, klasa `visually-hidden` |
+| `public/css/style.css` | Zmienne CSS (tokeny projektu w wariancie jasnym i ciemnym), `box-sizing`, typografia, linki, fokus oraz wspólne komponenty: logo, przycisk, pola formularza z podpowiedzią, pole wyboru (checkbox), nagłówek z nawigacją (na telefonie dolny pasek) i menu konta pod avatarem (atrybut `popover` – otwieranie i zamykanie bez JavaScriptu), stopka, przełącznik motywu, klasa `visually-hidden` |
 | `public/css/login.css` | Układ widoków Logowanie i Rejestracja (dołączany przez layout, gdy kontroler przekaże `'stylesheet' => 'login'`) |
 | `public/css/venues.css` | Układ widoku Odkrywaj: pasek celu i trybu, mapa, karty lokali, przełącznik „Rolki / Mapa” na telefonie |
+| `public/css/reservations.css` | Lista kart w Moich rezerwacjach i kolory statusów |
 | `public/js/theme.js` | Przełączanie i zapamiętywanie motywu |
 | `public/js/map.js` | Mapa Mapbox: pinezki z ceną z atrybutu `data-venues`, wbudowane przyciski przybliżania i lokalizacji, wyróżnienie pinezki lokalu z karty widocznej w kolumnie (`IntersectionObserver`), przeliczenie rozmiaru po pokazaniu mapy na telefonie (`ResizeObserver`) |
-| `public/images/icons.svg` | Ikony z prototypu jako `<symbol>`, wstawiane przez `<use href="/images/icons.svg#…">` |
-| `public/images/venues/*.svg` | Ilustracje przykładowych lokali (Bar Lampion jest też tłem logowania) |
+| `public/images/login-hero.svg` | Ilustracja z prototypu w lewej kolumnie logowania; na razie także obraz każdego lokalu w Odkrywaj i avatar (twarz Anny wycięta przez `background-position`) |
 
 Kolory, fonty, odstępy i zaokrąglenia są zapisane raz w `:root` jako zmienne nazwane według roli (np. `--color-primary`, `--color-muted`, `--space-2`, `--radius`), a reguły odwołują się do nich przez `var()`. Wartości pochodzą z prototypu: kolor marki `#B4532A`, tekst `#1C1917`, tło `#F4EFE9`, nagłówki w kroju Newsreader, tekst w Inter (oba z Google Fonts).
 
@@ -271,7 +274,7 @@ Kolejność wyboru motywu:
 | Element | Plik | Działanie |
 |---|---|---|
 | Skrypt w `<head>` | `public/views/layout.html.php` | Ustawia `data-theme` przed pierwszym arkuszem stylów, więc strona nie miga jasnym motywem przed ciemnym (brak FOUC) |
-| Przełącznik | `public/views/partials/theme-toggle.html.php`, `.theme-toggle` w `style.css` | Element `<button>` obsługiwany myszą i klawiaturą (Tab, Enter, Spacja); `aria-label` i `aria-pressed` opisują stan. Ma dwie ikony SVG: pływający przycisk i nagłówek na telefonie pokazują działanie (księżyc włącza ciemny, słońce jasny), a nagłówek na komputerze obie opcje z wyróżnioną bieżącą |
+| Przełącznik | `public/views/layout.html.php`, `.theme-toggle` w `style.css` | Element `<button>` obsługiwany myszą i klawiaturą (Tab, Enter, Spacja); `aria-label` i `aria-pressed` opisują stan, ikona (Font Awesome) pokazuje działanie: księżyc włącza ciemny, słońce jasny |
 | Logika | `public/js/theme.js` | Przełącza motyw, zapisuje wybór, synchronizuje przycisk i podąża za systemem, dopóki nie ma zapisu |
 
 Kolor marki, przyciski, logo i ilustracja logowania są takie same w obu motywach. Powrót do ustawienia systemowego (np. przy testach): w konsoli przeglądarki `localStorage.removeItem('theme'); location.reload();`.
@@ -319,10 +322,10 @@ Style z Laboratorium 3 korzystają z przykładów z instrukcji (zmienne w `:root
 Motyw z Laboratorium 5 korzysta 1:1 z kodu instrukcji: skrypt w `<head>`, znaczniki i style przełącznika `.theme-toggle`, `public/js/theme.js` oraz nazwy tokenów (`--color-bg`, `--color-primary`, `--color-focus`, `--shadow-soft` … – tokeny z Laboratorium 3 zostały do nich przemianowane). Świadome różnice:
 
 - instrukcja zakłada wspólny `public/views/layout.html.php` z `<?= $content ?>`, którego projekt wcześniej nie miał – powstał, a `AppController::render()` buforuje widok i dołącza layout; widoki z Laboratorium 2 straciły przez to własne `<!doctype>`, `<head>` i `<body>` (treść bez zmian);
-- przełącznik ma dwie ikony SVG zamiast jednej ikony Font Awesome – nagłówek z prototypu pokazuje na komputerze obie opcje naraz; z `theme.js` usunięte są przez to trzy linie obsługujące ikonę (`themeIcon`), a layout nie dołącza Font Awesome;
+- przełącznik używa ikon Font Awesome (`fa-moon`, `fa-sun`), więc layout dołącza Font Awesome 6.7.2 z cdnjs;
 - wartości tokenów pochodzą z palety PoGodzinach, nie z projektu referencyjnego; `--color-focus` jest pełnym kolorem zamiast koloru z 35% krycia (ten miał na tle kontrast poniżej 3:1), a `--color-primary` jest taki sam w obu motywach, bo biały tekst na `#B4532A` ma 5:1;
 - ogólnej reguły `button { background: var(--color-primary) }` z kroku 4 nie dodano – przyciski są stylowane klasami (`.button`, `.theme-toggle`), a reguła zmieniłaby też np. przycisk wyszukiwarki;
-- na stronach z nagłówkiem przełącznik jest w nagłówku, a wariant `position: fixed` z instrukcji został na stronach bez nagłówka (Logowanie, strony błędów, przykłady z laboratorium).
+- przełącznik ma `position: fixed` (wariant z instrukcji) na wszystkich stronach – nagłówek zostawia mu miejsce z prawej strony.
 
 Materiały Laboratorium 6 omawiają podstawy PHP i programowanie obiektowe, ale nie zawierają kodu formularzy, więc jego struktura (`src/forms/`, klasa abstrakcyjna `Form`, stałe klas, dziedziczenie) jest własnym rozwiązaniem. Elementy z późniejszych instrukcji użyte wcześniej, żeby nie zmieniać ich potem:
 
@@ -358,11 +361,11 @@ Wynikają z konfiguracji z laboratorium, do rozwiązania w kolejnych etapach:
 │   └── php/              # obraz PHP-FPM z rozszerzeniami
 ├── public/               # katalog publiczny (document root Nginx)
 │   ├── index.php         # Front Controller – jedyny punkt wejścia
-│   ├── css/              # arkusze stylów (style.css – wspólny, login.css – logowanie i rejestracja, venues.css – Odkrywaj)
+│   ├── css/              # arkusze stylów (style.css – wspólny, login.css – logowanie i rejestracja, venues.css – Odkrywaj, reservations.css – Moje rezerwacje)
 │   ├── js/               # skrypty (theme.js – motyw, map.js – mapa w Odkrywaj)
-│   ├── images/           # ikony (icons.svg) i ilustracje lokali (venues/)
+│   ├── images/           # obrazy używane w stylach
 │   └── views/            # layout.html.php i szablony widoków (*.html.php)
-│       └── partials/     # nagłówek, stopka, przełącznik motywu, błędy formularza, komunikat statusu
+│       └── partials/     # wspólny nagłówek i stopka
 ├── src/
 │   ├── Routing.php       # router: trasy i dopasowanie adresów (App\Routing)
 │   ├── controllers/      # AppController i kontrolery aplikacji (App\Controller)
