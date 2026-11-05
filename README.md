@@ -155,7 +155,7 @@ Bardziej szczegółowe reguły (`App\Controller\`, `App\Form\`) mają pierwszeń
 | Formularze | `src/forms/*Form.php` | Dane wpisane przez użytkownika i reguły ich walidacji |
 | Layout | `public/views/layout.html.php` | Wspólny dokument HTML: `<head>`, skrypt motywu, arkusze stylów (opcjonalny arkusz widoku ze zmiennej `$stylesheet`), przełącznik motywu, `theme.js` |
 | Widoki | `public/views/*.html.php` | Semantyczny HTML z danymi od kontrolera |
-| Wspólne fragmenty widoków | `public/views/partials/*.html.php` | Nagłówek z nawigacją i menu konta, lewa kolumna logowania i rejestracji, stopka, lista błędów formularza i komunikat statusu, dołączane do widoków przez `require` |
+| Wspólne fragmenty widoków | `public/views/partials/*.html.php` | Nagłówek z nawigacją i menu konta, lewa kolumna logowania i rejestracji, stopka, lista błędów formularza, komunikat statusu oraz lista celów rezerwacji z etykietami i ikonami (`purposes.php`, wspólna dla Odkrywaj i strony lokalu), dołączane do widoków przez `require` |
 | Autoloader | `composer.json`, `vendor/autoload.php` | Wczytywanie plików klas na podstawie namespace |
 
 Nagłówek i stopka są wspólne dla wielu widoków, więc nie są kopiowane do każdego szablonu. Widok dołącza je instrukcją `<?php require __DIR__ . '/partials/header.html.php'; ?>`. Dołączony plik ma dostęp do tych samych zmiennych co widok, dlatego nagłówek korzysta ze zmiennej `$activeNav` przekazanej z kontrolera i oznacza bieżącą pozycję menu atrybutem `aria-current="page"`. Działa to też w drugą stronę: nagłówek ustawia zmienną `$themeToggleInHeader`, a layout (wykonywany po widoku w tej samej metodzie `render()`) dołącza pływający przełącznik motywu tylko wtedy, gdy tej zmiennej nie ma.
@@ -244,7 +244,7 @@ Dane wyświetlane z powrotem w HTML przechodzą przez `htmlspecialchars()`, wię
 | `public/css/style.css` | Zmienne CSS (tokeny projektu w wariancie jasnym i ciemnym), `box-sizing`, typografia, linki, fokus oraz wspólne komponenty: logo, przycisk, pola formularza z podpowiedzią, pole wyboru (checkbox), nagłówek z nawigacją (na telefonie dolny pasek) i menu konta pod avatarem (atrybut `popover` – otwieranie i zamykanie bez JavaScriptu), stopka, przełącznik motywu, klasa `visually-hidden` |
 | `public/css/login.css` | Układ widoków Logowanie i Rejestracja (dołączany przez layout, gdy kontroler przekaże `'stylesheet' => 'login'`) |
 | `public/css/venues.css` | Układ widoku Odkrywaj: pasek celu i trybu, mapa, karty lokali, przełącznik „Rolki / Mapa” na telefonie |
-| `public/css/venue.css` | Układ widoku Lokal i rezerwacja: na telefonie jedna kolumna, na komputerze opis obok formularza, który zostaje widoczny przy przewijaniu (`position: sticky`) |
+| `public/css/venue.css` | Widok Lokal i rezerwacja według prototypu: rolka i „Nagrane tutaj”, karta gospodarza, cele, karty ofert z plakietkami, udogodnienia, wejście i panel rezerwacji z przełącznikiem trybu (radio wyróżnione przez `:has(:checked)`); na telefonie jedna kolumna, od 1024 px panel obok treści (`position: sticky`), od 1280 px trzy kolumny |
 | `public/css/reservations.css` | Lista kart w Moich rezerwacjach i kolory statusów |
 | `public/js/theme.js` | Przełączanie i zapamiętywanie motywu |
 | `public/js/map.js` | Mapa Mapbox: pinezki z ceną z atrybutu `data-venues`, wbudowane przyciski przybliżania i lokalizacji, wyróżnienie pinezki lokalu z karty widocznej w kolumnie (`IntersectionObserver`), przeliczenie rozmiaru po pokazaniu mapy na telefonie (`ResizeObserver`) |
