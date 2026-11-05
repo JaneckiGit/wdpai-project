@@ -1,10 +1,5 @@
 <?php
-$purposes = [
-    'work' => ['Praca', 'fa-laptop'],
-    'meetings' => ['Spotkania i szkolenia', 'fa-users'],
-    'shoots' => ['Sesje foto i wideo', 'fa-camera'],
-    'events' => ['Kameralne wydarzenia', 'fa-champagne-glasses'],
-];
+$purposes = require __DIR__ . '/partials/purposes.php';
 $modes = [
     'seats' => ['Miejsce do pracy', 'fa-laptop'],
     'exclusive' => ['Cały lokal', 'fa-key'],
