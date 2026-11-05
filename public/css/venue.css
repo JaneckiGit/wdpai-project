@@ -185,17 +185,6 @@
     font-size: 0.9375rem;
 }
 
-.icon-tile {
-    display: grid;
-    place-items: center;
-    flex: none;
-    width: 2.625rem;
-    height: 2.625rem;
-    border-radius: 0.75rem;
-    background: var(--color-chip);
-    color: var(--color-text);
-}
-
 .venue__details .entry {
     padding: var(--space-2) 1.125rem;
     border-radius: var(--radius);
@@ -512,11 +501,6 @@
     font-size: 1.0625rem;
     font-weight: 700;
     text-align: center;
-    appearance: textfield;
-}
-
-.stepper input::-webkit-inner-spin-button {
-    appearance: none;
 }
 
 .summary {

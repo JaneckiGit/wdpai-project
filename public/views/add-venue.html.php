@@ -18,7 +18,7 @@ $failedSteps = array_filter($steps, static fn (array $step): bool => array_inter
 ?>
 <?php require __DIR__ . '/partials/header.html.php'; ?>
 
-<main class="add-venue">
+<main class="page add-venue">
     <nav class="breadcrumbs" aria-label="Ścieżka">
         <ol>
             <li><a href="/host">Panel gospodarza</a></li>
@@ -37,7 +37,7 @@ $failedSteps = array_filter($steps, static fn (array $step): bool => array_inter
                         <?php $state = $errors === [] ? 'todo' : (isset($failedSteps[$anchor]) ? 'error' : 'done'); ?>
                         <li>
                             <a class="steps__link steps__link--<?= $state ?>" href="#<?= $anchor ?>">
-                                <span class="steps__icon">
+                                <span class="initials steps__icon">
                                     <?php if ($state === 'todo'): ?>
                                         <?= $number + 1 ?>
                                     <?php elseif ($state === 'error'): ?>
@@ -106,7 +106,7 @@ $failedSteps = array_filter($steps, static fn (array $step): bool => array_inter
                     <?php foreach ($purposes as $value => [$label, $icon, $hint]): ?>
                         <label class="option-card">
                             <input type="checkbox" name="purposes[]" value="<?= $value ?>" <?= in_array($value, $form->purposes, true) ? 'checked' : '' ?>>
-                            <span class="option-card__icon"><i class="fa-solid <?= $icon ?>" aria-hidden="true"></i></span>
+                            <span class="icon-tile"><i class="fa-solid <?= $icon ?>" aria-hidden="true"></i></span>
                             <span><strong><?= $label ?></strong><?= $hint ?></span>
                         </label>
                     <?php endforeach; ?>
@@ -128,7 +128,7 @@ $failedSteps = array_filter($steps, static fn (array $step): bool => array_inter
                 <h2><span>4</span> Rolka <span class="badge add-venue__optional">opcjonalnie</span></h2>
                 <p class="add-venue__tip"><i class="fa-solid fa-arrow-trend-up" aria-hidden="true"></i> Lokale z rolką są wyżej w wynikach</p>
                 <label class="dropzone">
-                    <span class="option-card__icon"><i class="fa-solid fa-video" aria-hidden="true"></i></span>
+                    <span class="icon-tile"><i class="fa-solid fa-video" aria-hidden="true"></i></span>
                     <strong>Przeciągnij plik lub wybierz z dysku</strong>
                     <span class="field__hint">Pionowe wideo MP4, 9:16, maks. 60 s i 50 MB</span>
                     <input type="file" name="reel" accept="video/mp4">
