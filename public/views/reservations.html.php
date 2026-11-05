@@ -16,7 +16,7 @@ $statusLabels = [
         <?php foreach ($reservations as $reservation): ?>
             <li class="card reservation">
                 <a href="/venues/<?= $reservation['venueId'] ?>"><?= htmlspecialchars($reservation['venueName']) ?></a>
-                <span class="reservation__date"><?= $reservation['date'] ?>, <?= $reservation['hours'] ?></span>
+                <span class="muted"><?= $reservation['date'] ?>, <?= $reservation['hours'] ?></span>
                 <span class="badge reservation__status--<?= $reservation['status'] ?>"><?= $statusLabels[$reservation['status']] ?></span>
                 <?php if ($reservation['status'] !== 'rejected'): ?>
                     <form method="post" action="/reservations/<?= $reservation['id'] ?>/cancel">

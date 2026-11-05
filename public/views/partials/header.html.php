@@ -38,15 +38,15 @@
     </nav>
 
     <!-- Atrybut popover: przeglądarka sama otwiera menu po kliknięciu avatara i zamyka je klawiszem Esc albo kliknięciem obok. -->
-    <!-- TODO: Laboratorium 9 – dane zalogowanego użytkownika z sesji oraz działające „Zmień hasło” i „Usuń konto”. -->
-    <button class="avatar" type="button" popovertarget="account-menu" aria-label="Konto: Anna Kowalska"></button>
+    <!-- TODO: Laboratorium 9 – działające „Zmień hasło” i „Usuń konto”. -->
+    <button class="avatar" type="button" popovertarget="account-menu" aria-label="Konto: <?= htmlspecialchars($currentUser['name']) ?>"></button>
     <div class="account-menu" id="account-menu" popover>
         <div class="account-menu__user">
             <span class="avatar" aria-hidden="true"></span>
             <div>
-                <p class="account-menu__name">Anna Kowalska</p>
-                <p class="account-menu__email">anna.kowalska@example.com</p>
-                <span class="account-menu__role">Najemca</span>
+                <p class="account-menu__name"><?= htmlspecialchars($currentUser['name']) ?></p>
+                <p class="account-menu__email"><?= htmlspecialchars($currentUser['email']) ?></p>
+                <span class="account-menu__role"><?= htmlspecialchars($currentUser['role']) ?></span>
             </div>
         </div>
         <a href="/account/password"><i class="fa-solid fa-lock" aria-hidden="true"></i> Zmień hasło</a>

@@ -1,24 +1,7 @@
 /* Lokal i rezerwacja według prototypu: zdjęcie i rolki, opis lokalu oraz panel rezerwacji.
    Na telefonie wszystko w jednej kolumnie, od 1024 px panel obok treści, od 1280 px trzy kolumny. */
-.venue {
-    max-width: 86rem;
-    margin: 0 auto;
-    padding: 1.25rem var(--space-2) var(--space-5);
-}
-
-.venue p,
-.venue ul,
-.venue figure {
-    margin: 0;
-}
-
 .venue h2 {
     font-size: 1.625rem;
-}
-
-.venue__muted {
-    color: var(--color-muted);
-    font-size: 0.875rem;
 }
 
 .breadcrumbs ol {
@@ -146,13 +129,9 @@
     padding: 1.25rem;
 }
 
-.host-card__avatar {
-    display: grid;
-    place-items: center;
-    flex: none;
+.host-card .initials {
     width: 3.5rem;
     height: 3.5rem;
-    border-radius: 50%;
     background: var(--color-dark);
     color: var(--color-on-dark);
     font-size: 1.125rem;
@@ -392,7 +371,7 @@
     font-weight: 600;
 }
 
-.slots__header .venue__muted {
+.slots__header .muted {
     font-size: 0.8125rem;
     font-weight: 400;
 }
@@ -496,7 +475,7 @@
     font-variant-numeric: tabular-nums;
 }
 
-.hour-row .venue__muted {
+.hour-row .muted {
     flex: 1;
 }
 
@@ -516,7 +495,7 @@
     font-weight: 600;
 }
 
-.seats .venue__muted {
+.seats .muted {
     display: block;
     font-size: 0.8125rem;
     font-weight: 400;
@@ -615,11 +594,6 @@
 }
 
 @media (min-width: 48rem) {
-    .venue {
-        padding-right: var(--space-4);
-        padding-left: var(--space-4);
-    }
-
     .reservation-panel {
         padding: var(--space-3);
     }

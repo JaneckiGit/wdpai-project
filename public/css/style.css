@@ -380,6 +380,38 @@ input:focus {
     color: var(--color-exclusive-text);
 }
 
+/* Kontener stron aplikacji (Lokal, Panel gospodarza): szerokość i odstępy od krawędzi ekranu. */
+.page {
+    max-width: 86rem;
+    margin: 0 auto;
+    padding: 1.25rem var(--space-2) var(--space-5);
+}
+
+.page p,
+.page ul,
+.page figure {
+    margin: 0;
+}
+
+/* Szary, mniejszy tekst pomocniczy, np. adres, termin, wyliczenie kwoty. */
+.muted {
+    color: var(--color-muted);
+    font-size: 0.875rem;
+}
+
+/* Kółko z inicjałami osoby: najemca w prośbie, gospodarz na stronie lokalu. */
+.initials {
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 50%;
+    background: var(--color-chip);
+    font-size: 0.875rem;
+    font-weight: 700;
+}
+
 .form-errors,
 .status-message {
     margin: 0;
@@ -430,7 +462,7 @@ textarea[aria-invalid="true"] {
     display: none;
 }
 
-/* Avatar to twarz Anny z ilustracji logowania: obraz 3:4 w rozmiarze 300×400 px przesunięty tak, że w kółku widać twarz. */
+/* Avatar to twarz Piotra (postać po lewej) z ilustracji logowania: obraz 3:4 w rozmiarze 300×400 px przesunięty tak, że w kółku widać twarz. */
 .avatar {
     flex: none;
     width: 2.5rem;
@@ -438,7 +470,7 @@ textarea[aria-invalid="true"] {
     padding: 0;
     border: 0;
     border-radius: 50%;
-    background: url("/images/login-hero.svg") -130px -210px / 300px 400px;
+    background: url("/images/login-hero.svg") -63px -210px / 300px 400px;
     cursor: pointer;
 }
 
@@ -584,6 +616,11 @@ body > .site-footer {
 
 /* Od 48rem (768 px) nawigacja wraca do nagłówka, obok wyszukiwarki. */
 @media (min-width: 48rem) {
+    .page {
+        padding-right: var(--space-4);
+        padding-left: var(--space-4);
+    }
+
     .site-header {
         flex-wrap: wrap;
         gap: 0.75rem 1.75rem;

@@ -30,11 +30,6 @@
     font-weight: 600;
 }
 
-.reservation__date {
-    color: var(--color-muted);
-    font-size: 0.875rem;
-}
-
 /* Przycisk anulowania wygląda jak link, żeby nie konkurował z kartą. */
 .reservation button {
     padding: 0;
