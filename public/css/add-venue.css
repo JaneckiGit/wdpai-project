@@ -8,12 +8,6 @@
     display: none;
 }
 
-.add-venue__form {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-3);
-}
-
 .steps {
     display: flex;
     flex-direction: column;

@@ -466,6 +466,13 @@ input:focus {
     margin: 0;
 }
 
+/* Kolumna elementów z odstępem, np. karty formularza albo sekcje panelu. */
+.stack {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+}
+
 /* Szary, mniejszy tekst pomocniczy, np. adres, termin, wyliczenie kwoty. */
 .muted {
     color: var(--color-muted);

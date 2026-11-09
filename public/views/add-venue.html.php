@@ -59,7 +59,7 @@ $failedSteps = array_filter($steps, static fn (array $step): bool => array_inter
             </p>
         </aside>
 
-        <form class="add-venue__form app-form" action="/host/venues/new" method="post" enctype="multipart/form-data">
+        <form class="stack add-venue__form app-form" action="/host/venues/new" method="post" enctype="multipart/form-data">
             <?php require __DIR__ . '/partials/form-errors.html.php'; ?>
 
             <section class="card form-section" id="basics">
