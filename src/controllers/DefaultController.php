@@ -6,11 +6,10 @@ namespace App\Controller;
 
 final class DefaultController extends AppController
 {
+    /* Strona startowa to Odkrywaj – lista lokali z mapą. */
     public function index(): void
     {
-        $this->render('home', [
-            'pageTitle' => 'Moja aplikacja',
-        ]);
+        $this->redirect('/venues');
     }
 
     public function notFound(): void

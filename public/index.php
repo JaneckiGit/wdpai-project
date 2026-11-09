@@ -5,7 +5,6 @@ declare(strict_types=1);
 use App\Controller\AdminController;
 use App\Controller\DefaultController;
 use App\Controller\HostController;
-use App\Controller\ProjectController;
 use App\Controller\ReservationController;
 use App\Controller\SecurityController;
 use App\Controller\VenueController;
@@ -27,8 +26,6 @@ set_error_handler(static function (int $severity, string $message, string $file,
 
 $routing = new Routing();
 
-$routing->get('/projects', ProjectController::class, 'index');
-$routing->get('/projects/{id}', ProjectController::class, 'show');
 $routing->get('/', DefaultController::class, 'index');
 $routing->get('/login', SecurityController::class, 'login');
 $routing->post('/login', SecurityController::class, 'login');
