@@ -53,8 +53,7 @@ Gotowy jest szkielet MVC z laboratoriów oraz szablony HTML pięciu widoków z p
 
 | Obszar | Co robi |
 |---|---|
-| Strona główna | Widok startowy z linkiem do listy projektów (przykład z laboratorium) |
-| Projekty | Lista projektów i widok szczegółów projektu o podanym id (przykład z laboratorium) |
+| Strona główna | Adres `/` przekierowuje do Odkrywaj |
 | Logowanie | E-mail i hasło; walidacja i przekierowanie do Odkrywaj (bez sprawdzania hasła, które dojdzie w Laboratorium 9) |
 | Rejestracja | Formularz z walidacją po stronie serwera jak w Laboratorium 9; po poprawnym wysłaniu przekierowanie na logowanie z komunikatem (zapis konta w bazie w Laboratorium 9) |
 | Odkrywaj | Mapa Mapbox z pinezkami cen obok kolumny kart lokali; filtry celu i trybu jako linki (`?purpose=…&mode=…`) oraz fraza z wyszukiwarki w nagłówku; na telefonie przełącznik „Rolki / Mapa” |
@@ -133,8 +132,8 @@ Aplikacja ma jeden punkt wejścia – `public/index.php` (Front Controller). Ngi
 Przepływ żądania:
 
 1. `public/index.php` rejestruje trasy w obiekcie `Routing` i przekazuje mu metodę HTTP oraz adres żądania.
-2. `Routing::dispatch()` porównuje adres z listą tras (białą listą). Ścieżka trasy jest zamieniana na wyrażenie regularne, np. `/projects/{id}` → `~^/projects/(?P<id>\d+)$~`, więc `{id}` przyjmuje tylko cyfry.
-3. Dla pierwszej pasującej trasy router tworzy obiekt kontrolera i wywołuje jego akcję, przekazując parametry z adresu (`/projects/12` → `ProjectController::show(12)`).
+2. `Routing::dispatch()` porównuje adres z listą tras (białą listą). Ścieżka trasy jest zamieniana na wyrażenie regularne, np. `/venues/{id}` → `~^/venues/(?P<id>\d+)$~`, więc `{id}` przyjmuje tylko cyfry.
+3. Dla pierwszej pasującej trasy router tworzy obiekt kontrolera i wywołuje jego akcję, przekazując parametry z adresu (`/venues/2` → `VenueController::show(2)`).
 4. Kontroler wywołuje odziedziczoną z `AppController` metodę `render()`, która udostępnia dane widokowi jako zmienne (`extract()`), wykonuje szablon z `public/views/` do bufora (`ob_start()` / `ob_get_clean()`) i wstawia wynik jako `$content` do wspólnego dokumentu `public/views/layout.html.php`. Layout zawiera `<head>`, arkusze stylów, przełącznik motywu i skrypty, więc widoki opisują już tylko treść strony.
 5. Gdy żadna trasa nie pasuje, `index.php` ustawia status 404 i wyświetla widok `not-found`.
 
@@ -142,7 +141,7 @@ Klasy nie są ładowane ręcznie przez `require_once`. `index.php` wczytuje tylk
 
 | Namespace | Katalog | Przykład |
 |---|---|---|
-| `App\Controller\` | `src/controllers/` | `App\Controller\ProjectController` → `src/controllers/ProjectController.php` |
+| `App\Controller\` | `src/controllers/` | `App\Controller\VenueController` → `src/controllers/VenueController.php` |
 | `App\Form\` | `src/forms/` | `App\Form\LoginForm` → `src/forms/LoginForm.php` |
 | `App\` | `src/` | `App\Routing` → `src/Routing.php` |
 
@@ -166,9 +165,7 @@ Nagłówek i stopka są wspólne dla wielu widoków, więc nie są kopiowane do 
 
 | Metoda | Adres | Kontroler i akcja | Widok |
 |---|---|---|---|
-| GET | `/` | `DefaultController::index` | `home` |
-| GET | `/projects` | `ProjectController::index` | `projects` |
-| GET | `/projects/{id}` (`id` – tylko cyfry) | `ProjectController::show` | `project` |
+| GET | `/` | `DefaultController::index` | przekierowanie do `/venues` |
 | GET, POST | `/login` | `SecurityController::login` | `login` |
 | GET, POST | `/register` | `SecurityController::register` | `register` |
 | GET | `/venues` | `VenueController::index` | `venues` (Odkrywaj) |
@@ -194,10 +191,6 @@ Parametry zapytania (query parameters):
 Sprawdzenie z terminala:
 
 ```bash
-curl -i http://localhost:8080/projects/abc
-```
-
-```bash
 curl -i http://localhost:8080/venues/2
 ```
 
@@ -209,7 +202,7 @@ curl -i http://localhost:8080/venues/abc
 curl -i "http://localhost:8080/venues?purpose=zzz"
 ```
 
-Pierwszy i trzeci adres zwracają 404, bo `{id}` przyjmuje tylko cyfry. Drugi wyświetla widok lokalu, a formularz rezerwacji wysyła dane na `/venues/2/reservations`. Czwarty zwraca 400, bo cel spoza listy jest błędem. Lokal o id spoza przykładowych danych (np. `/venues/9`) też zwraca 404.
+Drugi adres zwraca 404, bo `{id}` przyjmuje tylko cyfry. Pierwszy wyświetla widok lokalu, a formularz rezerwacji wysyła dane na `/venues/2/reservations`. Trzeci zwraca 400, bo cel spoza listy jest błędem. Lokal o id spoza przykładowych danych (np. `/venues/9`) też zwraca 404.
 
 ## Formularze i obsługa błędów
 
@@ -248,7 +241,7 @@ Dane wyświetlane z powrotem w HTML przechodzą przez `htmlspecialchars()`, wię
 
 | Plik | Zawartość |
 |---|---|
-| `public/css/style.css` | Zmienne CSS (tokeny projektu w wariancie jasnym i ciemnym), `box-sizing`, typografia, linki, fokus oraz wspólne komponenty: logo, przycisk, pola formularza z podpowiedzią, pole wyboru (checkbox), pole opisu (textarea) z licznikiem znaków (`.field__count`), karty sekcji formularza z numerem i siatka pól (`.form-section`, `.form-grid`), niższe pola w formularzach aplikacji (`.app-form`), przycisk drugorzędny (`.button--secondary`), ścieżka (`.breadcrumbs`), karta (`.card`), plakietka celu (`.chip`) i plakietka trybu lub statusu (`.badge`), kontener strony (`.page`), szary podpis (`.muted`), kwadrat z ikoną (`.icon-tile`) kółko z inicjałami (`.initials`), wybrany filtr (`.chip[aria-current]`), plakietki statusu (`.badge--success`, `--warning`, `--danger`, `--muted`), karta z listą i licznikiem (`.panel`, `.count`, `.list-item`), przyciski decyzji (`.actions`, `.button--outline`) i pole wyszukiwania (`.search`) używane w kilku widokach, pola liczb bez strzałek w formularzach aplikacji, nagłówek z nawigacją (na telefonie dolny pasek) i menu konta pod avatarem (atrybut `popover` – otwieranie i zamykanie bez JavaScriptu), stopka, przełącznik motywu, klasa `visually-hidden` |
+| `public/css/style.css` | Zmienne CSS (tokeny projektu w wariancie jasnym i ciemnym), `box-sizing`, typografia, linki, fokus oraz wspólne komponenty: logo, przycisk, pola formularza z podpowiedzią, pole wyboru (checkbox), pole opisu (textarea) z licznikiem znaków (`.field__count`), karty sekcji formularza z numerem i siatka pól (`.form-section`, `.form-grid`), niższe pola w formularzach aplikacji (`.app-form`), przycisk drugorzędny (`.button--secondary`), ścieżka (`.breadcrumbs`), karta (`.card`), plakietka celu (`.chip`) i plakietka trybu lub statusu (`.badge`), kontener strony (`.page`), kolumna z odstępem (`.stack`), szary podpis (`.muted`), kwadrat z ikoną (`.icon-tile`) kółko z inicjałami (`.initials`), wybrany filtr (`.chip[aria-current]`), plakietki statusu (`.badge--success`, `--warning`, `--danger`, `--muted`), karta z listą i licznikiem (`.panel`, `.count`, `.list-item`), przyciski decyzji (`.actions`, `.button--outline`) i pole wyszukiwania (`.search`) używane w kilku widokach, pola liczb bez strzałek w formularzach aplikacji, nagłówek z nawigacją (na telefonie dolny pasek) i menu konta pod avatarem (atrybut `popover` – otwieranie i zamykanie bez JavaScriptu), stopka, przełącznik motywu, klasa `visually-hidden` |
 | `public/css/login.css` | Układ widoków Logowanie i Rejestracja (dołączany przez layout, gdy kontroler przekaże `'stylesheet' => 'login'`) |
 | `public/css/venues.css` | Układ widoku Odkrywaj: pasek celu i trybu, mapa, karty lokali, przełącznik „Rolki / Mapa” na telefonie |
 | `public/css/venue.css` | Widok Lokal i rezerwacja według prototypu: rolka i „Nagrane tutaj”, karta gospodarza, cele, karty ofert z plakietkami, udogodnienia, wejście i panel rezerwacji: przełącznik trybu, kafelki dni i lista godzin (ukryte pola radio i checkbox, wybór wyróżnia `:has(:checked)`), licznik miejsc i podsumowanie; na telefonie jedna kolumna, od 1024 px panel obok treści (`position: sticky`), od 1280 px trzy kolumny |
@@ -360,7 +353,7 @@ Wynikają z konfiguracji z laboratorium, do rozwiązania w kolejnych etapach:
 | Nginx ma domyślny limit 1 MB na żądanie | Upload większego pliku kończy się błędem 413, mimo limitu 512M w PHP | Dodać `client_max_body_size 512M;` w `nginx.conf` |
 | Brak `.dockerignore` | `COPY . .` kopiuje `.env` i `.git` do obrazu PHP | Dodać `.dockerignore` przed publikacją obrazu (np. przy deployu) |
 | Katalog `vendor/` nie jest w repozytorium i nie jest generowany przy starcie kontenera | Po sklonowaniu repo i `docker compose up` aplikacja zwraca `Fatal error`, dopóki nie uruchomi się `composer dump-autoload` | Uruchamiać `composer dump-autoload` przy starcie kontenera `php` (np. w `command` w `docker-compose.yaml`) |
-| Widoki leżą w katalogu publicznym `public/views/` | Szablon można otworzyć bezpośrednio, np. `/views/project.html.php` – PHP wyświetla wtedy ostrzeżenia o brakujących zmiennych razem ze ścieżką pliku | Przenieść widoki poza `public/` (np. do `src/views/`) albo zablokować `/views/` w `nginx.conf` |
+| Widoki leżą w katalogu publicznym `public/views/` | Szablon można otworzyć bezpośrednio, np. `/views/venue.html.php` – PHP wyświetla wtedy ostrzeżenia o brakujących zmiennych razem ze ścieżką pliku | Przenieść widoki poza `public/` (np. do `src/views/`) albo zablokować `/views/` w `nginx.conf` |
 
 ## Struktura projektu
 
