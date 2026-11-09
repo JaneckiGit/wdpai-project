@@ -12,7 +12,7 @@ $filterUrl = static fn (string $group): string => '/admin?' . http_build_query(a
 <?php require __DIR__ . '/partials/header.html.php'; ?>
 
 <!-- TODO: Laboratorium 8 i 9 – przyciski decyzji zapiszą zmiany w bazie; do tego czasu mają tylko wygląd (type="button"). -->
-<main class="page admin">
+<main class="page stack admin">
     <h1>Panel administratora</h1>
 
     <section class="card panel" aria-labelledby="applications-heading">
@@ -48,7 +48,7 @@ $filterUrl = static fn (string $group): string => '/admin?' . http_build_query(a
         </ul>
     </section>
 
-    <section class="admin__section" aria-labelledby="venues-heading">
+    <section class="stack admin__section" aria-labelledby="venues-heading">
         <h2 class="section-title" id="venues-heading">Lokale do akceptacji <span class="count"><?= count($pendingVenues) ?></span></h2>
 
         <ul class="pending-venues">

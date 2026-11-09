@@ -1,13 +1,6 @@
 /* Panel administratora: wnioski o rolę gospodarza, lokale do akceptacji i tabela użytkowników.
    Karty, listy, plakietki, przyciski i wyszukiwarka pochodzą ze style.css; tu jest tylko układ tej strony. */
-.admin,
-.admin__section {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-3);
-}
-
-.admin__section {
+.admin .admin__section {
     gap: var(--space-2);
 }
 

@@ -17,12 +17,6 @@
     margin-top: var(--space-3);
 }
 
-.host-application__form {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-3);
-}
-
 /* E-mail pochodzi z konta, więc pole jest tylko do odczytu i wygląda na nieaktywne. */
 .host-application__form input[readonly] {
     background: var(--color-surface-muted);

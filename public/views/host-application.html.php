@@ -17,7 +17,7 @@ $types = require __DIR__ . '/partials/venue-types.php';
     <?php require __DIR__ . '/partials/status-message.html.php'; ?>
 
     <div class="host-application__layout">
-        <form class="app-form host-application__form" action="/host/apply" method="post">
+        <form class="stack app-form host-application__form" action="/host/apply" method="post">
             <?php require __DIR__ . '/partials/form-errors.html.php'; ?>
 
             <section class="card form-section">
