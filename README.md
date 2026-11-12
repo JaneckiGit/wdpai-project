@@ -304,7 +304,14 @@ Kontrast par kolorów (WCAG 2.1, wymagane 4,5:1 dla tekstu i 3:1 dla obrysu foku
 
 ## Konfiguracja PHP
 
-Obraz PHP zawiera moduły `pdo_pgsql`, `pgsql`, `gd` (z JPEG), `zip`, `bcmath`, `opcache` oraz Composer 2. Limity uploadu w PHP: `upload_max_filesize` i `post_max_size` = 512M, `max_file_uploads` = 20 (plik `conf.d/mealplanner.ini`).
+Obraz PHP zawiera moduły `pdo_pgsql`, `pgsql`, `gd` (z JPEG), `zip`, `bcmath`, `opcache`, `xdebug` oraz Composer 2. Limity uploadu w PHP: `upload_max_filesize` i `post_max_size` = 512M, `max_file_uploads` = 20 (plik `conf.d/mealplanner.ini`).
+
+**Xdebug (Laboratorium 6)** – debugowanie krok po kroku zamiast `var_dump()`. Ustawienia są w `docker/php/conf.d/xdebug.ini` (`mode=develop,debug`, `client_host=host.docker.internal`, `start_with_request=yes`), a `docker/php/conf.d/error_reporting.ini` ustawia `error_reporting=E_ALL`. Oba pliki są podpięte jako wolumeny usługi `php`, więc po ich zmianie wystarczy `docker compose up -d php`. Przy każdym żądaniu Xdebug łączy się z edytorem na porcie 9003:
+
+- PhpStorm: *Settings → PHP → Debug* (port 9003), włącz nasłuchiwanie ikoną słuchawki na pasku narzędzi, a przy pierwszym połączeniu zmapuj katalog projektu na `/app`;
+- VS Code: rozszerzenie *PHP Debug* i w `.vscode/launch.json` konfiguracja `{ "name": "Xdebug", "type": "php", "request": "launch", "port": 9003, "pathMappings": { "/app": "${workspaceFolder}" } }`.
+
+Ustaw breakpoint i odśwież stronę – edytor zatrzyma wykonanie w tym miejscu. Gdy edytor nie nasłuchuje, strona działa normalnie, a w `docker compose logs php` przy każdym żądaniu pojawia się wpis `Could not connect to debugging client`. `docker compose exec php php -v` pokazuje `with Xdebug v3…`, a `xdebug_info();` w kodzie wyświetla diagnostykę połączenia.
 
 ## Różnice względem konfiguracji z laboratorium
 
@@ -315,6 +322,8 @@ Pliki `docker-compose.yaml`, `docker/php/Dockerfile` i `docker/nginx/*` są zgod
 - usługa `ollama` i wolumen `ollama_data` są zakomentowane – uruchamianie modeli językowych w kontenerze (na CPU) wymaga kilku GB pamięci RAM, a Docker ma na tym komputerze do dyspozycji 7,7 GB. Usługa została dodana i uruchomiona zgodnie z zadaniem, a następnie wyłączona.
 
 `docker/db/Dockerfile` (`FROM postgres:17-alpine`) jest wymagany przez `docker-compose.yaml`, ale instrukcja nie podaje jego treści.
+
+Xdebug z Laboratorium 6 jest dodany 1:1 według artykułu podlinkowanego w materiałach: `pecl install xdebug` i `docker-php-ext-enable xdebug` w `docker/php/Dockerfile`, pliki `xdebug.ini` i `error_reporting.ini` z artykułu w `docker/php/conf.d/` i te same dwa wolumeny w usłudze `php`. Różnice wynikają z obrazu projektu: artykuł używa `php:7.4-fpm` (Debian), a projekt `php:8.3-fpm-alpine`, w którym `pecl` potrzebuje narzędzi kompilacji (`$PHPIZE_DEPS`, `linux-headers`) – są instalowane tylko na czas instalacji i usuwane w tym samym kroku `RUN`. Kod jest w kontenerze w `/app` zamiast `/var/www/html`, dlatego edytor potrzebuje mapowania ścieżek. Artykuł opisuje PhpStorm; konfiguracja VS Code jest w sekcji „Konfiguracja PHP”, bo katalog `.vscode/` jest w `.gitignore`.
 
 Szkielet MVC (`src/Routing.php`, `src/controllers/`, `public/views/`, `public/index.php`) i `composer.json` są zgodne 1:1 z instrukcjami z Laboratorium 2, z wyjątkiem zmian wymaganych przez wspólny layout z Laboratorium 5 (opisanych niżej). Composer jest w obrazie PHP od Laboratorium 1, a `.gitignore` już zawierał wpis `vendor/`, który obejmuje `/vendor/` z instrukcji.
 
@@ -366,7 +375,7 @@ Wynikają z konfiguracji z laboratorium, do rozwiązania w kolejnych etapach:
 ├── docker/
 │   ├── db/               # obraz PostgreSQL i skrypty startowe bazy
 │   ├── nginx/            # obraz i konfiguracja Nginx
-│   └── php/              # obraz PHP-FPM z rozszerzeniami
+│   └── php/              # obraz PHP-FPM z rozszerzeniami; conf.d/ – ustawienia Xdebug i raportowania błędów
 ├── public/               # katalog publiczny (document root Nginx)
 │   ├── index.php         # Front Controller – jedyny punkt wejścia
 │   ├── css/              # arkusze stylów (style.css – wspólny, login.css – logowanie i rejestracja, venues.css – Odkrywaj, venue.css – Lokal, add-venue.css – Dodaj lokal, reservations.css – Moje rezerwacje, host.css – Panel gospodarza, admin.css – Panel administratora, host-application.css – Zostań gospodarzem)
