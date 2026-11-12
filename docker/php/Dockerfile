@@ -27,6 +27,13 @@ RUN apk add --no-cache \
         pdo_pgsql \
     && apk del .build-deps
 
+# Laboratorium 6: Xdebug 3 do debugowania krok po kroku (konfiguracja w docker/php/conf.d/xdebug.ini).
+# Na Alpine pecl kompiluje Xdebug, więc narzędzia kompilacji są instalowane tylko na czas instalacji.
+RUN apk add --no-cache --virtual .xdebug-deps $PHPIZE_DEPS linux-headers \
+    && pecl install xdebug \
+    && docker-php-ext-enable xdebug \
+    && apk del .xdebug-deps
+
 RUN { \
       echo 'memory_limit = -1'; \
       echo 'upload_max_filesize = 512M'; \
