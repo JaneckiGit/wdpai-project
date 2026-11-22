@@ -12,6 +12,9 @@ PoGodzinach to aplikacja webowa do wynajmu lokali na godziny, w czasie gdy stoj�
 - `src/Routing.php` — dopasowanie tras i uruchamianie kontrolerów.
 - `src/controllers/` — kontrolery w namespace `App\Controller`, dziedziczące po `AppController`.
 - `src/forms/` — formularze i ich walidacja w namespace `App\Form`, dziedziczące po `Form`.
+- `config.php`, `src/Database.php` — dane połączenia (ze zmiennych `POSTGRES_*`) i połączenie PDO z PostgreSQL.
+- `src/repositories/` — cały SQL tabeli i mapowanie wierszy na modele (`App\Repository`); `src/models/` — modele danych bez SQL (`App\Model`).
+- `database/` — skrypty SQL tworzące tabele, uruchamiane ręcznie przez `psql`.
 - `docker/`, `docker-compose.yaml` — środowisko uruchomieniowe.
 
 Pełny opis architektury, tras i stylów jest w `README.md`.
@@ -32,6 +35,8 @@ Pełny opis architektury, tras i stylów jest w `README.md`.
 ## Uruchamianie i weryfikacja
 - Start: `docker compose up --build -d`
 - Autoloader po sklonowaniu repozytorium: `docker compose exec php composer dump-autoload`
+- Tabele w pustej bazie: `docker compose exec -T db sh -c 'psql -U "$POSTGRES_USER" -d "$POSTGRES_DB"' < database/01-create-reservations.sql`
+- SQL tylko w repozytoriach i tylko przez `prepare()` / `execute()` z parametrami – bez sklejania wartości z zapytaniem.
 - Składnia: `docker compose exec -T php php -l ścieżka/do/pliku.php`
 - Po zmianie trasy sprawdź poprawny adres i odpowiedź 404, np. `curl -i http://localhost:8080/venues/abc`.
 - Po zmianie stylów sprawdź szerokości 360, 768 i 1440 px oraz oba motywy.
