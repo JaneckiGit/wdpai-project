@@ -57,15 +57,15 @@ Gotowy jest szkielet MVC z laboratoriów oraz szablony HTML pięciu widoków z p
 | Logowanie | E-mail i hasło; walidacja i przekierowanie do Odkrywaj (bez sprawdzania hasła, które dojdzie w Laboratorium 9) |
 | Rejestracja | Formularz z walidacją po stronie serwera jak w Laboratorium 9; po poprawnym wysłaniu przekierowanie na logowanie z komunikatem (zapis konta w bazie w Laboratorium 9) |
 | Odkrywaj | Mapa Mapbox z pinezkami cen obok kolumny kart lokali; filtry celu i trybu jako linki (`?purpose=…&mode=…`) oraz fraza z wyszukiwarki w nagłówku; na telefonie przełącznik „Rolki / Mapa” |
-| Moje rezerwacje | Lista rezerwacji (lokal, termin, status) z przykładowych danych w `ReservationController`; „Anuluj rezerwację” wysyła POST i wraca z komunikatem |
-| Lokal i rezerwacja | Lokal o id z adresu: ścieżka, zdjęcie, gospodarz, opis, cele, oferta, udogodnienia, wejście i podpisy rolek „Nagrane tutaj”; panel rezerwacji jak w prototypie: tryb, cel, 7 kafelków dni i lista godzin z okien dostępności gospodarza, liczba miejsc z przyciskami −/+ i podsumowanie kwoty (`reservation.js`); nieznane id daje 404 |
-| Panel gospodarza | Tylko dla gospodarza – pozostali są przekierowywani do wniosku o rolę (rola z `$currentUser`, w Laboratorium 9 z sesji). Powitanie zalogowanego gospodarza i przycisk „Dodaj lokal”; wszystkie oczekujące prośby o rezerwację (lista przewijana w karcie) z terminem, wygasaniem, celem, trybem, kwotą i działającymi przyciskami Akceptuj / Odrzuć (komunikat po przekierowaniu); karty lokali gospodarza z cenami trybów |
+| Moje rezerwacje | Lista rezerwacji z bazy PostgreSQL (lokal, termin, status: oczekuje, potwierdzona, odrzucona, anulowana); „Anuluj rezerwację” przy oczekującej lub potwierdzonej zmienia status na „anulowana” |
+| Lokal i rezerwacja | Lokal o id z adresu: ścieżka, zdjęcie, gospodarz, opis, cele, oferta, udogodnienia, wejście i podpisy rolek „Nagrane tutaj”; panel rezerwacji jak w prototypie: tryb, cel, 7 kafelków dni i lista godzin z okien dostępności gospodarza, liczba miejsc z przyciskami −/+ i podsumowanie kwoty (`reservation.js`); poprawna prośba zapisuje się w bazie jako oczekująca; nieznane id daje 404 |
+| Panel gospodarza | Tylko dla gospodarza – pozostali są przekierowywani do wniosku o rolę (rola z `$currentUser`, w Laboratorium 9 z sesji). Powitanie zalogowanego gospodarza i przycisk „Dodaj lokal”; oczekujące rezerwacje z bazy w lokalach gospodarza (lista przewijana w karcie) z terminem, czasem do wygaśnięcia (24 h od wysłania), celem, trybem i kwotą; Akceptuj / Odrzuć zmieniają status rezerwacji w bazie (komunikat po przekierowaniu); karty lokali gospodarza z cenami trybów |
 | Zostań gospodarzem | Adres `/host/apply`: wniosek o rolę gospodarza w czterech kartach (dane kontaktowe z imieniem i nazwiskiem z konta, firma z NIP-em, pierwszy lokal, opis z licznikiem znaków), zgoda na regulamin i karta „Jak to działa”; walidacja w `HostApplicationForm`, po wysłaniu komunikat (zapis wniosku i zatwierdzanie przez administratora w Laboratoriach 8–9) |
 | Dodaj lokal | Formularz według prototypu: kroki po lewej (po wysłaniu „!” przy sekcji z błędem i „✓” przy pozostałych), nazwa, typ, adres z mapą Mapbox i pinezką do przeciągnięcia (współrzędne trafiają do formularza), opis z licznikiem znaków, karty celów, pola zdjęć i rolki, tabela okien dostępności z przyciskami „Dodaj okno” i usuwania, sposób wejścia, pasek z przyciskami; walidacja wykrywa nakładające się okna; szkic i wysłanie do weryfikacji |
 | Panel administratora | Adres `/admin` (link i dostęp tylko dla administratora dojdą z rolami w Laboratorium 9): wnioski o rolę gospodarza z danymi firmy i lokalu, lokale do akceptacji, tabela użytkowników z działającą wyszukiwarką (`?q=`) i filtrami grup (`?group=hosts`, `?group=blocked`); przyciski decyzji mają na razie tylko wygląd |
-| Obsługa błędów | Kontrolowane odpowiedzi 400, 404, 422 i 500 (sekcja „Formularze i obsługa błędów”) |
+| Obsługa błędów | Kontrolowane odpowiedzi 400, 404, 409, 422 i 500 (sekcja „Formularze i obsługa błędów”) |
 
-Widoki to semantyczny HTML. W pełni ostylowane są widoki Logowanie, Rejestracja, Odkrywaj, Lokal i rezerwacja, Moje rezerwacje, Panel gospodarza, Zostań gospodarzem, Dodaj lokal oraz Panel administratora, a także wspólny nagłówek z nawigacją i menu konta i stopka (opis w sekcji „Style CSS”), pozostałe widoki mają tylko style bazowe (kolory, fonty, linki, fokus). Na każdej stronie działa motyw jasny i ciemny (Laboratorium 5, sekcja „Motyw jasny i ciemny”). Dane w widokach są przykładowe, wzięte z prototypu – listy oznaczone komentarzem `TODO` będą wyświetlane w pętli z danych z bazy. Formularze są sprawdzane po stronie serwera, ale aplikacja nie ma jeszcze bazy, więc poprawne dane nie są nigdzie zapisywane (Laboratoria 7–8). Lokale w Odkrywaj i na stronie lokalu to przykładowa tablica w `VenueController`, którą filtry naprawdę zawężają; w Laboratorium 8 zastąpi ją baza. Pliki z formularza „Dodaj lokal” nie są jeszcze zapisywane (Laboratorium 13); przesuwanie pinezki po wpisaniu adresu (geokodowanie przez Fetch API) dojdzie w Laboratorium 11. Ochrona CSRF i sprawdzanie hasła dojdą w Laboratorium 9. Linki do zaplanowanych, jeszcze nieistniejących stron (np. `/terms`, a w menu konta „Zmień hasło” i „Usuń konto”, które zadziałają w Laboratorium 9) kończą się odpowiedzią 404. Przełącznika języka jeszcze nie ma.
+Widoki to semantyczny HTML. W pełni ostylowane są widoki Logowanie, Rejestracja, Odkrywaj, Lokal i rezerwacja, Moje rezerwacje, Panel gospodarza, Zostań gospodarzem, Dodaj lokal oraz Panel administratora, a także wspólny nagłówek z nawigacją i menu konta i stopka (opis w sekcji „Style CSS”), pozostałe widoki mają tylko style bazowe (kolory, fonty, linki, fokus). Na każdej stronie działa motyw jasny i ciemny (Laboratorium 5, sekcja „Motyw jasny i ciemny”). Dane w widokach są przykładowe, wzięte z prototypu – listy oznaczone komentarzem `TODO` będą wyświetlane w pętli z danych z bazy. Formularze są sprawdzane po stronie serwera. Rezerwacje są zapisywane w PostgreSQL (Laboratorium 7, sekcja „Baza danych”); dane z pozostałych formularzy nie są jeszcze nigdzie zapisywane (Laboratoria 8–9). Lokale w Odkrywaj i na stronie lokalu to przykładowa tablica w `VenueController`, którą filtry naprawdę zawężają; w Laboratorium 8 zastąpi ją baza. Pliki z formularza „Dodaj lokal” nie są jeszcze zapisywane (Laboratorium 13); przesuwanie pinezki po wpisaniu adresu (geokodowanie przez Fetch API) dojdzie w Laboratorium 11. Ochrona CSRF i sprawdzanie hasła dojdą w Laboratorium 9. Linki do zaplanowanych, jeszcze nieistniejących stron (np. `/terms`, a w menu konta „Zmień hasło” i „Usuń konto”, które zadziałają w Laboratorium 9) kończą się odpowiedzią 404. Przełącznika języka jeszcze nie ma.
 
 ## Tech stack
 
@@ -87,7 +87,10 @@ cd wdpai-project
 cp .env.example .env   # następnie ustaw własne hasła w .env
 docker compose up --build -d
 docker compose exec php composer dump-autoload   # generuje vendor/autoload.php
+docker compose exec -T db sh -c 'psql -U "$POSTGRES_USER" -d "$POSTGRES_DB"' < database/01-create-reservations.sql   # tworzy tabelę rezerwacji (raz)
 ```
+
+Skrypt z `database/` uruchamia się raz, na pustej bazie – dane zostają potem w wolumenie `pg-data`, także po `docker compose down`. Polecenie bierze nazwę użytkownika i bazy ze zmiennych kontenera `db`, więc nie trzeba ich wpisywać. Jeśli wolumen `pg-data` powstał wcześniej z innym hasłem, PostgreSQL pomija inicjalizację, a strony z rezerwacjami kończą się błędem 500 (`password authentication failed` w `docker compose logs php`) – wtedy `docker compose down -v` (usuwa dane bazy), ponowny start i skrypt z `database/`.
 
 Katalog `vendor/` nie jest w repozytorium, więc bez `composer dump-autoload` aplikacja kończy się błędem `Fatal error` (brak `vendor/autoload.php`).
 
@@ -123,7 +126,8 @@ Przydatne polecenia:
 | `docker compose exec php php -m` | Lista modułów PHP |
 | `docker compose exec php composer dump-autoload` | Generuje autoloader Composera – po sklonowaniu repo i po zmianie sekcji `autoload` w `composer.json` |
 | `docker compose build --no-cache` | Przebudowa obrazów bez cache |
-| `docker compose down` | Zatrzymanie i usunięcie kontenerów oraz sieci (po ponownym `up` baza startuje pusta) |
+| `docker compose down` | Zatrzymanie i usunięcie kontenerów oraz sieci (dane bazy zostają w wolumenie `pg-data`; `down -v` usuwa także je) |
+| `docker compose exec db sh -c 'psql -U "$POSTGRES_USER" -d "$POSTGRES_DB"'` | Konsola `psql` w bazie aplikacji, np. `\d reservations` albo `SELECT * FROM reservations;` |
 
 ## Architektura (MVC)
 
@@ -137,15 +141,17 @@ Przepływ żądania:
 4. Kontroler wywołuje odziedziczoną z `AppController` metodę `render()`, która udostępnia dane widokowi jako zmienne (`extract()`), wykonuje szablon z `public/views/` do bufora (`ob_start()` / `ob_get_clean()`) i wstawia wynik jako `$content` do wspólnego dokumentu `public/views/layout.html.php`. Layout zawiera `<head>`, arkusze stylów, przełącznik motywu i skrypty, więc widoki opisują już tylko treść strony.
 5. Gdy żadna trasa nie pasuje, `index.php` ustawia status 404 i wyświetla widok `not-found`.
 
-Klasy nie są ładowane ręcznie przez `require_once`. `index.php` wczytuje tylko `vendor/autoload.php`, a autoloader Composera odnajduje plik klasy przy jej pierwszym użyciu, według reguł PSR-4 z `composer.json`:
+Klasy nie są ładowane ręcznie przez `require_once`. `index.php` wczytuje tylko `vendor/autoload.php` (a `src/Database.php` – plik ze stałymi `config.php`, który nie jest klasą), a autoloader Composera odnajduje plik klasy przy jej pierwszym użyciu, według reguł PSR-4 z `composer.json`:
 
 | Namespace | Katalog | Przykład |
 |---|---|---|
 | `App\Controller\` | `src/controllers/` | `App\Controller\VenueController` → `src/controllers/VenueController.php` |
 | `App\Form\` | `src/forms/` | `App\Form\LoginForm` → `src/forms/LoginForm.php` |
-| `App\` | `src/` | `App\Routing` → `src/Routing.php` |
+| `App\Model\` | `src/models/` | `App\Model\Reservation` → `src/models/Reservation.php` |
+| `App\Repository\` | `src/repositories/` | `App\Repository\ReservationRepository` → `src/repositories/ReservationRepository.php` |
+| `App\` | `src/` | `App\Routing` → `src/Routing.php`, `App\Database` → `src/Database.php` |
 
-Bardziej szczegółowe reguły (`App\Controller\`, `App\Form\`) mają pierwszeństwo. Nowa klasa jest odnajdywana bez zmian w `index.php`, jeśli jej namespace i nazwa pliku odpowiadają tym regułom.
+Bardziej szczegółowe reguły (np. `App\Controller\`, `App\Model\`) mają pierwszeństwo – katalogi zapisane małymi literami potrzebują ich, bo sama reguła `App\` szukałaby np. `src/Model/`. Nowa klasa jest odnajdywana bez zmian w `index.php`, jeśli jej namespace i nazwa pliku odpowiadają tym regułom.
 
 | Element | Plik | Odpowiedzialność |
 |---|---|---|
@@ -154,12 +160,48 @@ Bardziej szczegółowe reguły (`App\Controller\`, `App\Form\`) mają pierwszeń
 | Kontroler bazowy | `src/controllers/AppController.php` | Wspólne renderowanie widoków i stron błędów, `isPost()`, `redirect()`, komunikaty statusu; każdy widok dostaje `$currentUser` – do Laboratorium 9 przykładowego gospodarza Piotra Nowaka (nagłówek, menu konta, powitanie w panelu; flaga `isHost` decyduje, czy `/host` pokazuje panel, czy przekierowuje do wniosku) |
 | Kontrolery | `src/controllers/*Controller.php` | Wybór widoku i danych dla danej trasy, koordynacja formularza i przekierowania |
 | Formularze | `src/forms/*Form.php` | Dane wpisane przez użytkownika i reguły ich walidacji |
+| Połączenie z bazą | `config.php`, `src/Database.php` | Dane połączenia (ze zmiennych środowiskowych) i utworzenie obiektu PDO z wyjątkami, wynikami jako tablice asocjacyjne i natywnymi prepared statements |
+| Repozytoria | `src/repositories/*Repository.php` | Cały SQL danej tabeli i zamiana wierszy na modele |
+| Modele | `src/models/*.php` | Dane jednego rekordu z typami; nie znają PDO ani SQL |
 | Layout | `public/views/layout.html.php` | Wspólny dokument HTML: `<head>`, skrypt motywu, arkusze stylów (opcjonalny arkusz widoku ze zmiennej `$stylesheet`), przełącznik motywu, `theme.js` |
 | Widoki | `public/views/*.html.php` | Semantyczny HTML z danymi od kontrolera |
-| Wspólne fragmenty widoków | `public/views/partials/*.html.php` | Nagłówek z nawigacją i menu konta, lewa kolumna logowania i rejestracji, stopka, lista błędów formularza, komunikat statusu lista celów rezerwacji z etykietami i ikonami (`purposes.php`), typy lokalu (`venue-types.php`, klucze w `Form::VENUE_TYPES`) oraz funkcja inicjałów do kółek z osobą (`initials.php`), dołączane do widoków przez `require` |
+| Wspólne fragmenty widoków | `public/views/partials/*.html.php` | Nagłówek z nawigacją i menu konta, lewa kolumna logowania i rejestracji, stopka, lista błędów formularza, komunikat statusu lista celów rezerwacji z etykietami i ikonami (`purposes.php`), typy lokalu (`venue-types.php`, klucze w `Form::VENUE_TYPES`) , skróty dni tygodnia (`day-names.php`) oraz funkcja inicjałów do kółek z osobą (`initials.php`), dołączane do widoków przez `require` |
 | Autoloader | `composer.json`, `vendor/autoload.php` | Wczytywanie plików klas na podstawie namespace |
 
 Nagłówek i stopka są wspólne dla wielu widoków, więc nie są kopiowane do każdego szablonu. Widok dołącza je instrukcją `<?php require __DIR__ . '/partials/header.html.php'; ?>`. Dołączony plik ma dostęp do tych samych zmiennych co widok, dlatego nagłówek korzysta ze zmiennej `$activeNav` przekazanej z kontrolera i oznacza bieżącą pozycję menu atrybutem `aria-current="page"`. Działa to też w drugą stronę: nagłówek ustawia zmienną `$themeToggleInHeader`, a layout (wykonywany po widoku w tej samej metodzie `render()`) dołącza pływający przełącznik motywu tylko wtedy, gdy tej zmiennej nie ma.
+
+## Baza danych
+
+PostgreSQL 17 działa w usłudze `db`, a PHP łączy się z nią przez PDO (`pdo_pgsql`) pod nazwą hosta `db`. Na tym etapie (Laboratorium 7) w bazie są prośby o rezerwację – jedna tabela utworzona skryptem `database/01-create-reservations.sql`:
+
+```mermaid
+erDiagram
+    RESERVATIONS {
+        bigint id PK "GENERATED ALWAYS AS IDENTITY"
+        bigint venue_id "lokal; klucz obcy w Laboratorium 8"
+        varchar mode "seats | exclusive"
+        varchar purpose "work | meetings | shoots | events"
+        date reservation_date
+        smallint start_hour "0–23"
+        smallint end_hour "start_hour < end_hour <= 24"
+        smallint seats "tylko w trybie seats, inaczej NULL"
+        varchar status "pending | accepted | rejected | cancelled"
+        timestamptz created_at
+        timestamptz updated_at
+    }
+```
+
+Ograniczenia `CHECK` pilnują dozwolonych trybów, celów, godzin i statusów niezależnie od kodu PHP – np. `INSERT` ze statusem `'expired'` baza odrzuca błędem `reservations_status_check`. Indeks `reservations_status_idx` przyspiesza filtr panelu gospodarza (`WHERE status = 'pending'`). Gdy lokale i konta trafią do bazy, tabela dostanie klucze obce `venue_id` → `venues` i `user_id` → `users`, a diagram pokaże relacje jeden lokal → wiele rezerwacji i jeden użytkownik → wiele rezerwacji.
+
+Statusy zmieniają akcje aplikacji:
+
+| Akcja | Trasa | Status |
+|---|---|---|
+| Najemca wysyła prośbę ze strony lokalu | `POST /venues/{id}/reservations` | nowa rezerwacja `pending` |
+| Gospodarz akceptuje albo odrzuca prośbę w swoim lokalu | `POST /host/requests/{id}` | `pending` → `accepted` / `rejected` |
+| Najemca anuluje rezerwację | `POST /reservations/{id}/cancel` | `pending` / `accepted` → `cancelled` |
+
+Przepływ od żądania do danych: przeglądarka → `public/index.php` i router → kontroler (`VenueController`, `ReservationController`, `HostController`) → `ReservationRepository` → PDO → PostgreSQL → wiersz tablicy → model `Reservation` → kontroler i widok. Kontroler tworzy repozytorium w konstruktorze z połączeniem z `(new Database())->connect()`; repozytorium wykonuje SQL wyłącznie przez `prepare()` i `execute()` z parametrami (`query()` tylko dla stałego zapytania bez danych z zewnątrz), więc dane użytkownika nie stają się częścią składni zapytania. Błąd połączenia kończy się stroną 500, a szczegóły trafiają do logu.
 
 ## Routing
 
@@ -173,11 +215,11 @@ Nagłówek i stopka są wspólne dla wielu widoków, więc nie są kopiowane do 
 | POST | `/venues/{id}/reservations` | `VenueController::requestReservation` | przekierowanie albo `venue` z błędami |
 | GET | `/reservations` | `ReservationController::index` | `reservations` (Moje rezerwacje) |
 | GET | `/admin` | `AdminController::dashboard` | `admin` (Panel administratora) |
-| POST | `/reservations/{id}/cancel` | `ReservationController::cancel` | przekierowanie albo `error` (404) |
+| POST | `/reservations/{id}/cancel` | `ReservationController::cancel` | przekierowanie albo `error` (404, 409) |
 | GET | `/host` | `HostController::dashboard` | `host-dashboard` (Panel gospodarza) |
 | GET, POST | `/host/apply` | `HostController::apply` | `host-application` (Zostań gospodarzem) |
 | GET, POST | `/host/venues/new` | `HostController::addVenue` | `add-venue` (Dodaj lokal) |
-| POST | `/host/requests/{id}` | `HostController::decideRequest` | przekierowanie albo `error` (400) |
+| POST | `/host/requests/{id}` | `HostController::decideRequest` | przekierowanie albo `error` (400, 404) |
 | – | każdy inny adres lub metoda | `DefaultController::notFound` (status 404) | `not-found` |
 
 Parametry zapytania (query parameters):
@@ -229,9 +271,10 @@ Przepływ formularza (wzorzec Post/Redirect/Get):
 |---|---|
 | 303 | Poprawny formularz – przekierowanie (`redirect()`) |
 | 400 | Nieznana decyzja gospodarza, niepoprawne filtry w adresie |
-| 404 | Nieznany adres lub metoda, identyfikator niebędący liczbą albo mniejszy niż 1 |
+| 404 | Nieznany adres lub metoda, identyfikator niebędący liczbą, nieistniejący lokal lub rezerwacja, prośba z cudzego lokalu albo już z decyzją |
+| 409 | Anulowanie rezerwacji odrzuconej albo już anulowanej |
 | 422 | Błędne dane w formularzu `POST` |
-| 500 | Nieoczekiwany błąd – strona bez szczegółów technicznych |
+| 500 | Nieoczekiwany błąd, np. brak połączenia z bazą – strona bez szczegółów technicznych |
 
 Błędy wykonania: `public/index.php` wyłącza `display_errors` i zamienia ostrzeżenia PHP na wyjątki, a blok `try/catch` wokół routera zapisuje wyjątek w logu (`docker compose logs php`), czyści bufor z niedokończonym widokiem i pokazuje stronę 500.
 
@@ -352,13 +395,24 @@ Materiały Laboratorium 6 omawiają podstawy PHP i programowanie obiektowe, ale 
 - błędy walidacji dostają status 422, podczas gdy kod z Laboratorium 9 zwraca wtedy domyślne 200;
 - katalog `src/forms/` i wpis w `composer.json` naśladują konwencję `src/models/` i `src/repositories/` z Laboratorium 7.
 
+Laboratorium 7 jest wykonane na tabeli `reservations` zamiast `projects` – przykład z projektami został usunięty razem z kodem z Laboratorium 2, a rezerwacje mają w aplikacji działające akcje dla wszystkich statusów. Jak w instrukcji są: `src/Database.php` (1:1), skrypt w `database/` uruchamiany ręcznie przez `psql`, typy i ograniczenia tabeli (`GENERATED ALWAYS AS IDENTITY`, `NOT NULL`, nazwane `CHECK`, `TIMESTAMPTZ` z `DEFAULT CURRENT_TIMESTAMP`), model z konstruktorem i getterami, metody repozytorium (`findAll`, `find`, `save` z `RETURNING id`, `update`, `delete`, `mapRowTo…`) oraz wpisy `App\Model\` i `App\Repository\` w `composer.json`. Świadome różnice:
+
+- `config.php` czyta użytkownika, hasło i nazwę bazy ze zmiennych `POSTGRES_*` (z `.env`, przekazanych usłudze `php` w `docker-compose.yaml`) zamiast stałych `'docker'` – instrukcja sama zaleca to dla prawdziwej aplikacji, a `.env` z Laboratorium 1 ma już te wartości. Wartości ze zmiennych wymagają `define()`, bo `const` przyjmuje tylko wyrażenia znane przed uruchomieniem; `DB_HOST` i `DB_PORT` zostały stałymi z instrukcji;
+- usługa `db` zostaje z Laboratorium 1 (obraz z `docker/db/Dockerfile`, port 5433, dane z `.env`); z bloku z Laboratorium 7 doszły wolumen na dane (podpięty zadeklarowany już `pg-data` zamiast nowego `postgres_data`) i `healthcheck` z `pg_isready` dla użytkownika i bazy z `.env`;
+- repozytorium tworzy kontroler w konstruktorze, jak w Laboratorium 9 (`$this->users`), a nie `index.php` (krok 10) – router tworzy kontrolery bez argumentów;
+- repozytorium ma dodatkowo `findByStatus()` dla panelu gospodarza, a listę kolumn odczytu trzyma raz w stałej `SELECT` zamiast w każdej metodzie; `update()` zmienia tylko status, bo aplikacja nie edytuje innych pól wysłanej prośby; `delete()` jest zgodnie z zadaniem 5 (CRUD), ale aplikacja go nie wywołuje – anulowanie zmienia status, żeby historia rezerwacji została;
+- model `Reservation` ma obok `setId()` z instrukcji `setStatus()`, bo akceptacja, odrzucenie i anulowanie zmieniają status przed `update()`;
+- tabela ma jeden dodatkowy indeks (`status`, filtr panelu gospodarza) zamiast dwóch – żadne zapytanie nie sortuje po `created_at`;
+- `venue_id` nie ma jeszcze klucza obcego, bo lokale są przykładową tablicą w `VenueController` (Laboratorium 8), a najemcą każdej rezerwacji jest przykładowy użytkownik (Laboratorium 9), więc gospodarz Piotr Nowak widzi w panelu własne prośby;
+- skrypt testowy z kroku 11 (`var_dump`) nie trafił do repozytorium – zapis i odczyt sprawdzono formularzami aplikacji i w `psql`.
+
 ## Znane ograniczenia
 
 Wynikają z konfiguracji z laboratorium, do rozwiązania w kolejnych etapach:
 
 | Ograniczenie | Skutek | Rozwiązanie |
 |---|---|---|
-| Wolumen `pg-data` jest zadeklarowany, ale nie jest podpięty do usługi `db` | Po `docker compose down` i `up` baza jest pusta | Dodać `- pg-data:/var/lib/postgresql/data` do `volumes` usługi `db` |
+| Tabelę `reservations` tworzy się ręcznie skryptem z `database/` (krok 4 Laboratorium 7) | Po sklonowaniu repo i pierwszym `docker compose up` strony z rezerwacjami zwracają 500, dopóki nie uruchomi się skryptu | Przenieść skrypt do `docker/db/` (wykonywany przy starcie z pustą bazą) albo wprowadzić numerowane migracje |
 | Nginx ma domyślny limit 1 MB na żądanie | Upload większego pliku kończy się błędem 413, mimo limitu 512M w PHP | Dodać `client_max_body_size 512M;` w `nginx.conf` |
 | Brak `.dockerignore` | `COPY . .` kopiuje `.env` i `.git` do obrazu PHP | Dodać `.dockerignore` przed publikacją obrazu (np. przy deployu) |
 | Katalog `vendor/` nie jest w repozytorium i nie jest generowany przy starcie kontenera | Po sklonowaniu repo i `docker compose up` aplikacja zwraca `Fatal error`, dopóki nie uruchomi się `composer dump-autoload` | Uruchamiać `composer dump-autoload` przy starcie kontenera `php` (np. w `command` w `docker-compose.yaml`) |
@@ -369,6 +423,8 @@ Wynikają z konfiguracji z laboratorium, do rozwiązania w kolejnych etapach:
 ```
 .
 ├── AGENTS.md             # zasady pracy dla agentów AI w tym repozytorium
+├── config.php            # dane połączenia z bazą (ze zmiennych środowiskowych)
+├── database/             # skrypty SQL tworzące tabele (01-create-reservations.sql)
 ├── docker-compose.yaml   # definicja usług
 ├── .env.example          # wzór zmiennych środowiskowych
 ├── composer.json         # reguły autoloadingu PSR-4
@@ -385,8 +441,11 @@ Wynikają z konfiguracji z laboratorium, do rozwiązania w kolejnych etapach:
 │       └── partials/     # wspólny nagłówek i stopka
 ├── src/
 │   ├── Routing.php       # router: trasy i dopasowanie adresów (App\Routing)
+│   ├── Database.php      # połączenie PDO z PostgreSQL (App\Database)
 │   ├── controllers/      # AppController i kontrolery aplikacji (App\Controller)
-│   └── forms/            # formularze i ich walidacja (App\Form)
+│   ├── forms/            # formularze i ich walidacja (App\Form)
+│   ├── models/           # modele danych, np. Reservation (App\Model)
+│   └── repositories/     # zapytania SQL i mapowanie wierszy na modele (App\Repository)
 └── vendor/               # autoloader Composera (generowany, poza repozytorium)
 ```
 

@@ -4,14 +4,25 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
+use App\Database;
 use App\Form\ReservationForm;
 use App\Form\VenueFilterForm;
+use App\Model\Reservation;
+use App\Repository\ReservationRepository;
+use DateTimeImmutable;
 
 final class VenueController extends AppController
 {
     private const VENUE_STATUS_MESSAGES = [
-        'request-sent' => 'Formularz jest poprawny. Prośba o rezerwację zostanie zapisana, gdy aplikacja będzie miała bazę danych.',
+        'request-sent' => 'Prośba o rezerwację wysłana. Gospodarz ma 24 h na odpowiedź – status sprawdzisz w „Moich rezerwacjach”.',
     ];
+
+    private ReservationRepository $reservations;
+
+    public function __construct()
+    {
+        $this->reservations = new ReservationRepository((new Database())->connect());
+    }
 
     // TODO: Laboratorium 8 – lokale z bazy (repozytorium) zamiast przykładowych danych.
     // Okna gospodarza: dni tygodnia (1 = poniedziałek … 7 = niedziela) i godziny od–do dla każdego trybu.
@@ -112,7 +123,19 @@ final class VenueController extends AppController
         $form = new ReservationForm($venue, $_POST);
 
         if ($form->isValid()) {
-            // TODO: Laboratorium 8 – zapis prośby w bazie i blokada terminu na 24 h.
+            // TODO: Laboratorium 8 – sprawdzenie, czy wybrane godziny nie są już zajęte przez inne rezerwacje.
+            // Zaznaczone godziny idą jedna po drugiej, np. [18, 19, 20], więc rezerwacja kończy się o 21:00.
+            $this->reservations->save(new Reservation(
+                null,
+                $id,
+                $form->mode,
+                $form->purpose,
+                new DateTimeImmutable($form->date),
+                $form->hours[0],
+                $form->hours[count($form->hours) - 1] + 1,
+                $form->mode === 'seats' ? (int) $form->seats : null,
+                'pending',
+            ));
             $this->redirect('/venues/' . $id . '?status=request-sent');
         }
 

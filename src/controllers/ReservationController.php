@@ -4,39 +4,56 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
+use App\Database;
+use App\Repository\ReservationRepository;
+
 final class ReservationController extends AppController
 {
+    // Anulować można prośbę bez decyzji gospodarza i rezerwację już potwierdzoną.
+    private const CANCELLABLE_STATUSES = ['pending', 'accepted'];
+
     private const STATUS_MESSAGES = [
-        'cancelled' => 'Rezerwacja anulowana. Jej status zmieni się, gdy aplikacja będzie miała bazę danych.',
+        'cancelled' => 'Rezerwacja anulowana.',
     ];
 
-    // TODO: Laboratorium 8 – rezerwacje zalogowanego użytkownika z bazy zamiast przykładowych danych.
-    private const SAMPLE_RESERVATIONS = [
-        // Zalogowany gospodarz (Piotr) rezerwuje u innego gospodarza, więc wszystkie rezerwacje są w Kawiarni Pod Zegarem.
-        ['id' => 1, 'venueId' => 3, 'venueName' => 'Kawiarnia Pod Zegarem', 'date' => 'wt 18.11', 'hours' => '10:00–14:00', 'status' => 'pending'],
-        ['id' => 2, 'venueId' => 3, 'venueName' => 'Kawiarnia Pod Zegarem', 'date' => 'śr 19.11', 'hours' => '9:00–12:00', 'status' => 'accepted'],
-        ['id' => 3, 'venueId' => 3, 'venueName' => 'Kawiarnia Pod Zegarem', 'date' => 'pon 10.11', 'hours' => '12:00–15:00', 'status' => 'rejected'],
-    ];
+    private ReservationRepository $reservations;
+
+    public function __construct()
+    {
+        $this->reservations = new ReservationRepository((new Database())->connect());
+    }
 
     public function index(): void
     {
+        // TODO: Laboratorium 9 – tylko rezerwacje zalogowanego użytkownika (user_id z sesji).
         $this->render('reservations', [
             'pageTitle' => 'Moje rezerwacje – PoGodzinach',
             'stylesheet' => 'reservations',
             'activeNav' => 'reservations',
-            'reservations' => self::SAMPLE_RESERVATIONS,
+            'reservations' => $this->reservations->findAll(),
+            'venues' => array_column(VenueController::SAMPLE_VENUES, null, 'id'),
+            'cancellableStatuses' => self::CANCELLABLE_STATUSES,
             'statusMessage' => $this->statusMessage(self::STATUS_MESSAGES),
         ]);
     }
 
     public function cancel(int $id): void
     {
-        if (!in_array($id, array_column(self::SAMPLE_RESERVATIONS, 'id'), true)) {
+        $reservation = $this->reservations->find($id);
+
+        if ($reservation === null) {
             $this->renderError(404, 'Nie znaleziono rezerwacji', 'Rezerwacja o podanym numerze nie istnieje.');
             return;
         }
 
-        // TODO: Laboratorium 8 – zmiana statusu rezerwacji w bazie.
+        if (!in_array($reservation->getStatus(), self::CANCELLABLE_STATUSES, true)) {
+            $this->renderError(409, 'Nie można anulować', 'Ta rezerwacja jest już odrzucona albo anulowana.');
+            return;
+        }
+
+        // Rezerwacja zostaje w bazie ze statusem „anulowana”, żeby obie strony widziały historię.
+        $reservation->setStatus('cancelled');
+        $this->reservations->update($reservation);
         $this->redirect('/reservations?status=cancelled');
     }
 }
