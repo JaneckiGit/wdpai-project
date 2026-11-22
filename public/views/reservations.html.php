@@ -1,9 +1,11 @@
 <?php
+$dayNames = require __DIR__ . '/partials/day-names.php';
 // Status rezerwacji: etykieta i kolor plakietki ze wspólnych klas badge--….
 $statusLabels = [
     'pending' => ['Oczekuje na akceptację', 'warning'],
     'accepted' => ['Potwierdzona', 'success'],
     'rejected' => ['Odrzucona', 'danger'],
+    'cancelled' => ['Anulowana', 'muted'],
 ];
 ?>
 <?php require __DIR__ . '/partials/header.html.php'; ?>
@@ -13,14 +15,19 @@ $statusLabels = [
 
     <?php require __DIR__ . '/partials/status-message.html.php'; ?>
 
+    <?php if ($reservations === []): ?>
+        <p class="muted">Nie masz jeszcze rezerwacji. <a href="/venues">Znajdź lokal w Odkrywaj</a>.</p>
+    <?php endif; ?>
+
     <ul class="reservation-list">
         <?php foreach ($reservations as $reservation): ?>
+            <?php $date = $reservation->getDate(); ?>
             <li class="card reservation">
-                <a href="/venues/<?= $reservation['venueId'] ?>"><?= htmlspecialchars($reservation['venueName']) ?></a>
-                <span class="muted"><?= $reservation['date'] ?>, <?= $reservation['hours'] ?></span>
-                <span class="badge badge--<?= $statusLabels[$reservation['status']][1] ?>"><?= $statusLabels[$reservation['status']][0] ?></span>
-                <?php if ($reservation['status'] !== 'rejected'): ?>
-                    <form method="post" action="/reservations/<?= $reservation['id'] ?>/cancel">
+                <a href="/venues/<?= $reservation->getVenueId() ?>"><?= htmlspecialchars($venues[$reservation->getVenueId()]['name']) ?></a>
+                <span class="muted"><?= $dayNames[(int) $date->format('N')] . ' ' . $date->format('d.m') ?>, <?= $reservation->getStartHour() ?>:00–<?= $reservation->getEndHour() ?>:00</span>
+                <span class="badge badge--<?= $statusLabels[$reservation->getStatus()][1] ?>"><?= $statusLabels[$reservation->getStatus()][0] ?></span>
+                <?php if (in_array($reservation->getStatus(), $cancellableStatuses, true)): ?>
+                    <form method="post" action="/reservations/<?= $reservation->getId() ?>/cancel">
                         <button type="submit">Anuluj rezerwację</button>
                     </form>
                 <?php endif; ?>

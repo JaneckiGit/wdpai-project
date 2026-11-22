@@ -1,6 +1,6 @@
 <?php
 $purposes = require __DIR__ . '/partials/purposes.php';
-$dayNames = [1 => 'pon', 'wt', 'śr', 'czw', 'pt', 'sob', 'nd'];
+$dayNames = require __DIR__ . '/partials/day-names.php';
 $monthNames = [1 => 'styczeń', 'luty', 'marzec', 'kwiecień', 'maj', 'czerwiec', 'lipiec', 'sierpień', 'wrzesień', 'październik', 'listopad', 'grudzień'];
 
 // Teksty i ceny obu trybów; strona pokazuje tylko tryby, dla których gospodarz ma okno dostępności.
