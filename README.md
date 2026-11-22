@@ -90,7 +90,7 @@ docker compose exec php composer dump-autoload   # generuje vendor/autoload.php
 docker compose exec -T db sh -c 'psql -U "$POSTGRES_USER" -d "$POSTGRES_DB"' < database/01-create-reservations.sql   # tworzy tabelę rezerwacji (raz)
 ```
 
-Skrypt z `database/` uruchamia się raz, na pustej bazie – dane zostają potem w wolumenie `pg-data`, także po `docker compose down`. Polecenie bierze nazwę użytkownika i bazy ze zmiennych kontenera `db`, więc nie trzeba ich wpisywać.
+Skrypt z `database/` uruchamia się raz, na pustej bazie – dane zostają potem w wolumenie `pg-data`, także po `docker compose down`. Polecenie bierze nazwę użytkownika i bazy ze zmiennych kontenera `db`, więc nie trzeba ich wpisywać. Jeśli wolumen `pg-data` powstał wcześniej z innym hasłem, PostgreSQL pomija inicjalizację, a strony z rezerwacjami kończą się błędem 500 (`password authentication failed` w `docker compose logs php`) – wtedy `docker compose down -v` (usuwa dane bazy), ponowny start i skrypt z `database/`.
 
 Katalog `vendor/` nie jest w repozytorium, więc bez `composer dump-autoload` aplikacja kończy się błędem `Fatal error` (brak `vendor/autoload.php`).
 
