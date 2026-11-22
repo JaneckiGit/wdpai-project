@@ -4,37 +4,35 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
+use App\Database;
 use App\Form\HostApplicationForm;
 use App\Form\VenueForm;
+use App\Model\Reservation;
+use App\Repository\ReservationRepository;
 
 final class HostController extends AppController
 {
     private const REQUEST_DECISIONS = ['accept', 'reject'];
+    // Prośba bez decyzji gospodarza wygasa po tylu godzinach od wysłania.
+    private const REQUEST_HOURS_TO_DECIDE = 24;
 
     private const DASHBOARD_STATUS_MESSAGES = [
         'venue-submitted' => 'Formularz lokalu jest poprawny. Lokal trafi do weryfikacji, gdy aplikacja będzie miała bazę danych.',
         'venue-draft' => 'Szkic lokalu jest poprawny. Zostanie zapisany, gdy aplikacja będzie miała bazę danych.',
-        'request-accept' => 'Decyzja przyjęta: akceptacja. Status prośby zmieni się, gdy aplikacja będzie miała bazę danych.',
-        'request-reject' => 'Decyzja przyjęta: odrzucenie. Status prośby zmieni się, gdy aplikacja będzie miała bazę danych.',
+        'request-accept' => 'Rezerwacja zaakceptowana – najemca zobaczy ją jako potwierdzoną.',
+        'request-reject' => 'Prośba o rezerwację odrzucona.',
     ];
 
     private const APPLICATION_STATUS_MESSAGES = [
         'sent' => 'Wniosek jest poprawny. Administrator sprawdzi go, gdy aplikacja będzie miała bazę danych – decyzję dostaniesz e-mailem.',
     ];
 
-    // TODO: Laboratorium 8 – oczekujące prośby o rezerwację w lokalach zalogowanego gospodarza z bazy.
-    private const SAMPLE_REQUESTS = [
-        ['id' => 1, 'guest' => 'Marta Zielińska', 'company' => 'Studio Kadr', 'venueId' => 1, 'date' => 'nd 23.11',
-            'from' => 10, 'to' => 14, 'purpose' => 'shoots', 'mode' => 'exclusive', 'people' => 6, 'expiresInHours' => 6],
-        ['id' => 2, 'guest' => 'Ola Mazur', 'company' => '', 'venueId' => 1, 'date' => 'wt 18.11',
-            'from' => 9, 'to' => 13, 'purpose' => 'work', 'mode' => 'seats', 'people' => 2, 'expiresInHours' => 11],
-        ['id' => 3, 'guest' => 'Tomasz Wójcik', 'company' => '', 'venueId' => 2, 'date' => 'pon 24.11',
-            'from' => 10, 'to' => 14, 'purpose' => 'meetings', 'mode' => 'exclusive', 'people' => 14, 'expiresInHours' => 15],
-        ['id' => 4, 'guest' => 'Kuba Wiśniewski', 'company' => '', 'venueId' => 2, 'date' => 'pt 21.11',
-            'from' => 18, 'to' => 21, 'purpose' => 'work', 'mode' => 'seats', 'people' => 3, 'expiresInHours' => 20],
-        ['id' => 5, 'guest' => 'Anna Kowalska', 'company' => '', 'venueId' => 2, 'date' => 'czw 20.11',
-            'from' => 18, 'to' => 22, 'purpose' => 'work', 'mode' => 'seats', 'people' => 1, 'expiresInHours' => 23],
-    ];
+    private ReservationRepository $reservations;
+
+    public function __construct()
+    {
+        $this->reservations = new ReservationRepository((new Database())->connect());
+    }
 
     public function dashboard(): void
     {
@@ -44,28 +42,53 @@ final class HostController extends AppController
             $this->redirect('/host/apply');
         }
 
-        $venues = array_column(VenueController::SAMPLE_VENUES, null, 'id');
+        $venues = $this->hostVenues();
+
+        // Prośby to oczekujące rezerwacje w lokalach zalogowanego gospodarza.
+        $requests = array_filter(
+            $this->reservations->findByStatus('pending'),
+            static fn (Reservation $reservation): bool => isset($venues[$reservation->getVenueId()]),
+        );
 
         $this->render('host-dashboard', [
             'pageTitle' => 'Panel gospodarza – PoGodzinach',
             'stylesheet' => 'host',
             'activeNav' => 'host',
-            'requests' => array_map(fn (array $request): array => $this->withPrice($request, $venues[$request['venueId']]), self::SAMPLE_REQUESTS),
-            'venues' => array_filter($venues, static fn (array $venue): bool => $venue['host'] === self::CURRENT_USER['name']),
+            'requests' => array_map(fn (Reservation $reservation): array => $this->requestDetails($reservation, $venues[$reservation->getVenueId()]), $requests),
+            'venues' => $venues,
             'statusMessage' => $this->statusMessage(self::DASHBOARD_STATUS_MESSAGES),
         ]);
     }
 
-    /* Kwota prośby: miejsca × godziny × cena za miejsce albo godziny × cena za cały lokal. */
-    private function withPrice(array $request, array $venue): array
+    /** @return array<int, array> lokale zalogowanego gospodarza, kluczem jest id lokalu */
+    private function hostVenues(): array
     {
-        $isSeats = $request['mode'] === 'seats';
-        $hours = $request['to'] - $request['from'];
-        $price = $isSeats ? $venue['seatPrice'] : $venue['exclusivePrice'];
-        $count = $isSeats ? $request['people'] : 1;
+        return array_filter(
+            array_column(VenueController::SAMPLE_VENUES, null, 'id'),
+            static fn (array $venue): bool => $venue['host'] === self::CURRENT_USER['name'],
+        );
+    }
 
-        return $request + [
+    /* Dane prośby do widoku; kwota to miejsca × godziny × cena za miejsce albo godziny × cena za cały lokal. */
+    private function requestDetails(Reservation $reservation, array $venue): array
+    {
+        $isSeats = $reservation->getMode() === 'seats';
+        $hours = $reservation->getEndHour() - $reservation->getStartHour();
+        $price = $isSeats ? $venue['seatPrice'] : $venue['exclusivePrice'];
+        $count = $isSeats ? $reservation->getSeats() : 1;
+        $hoursSinceSent = intdiv(time() - $reservation->getCreatedAt()->getTimestamp(), 3600);
+
+        return [
+            'id' => $reservation->getId(),
+            // TODO: Laboratorium 9 – najemca z konta (user_id); do tego czasu rezerwuje przykładowy użytkownik.
+            'guest' => self::CURRENT_USER['name'],
             'venueName' => $venue['name'],
+            'date' => $reservation->getDate(),
+            'from' => $reservation->getStartHour(),
+            'to' => $reservation->getEndHour(),
+            'purpose' => $reservation->getPurpose(),
+            'mode' => $reservation->getMode(),
+            'expiresInHours' => max(0, self::REQUEST_HOURS_TO_DECIDE - $hoursSinceSent),
             'hours' => $hours,
             'price' => $price,
             'count' => $count,
@@ -77,12 +100,21 @@ final class HostController extends AppController
     {
         $decision = $_POST['decision'] ?? null;
 
-        if ($id < 1 || !in_array($decision, self::REQUEST_DECISIONS, true)) {
+        if (!in_array($decision, self::REQUEST_DECISIONS, true)) {
             $this->renderError(400, 'Nieprawidłowe żądanie', 'Nie rozpoznano decyzji dla tej prośby o rezerwację.');
             return;
         }
 
-        // TODO: Laboratorium 8 – zmiana statusu prośby w bazie.
+        $reservation = $this->reservations->find($id);
+
+        // Gospodarz decyduje tylko o oczekujących prośbach w swoich lokalach.
+        if ($reservation === null || $reservation->getStatus() !== 'pending' || !isset($this->hostVenues()[$reservation->getVenueId()])) {
+            $this->renderError(404, 'Nie znaleziono prośby', 'Prośba o rezerwację nie istnieje albo ma już decyzję.');
+            return;
+        }
+
+        $reservation->setStatus($decision === 'accept' ? 'accepted' : 'rejected');
+        $this->reservations->update($reservation);
         $this->redirect('/host?status=request-' . $decision);
     }
 

@@ -1,6 +1,7 @@
 <?php
 $purposes = require __DIR__ . '/partials/purposes.php';
 $initials = require __DIR__ . '/partials/initials.php';
+$dayNames = require __DIR__ . '/partials/day-names.php';
 $modes = ['seats' => ['Miejsca do pracy', 'fa-laptop'], 'exclusive' => ['Na wyłączność', 'fa-key']];
 $money = static fn (float $amount): string => number_format($amount, 2, ',', ' ') . ' zł';
 ?>
@@ -27,8 +28,8 @@ $money = static fn (float $amount): string => number_format($amount, 2, ',', ' '
                     <li class="list-item">
                         <span class="initials" aria-hidden="true"><?= htmlspecialchars($initials($request['guest'])) ?></span>
                         <div>
-                            <h3><?= htmlspecialchars($request['guest'] . ($request['company'] !== '' ? ' · ' . $request['company'] : '')) ?></h3>
-                            <p class="muted"><?= htmlspecialchars($request['venueName']) ?> · <?= $request['date'] ?>, <?= $request['from'] ?>:00–<?= $request['to'] ?>:00</p>
+                            <h3><?= htmlspecialchars($request['guest']) ?></h3>
+                            <p class="muted"><?= htmlspecialchars($request['venueName']) ?> · <?= $dayNames[(int) $request['date']->format('N')] . ' ' . $request['date']->format('d.m') ?>, <?= $request['from'] ?>:00–<?= $request['to'] ?>:00</p>
                         </div>
                         <span class="badge <?= $request['expiresInHours'] <= 6 ? 'badge--warning' : 'badge--muted' ?>">
                             <i class="fa-regular fa-clock" aria-hidden="true"></i> wygasa za <?= $request['expiresInHours'] ?> h
@@ -37,7 +38,9 @@ $money = static fn (float $amount): string => number_format($amount, 2, ',', ' '
                         <p class="list-item__row">
                             <span class="chip chip--small"><i class="fa-solid <?= $purposes[$request['purpose']][1] ?>" aria-hidden="true"></i> <?= $purposes[$request['purpose']][0] ?></span>
                             <span class="badge badge--<?= $request['mode'] ?>"><i class="fa-solid <?= $modes[$request['mode']][1] ?>" aria-hidden="true"></i> <?= $modes[$request['mode']][0] ?></span>
-                            <span class="muted">· <?= $request['mode'] === 'seats' ? $request['people'] . ($request['people'] === 1 ? ' miejsce' : ' miejsca') : $request['people'] . ' osób' ?></span>
+                            <?php if ($request['mode'] === 'seats'): ?>
+                                <span class="muted">· <?= $request['count'] ?> <?= $request['count'] === 1 ? 'miejsce' : 'miejsca' ?></span>
+                            <?php endif; ?>
                         </p>
 
                         <div class="list-item__row request__footer">
