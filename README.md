@@ -63,7 +63,7 @@ Gotowy jest szkielet MVC z laboratoriów oraz szablony HTML pięciu widoków z p
 | Zostań gospodarzem | Adres `/host/apply`: wniosek o rolę gospodarza w czterech kartach (dane kontaktowe z imieniem i nazwiskiem z konta, firma z NIP-em, pierwszy lokal, opis z licznikiem znaków), zgoda na regulamin i karta „Jak to działa”; walidacja w `HostApplicationForm`, po wysłaniu komunikat (zapis wniosku i zatwierdzanie przez administratora w Laboratoriach 8–9) |
 | Dodaj lokal | Formularz według prototypu: kroki po lewej (po wysłaniu „!” przy sekcji z błędem i „✓” przy pozostałych), nazwa, typ, adres z mapą Mapbox i pinezką do przeciągnięcia (współrzędne trafiają do formularza), opis z licznikiem znaków, karty celów, pola zdjęć i rolki, tabela okien dostępności z przyciskami „Dodaj okno” i usuwania, sposób wejścia, pasek z przyciskami; walidacja wykrywa nakładające się okna; szkic i wysłanie do weryfikacji |
 | Panel administratora | Adres `/admin` (link i dostęp tylko dla administratora dojdą z rolami w Laboratorium 9): wnioski o rolę gospodarza z danymi firmy i lokalu, lokale do akceptacji, tabela użytkowników z działającą wyszukiwarką (`?q=`) i filtrami grup (`?group=hosts`, `?group=blocked`); przyciski decyzji mają na razie tylko wygląd |
-| Obsługa błędów | Kontrolowane odpowiedzi 400, 404, 422 i 500 (sekcja „Formularze i obsługa błędów”) |
+| Obsługa błędów | Kontrolowane odpowiedzi 400, 404, 409, 422 i 500 (sekcja „Formularze i obsługa błędów”) |
 
 Widoki to semantyczny HTML. W pełni ostylowane są widoki Logowanie, Rejestracja, Odkrywaj, Lokal i rezerwacja, Moje rezerwacje, Panel gospodarza, Zostań gospodarzem, Dodaj lokal oraz Panel administratora, a także wspólny nagłówek z nawigacją i menu konta i stopka (opis w sekcji „Style CSS”), pozostałe widoki mają tylko style bazowe (kolory, fonty, linki, fokus). Na każdej stronie działa motyw jasny i ciemny (Laboratorium 5, sekcja „Motyw jasny i ciemny”). Dane w widokach są przykładowe, wzięte z prototypu – listy oznaczone komentarzem `TODO` będą wyświetlane w pętli z danych z bazy. Formularze są sprawdzane po stronie serwera. Rezerwacje są zapisywane w PostgreSQL (Laboratorium 7, sekcja „Baza danych”); dane z pozostałych formularzy nie są jeszcze nigdzie zapisywane (Laboratoria 8–9). Lokale w Odkrywaj i na stronie lokalu to przykładowa tablica w `VenueController`, którą filtry naprawdę zawężają; w Laboratorium 8 zastąpi ją baza. Pliki z formularza „Dodaj lokal” nie są jeszcze zapisywane (Laboratorium 13); przesuwanie pinezki po wpisaniu adresu (geokodowanie przez Fetch API) dojdzie w Laboratorium 11. Ochrona CSRF i sprawdzanie hasła dojdą w Laboratorium 9. Linki do zaplanowanych, jeszcze nieistniejących stron (np. `/terms`, a w menu konta „Zmień hasło” i „Usuń konto”, które zadziałają w Laboratorium 9) kończą się odpowiedzią 404. Przełącznika języka jeszcze nie ma.
 
@@ -215,11 +215,11 @@ Przepływ od żądania do danych: przeglądarka → `public/index.php` i router 
 | POST | `/venues/{id}/reservations` | `VenueController::requestReservation` | przekierowanie albo `venue` z błędami |
 | GET | `/reservations` | `ReservationController::index` | `reservations` (Moje rezerwacje) |
 | GET | `/admin` | `AdminController::dashboard` | `admin` (Panel administratora) |
-| POST | `/reservations/{id}/cancel` | `ReservationController::cancel` | przekierowanie albo `error` (404) |
+| POST | `/reservations/{id}/cancel` | `ReservationController::cancel` | przekierowanie albo `error` (404, 409) |
 | GET | `/host` | `HostController::dashboard` | `host-dashboard` (Panel gospodarza) |
 | GET, POST | `/host/apply` | `HostController::apply` | `host-application` (Zostań gospodarzem) |
 | GET, POST | `/host/venues/new` | `HostController::addVenue` | `add-venue` (Dodaj lokal) |
-| POST | `/host/requests/{id}` | `HostController::decideRequest` | przekierowanie albo `error` (400) |
+| POST | `/host/requests/{id}` | `HostController::decideRequest` | przekierowanie albo `error` (400, 404) |
 | – | każdy inny adres lub metoda | `DefaultController::notFound` (status 404) | `not-found` |
 
 Parametry zapytania (query parameters):
@@ -271,9 +271,10 @@ Przepływ formularza (wzorzec Post/Redirect/Get):
 |---|---|
 | 303 | Poprawny formularz – przekierowanie (`redirect()`) |
 | 400 | Nieznana decyzja gospodarza, niepoprawne filtry w adresie |
-| 404 | Nieznany adres lub metoda, identyfikator niebędący liczbą albo mniejszy niż 1 |
+| 404 | Nieznany adres lub metoda, identyfikator niebędący liczbą, nieistniejący lokal lub rezerwacja, prośba z cudzego lokalu albo już z decyzją |
+| 409 | Anulowanie rezerwacji odrzuconej albo już anulowanej |
 | 422 | Błędne dane w formularzu `POST` |
-| 500 | Nieoczekiwany błąd – strona bez szczegółów technicznych |
+| 500 | Nieoczekiwany błąd, np. brak połączenia z bazą – strona bez szczegółów technicznych |
 
 Błędy wykonania: `public/index.php` wyłącza `display_errors` i zamienia ostrzeżenia PHP na wyjątki, a blok `try/catch` wokół routera zapisuje wyjątek w logu (`docker compose logs php`), czyści bufor z niedokończonym widokiem i pokazuje stronę 500.
 
