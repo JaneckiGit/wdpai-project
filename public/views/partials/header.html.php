@@ -37,15 +37,17 @@
         </ul>
     </nav>
 
+    <!-- Strona błędu serwera nie ma konta (null), więc nie pokazuje menu konta. -->
+    <?php if ($currentUser !== null): ?>
     <!-- Atrybut popover: przeglądarka sama otwiera menu po kliknięciu avatara i zamyka je klawiszem Esc albo kliknięciem obok. -->
-    <button class="avatar" type="button" popovertarget="account-menu" aria-label="Konto: <?= htmlspecialchars($currentUser['name']) ?>"></button>
+    <button class="avatar" type="button" popovertarget="account-menu" aria-label="Konto: <?= htmlspecialchars($currentUser->getName()) ?>"></button>
     <div class="account-menu" id="account-menu" popover>
         <div class="account-menu__user">
             <span class="avatar" aria-hidden="true"></span>
             <div>
-                <p class="account-menu__name"><?= htmlspecialchars($currentUser['name']) ?></p>
-                <p class="account-menu__email"><?= htmlspecialchars($currentUser['email']) ?></p>
-                <span class="account-menu__role"><?= htmlspecialchars($currentUser['role']) ?></span>
+                <p class="account-menu__name"><?= htmlspecialchars($currentUser->getName()) ?></p>
+                <p class="account-menu__email"><?= htmlspecialchars($currentUser->getEmail()) ?></p>
+                <span class="account-menu__role"><?= $currentUser->isAdmin() ? 'Administrator' : ($currentUser->isHost() ? 'Gospodarz' : 'Najemca') ?></span>
             </div>
         </div>
         <a href="/account/password"><i class="fa-solid fa-lock" aria-hidden="true"></i> Zmień hasło</a>
@@ -56,4 +58,5 @@
             <button type="submit"><i class="fa-solid fa-right-from-bracket" aria-hidden="true"></i> Wyloguj się</button>
         </form>
     </div>
+    <?php endif; ?>
 </header>

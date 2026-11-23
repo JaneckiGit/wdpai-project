@@ -11,7 +11,7 @@ $money = static fn (float $amount): string => number_format($amount, 2, ',', ' '
     <?php require __DIR__ . '/partials/status-message.html.php'; ?>
 
     <div class="host__header">
-        <h1>Dzień dobry, <?= htmlspecialchars(explode(' ', $currentUser['name'])[0]) ?></h1>
+        <h1>Dzień dobry, <?= htmlspecialchars($currentUser->getFirstName()) ?></h1>
         <a class="button" href="/host/venues/new"><i class="fa-solid fa-plus" aria-hidden="true"></i> Dodaj lokal</a>
     </div>
 

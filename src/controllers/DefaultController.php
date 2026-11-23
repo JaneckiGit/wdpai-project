@@ -39,8 +39,9 @@ final class DefaultController extends AppController
         ]);
     }
 
+    /* Bez konta w nagłówku: błąd mógł przyjść z bazy, więc ta strona nie może jej potrzebować. */
     public function serverError(): void
     {
-        $this->renderError(500, 'Błąd serwera', 'Coś poszło nie tak po naszej stronie. Spróbuj ponownie za chwilę.');
+        $this->renderError(500, 'Błąd serwera', 'Coś poszło nie tak po naszej stronie. Spróbuj ponownie za chwilę.', ['currentUser' => null]);
     }
 }
