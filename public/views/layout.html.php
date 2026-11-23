@@ -29,9 +29,13 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Newsreader:opsz,wght@6..72,400..700&display=swap">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" referrerpolicy="no-referrer">
-    <link rel="stylesheet" href="/css/style.css">
+    <?php
+    // Czas zmiany pliku w adresie (?v=…) – po każdej zmianie CSS przeglądarka pobiera nowy plik zamiast starego z pamięci podręcznej.
+    $asset = static fn (string $path): string => $path . '?v=' . filemtime(dirname(__DIR__) . $path);
+    ?>
+    <link rel="stylesheet" href="<?= $asset('/css/style.css') ?>">
     <?php if (isset($stylesheet)): ?>
-        <link rel="stylesheet" href="/css/<?= htmlspecialchars($stylesheet) ?>.css">
+        <link rel="stylesheet" href="<?= htmlspecialchars($asset('/css/' . $stylesheet . '.css')) ?>">
     <?php endif; ?>
 </head>
 <body>
@@ -47,6 +51,6 @@
 
     <?= $content ?>
 
-    <script src="/js/theme.js" defer></script>
+    <script src="<?= $asset('/js/theme.js') ?>" defer></script>
 </body>
 </html>
