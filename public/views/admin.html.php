@@ -11,9 +11,10 @@ $filterUrl = static fn (string $group): string => '/admin?' . http_build_query(a
 ?>
 <?php require __DIR__ . '/partials/header.html.php'; ?>
 
-<!-- TODO: Laboratorium 8 i 9 – przyciski decyzji zapiszą zmiany w bazie; do tego czasu mają tylko wygląd (type="button"). -->
 <main class="page stack admin">
     <h1>Panel administratora</h1>
+
+    <?php require __DIR__ . '/partials/status-message.html.php'; ?>
 
     <section class="card panel" aria-labelledby="applications-heading">
         <h2 id="applications-heading">Wnioski o rolę gospodarza <span class="count"><?= count($applications) ?></span></h2>
@@ -39,10 +40,10 @@ $filterUrl = static fn (string $group): string => '/admin?' . http_build_query(a
                     </dl>
                     <p class="list-item__row">„<?= htmlspecialchars($application['message']) ?>”</p>
 
-                    <div class="list-item__row actions admin__decision">
-                        <button class="button button--outline" type="button">Odrzuć</button>
-                        <button class="button" type="button"><i class="fa-solid fa-check" aria-hidden="true"></i> Zatwierdź</button>
-                    </div>
+                    <form class="list-item__row actions actions--end" action="/admin/applications/<?= $application['id'] ?>" method="post">
+                        <button class="button button--outline" type="submit" name="decision" value="reject">Odrzuć</button>
+                        <button class="button" type="submit" name="decision" value="approve"><i class="fa-solid fa-check" aria-hidden="true"></i> Zatwierdź</button>
+                    </form>
                 </li>
             <?php endforeach; ?>
         </ul>
@@ -76,10 +77,10 @@ $filterUrl = static fn (string $group): string => '/admin?' . http_build_query(a
                                 <i class="fa-solid fa-video" aria-hidden="true"></i> <?= $venue['hasReel'] ? 'Rolka czeka na zatwierdzenie' : 'Bez rolki' ?>
                             </span>
                         </p>
-                        <div class="actions">
-                            <button class="button button--outline" type="button">Odrzuć</button>
-                            <button class="button" type="button"><i class="fa-solid fa-check" aria-hidden="true"></i> Opublikuj</button>
-                        </div>
+                        <form class="actions" action="/admin/venues/<?= $venue['id'] ?>" method="post">
+                            <button class="button button--outline" type="submit" name="decision" value="reject">Odrzuć</button>
+                            <button class="button" type="submit" name="decision" value="publish"><i class="fa-solid fa-check" aria-hidden="true"></i> Opublikuj</button>
+                        </form>
                     </div>
                 </li>
             <?php endforeach; ?>
@@ -105,6 +106,9 @@ $filterUrl = static fn (string $group): string => '/admin?' . http_build_query(a
         </div>
 
         <?php require __DIR__ . '/partials/form-errors.html.php'; ?>
+        <?php if (isset($userStatusMessage)): ?>
+            <p class="status-message" role="status"><?= htmlspecialchars($userStatusMessage) ?></p>
+        <?php endif; ?>
 
         <div class="admin__table">
             <table>
@@ -128,22 +132,19 @@ $filterUrl = static fn (string $group): string => '/admin?' . http_build_query(a
                             </td>
                             <td>
                                 <span class="badge badge--<?= $statuses[$user['status']][1] ?>"><i class="<?= $statuses[$user['status']][2] ?>" aria-hidden="true"></i> <?= $statuses[$user['status']][0] ?></span>
-                                <?php if ($user['status'] === 'blocked'): ?>
-                                    <span class="muted">powód: <?= htmlspecialchars($user['blockReason']) ?></span>
-                                <?php endif; ?>
                             </td>
                             <td><?= $user['lastSeen'] ?></td>
                             <td>
-                                <div class="actions admin__user-actions">
-                                <?php if ($user['isHost']): ?>
-                                    <button class="button button--outline" type="button">Odbierz rolę gospodarza</button>
-                                <?php endif; ?>
-                                <?php if ($user['status'] === 'blocked'): ?>
-                                    <button class="button button--outline admin__unblock" type="button">Odblokuj</button>
-                                <?php else: ?>
-                                    <button class="button button--outline admin__block" type="button">Zablokuj</button>
-                                <?php endif; ?>
-                                </div>
+                                <form class="actions actions--end" action="/admin/users/<?= $user['id'] ?>" method="post">
+                                    <?php if ($user['isHost']): ?>
+                                        <button class="button button--outline" type="submit" name="action" value="revoke-host">Odbierz rolę gospodarza</button>
+                                    <?php endif; ?>
+                                    <?php if ($user['status'] === 'blocked'): ?>
+                                        <button class="button button--outline admin__unblock" type="submit" name="action" value="unblock">Odblokuj</button>
+                                    <?php else: ?>
+                                        <button class="button button--outline admin__block" type="submit" name="action" value="block">Zablokuj</button>
+                                    <?php endif; ?>
+                                </form>
                             </td>
                         </tr>
                     <?php endforeach; ?>

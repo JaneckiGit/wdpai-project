@@ -4,10 +4,6 @@
     gap: var(--space-2);
 }
 
-.admin__decision {
-    justify-content: flex-end;
-}
-
 /* Dane z wniosku w szarym polu: telefon, firma, lokal. */
 .application {
     display: grid;
@@ -154,10 +150,6 @@
 
 .admin__user strong {
     display: block;
-}
-
-.admin__user-actions {
-    justify-content: flex-end;
 }
 
 .actions .admin__block,

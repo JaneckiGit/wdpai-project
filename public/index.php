@@ -51,6 +51,9 @@ $routing->get('/host/venues/new', HostController::class, 'addVenue');
 $routing->post('/host/venues/new', HostController::class, 'addVenue');
 $routing->post('/host/requests/{id}', HostController::class, 'decideRequest');
 $routing->get('/admin', AdminController::class, 'dashboard');
+$routing->post('/admin/applications/{id}', AdminController::class, 'decideApplication');
+$routing->post('/admin/venues/{id}', AdminController::class, 'decideVenue');
+$routing->post('/admin/users/{id}', AdminController::class, 'updateUser');
 
 try {
     $routeFound = $routing->dispatch(
