@@ -132,37 +132,19 @@ $filterUrl = static fn (string $group): string => '/admin?' . http_build_query(a
                             </td>
                             <td>
                                 <span class="badge badge--<?= $statuses[$user['status']][1] ?>"><i class="<?= $statuses[$user['status']][2] ?>" aria-hidden="true"></i> <?= $statuses[$user['status']][0] ?></span>
-                                <?php if ($user['status'] === 'blocked'): ?>
-                                    <span class="muted">powód: <?= htmlspecialchars($user['blockReason']) ?></span>
-                                <?php endif; ?>
                             </td>
                             <td><?= $user['lastSeen'] ?></td>
                             <td>
-                                <!-- #users w adresie: po wysłaniu (także przy błędzie 422) strona wraca do tabeli z komunikatem. -->
-                                <form class="actions actions--end" action="/admin/users/<?= $user['id'] ?>#users" method="post">
+                                <form class="actions actions--end" action="/admin/users/<?= $user['id'] ?>" method="post">
                                     <?php if ($user['isHost']): ?>
                                         <button class="button button--outline" type="submit" name="action" value="revoke-host">Odbierz rolę gospodarza</button>
                                     <?php endif; ?>
                                     <?php if ($user['status'] === 'blocked'): ?>
                                         <button class="button button--outline admin__unblock" type="submit" name="action" value="unblock">Odblokuj</button>
                                     <?php else: ?>
-                                        <button class="button button--outline admin__block" type="button" popovertarget="block-<?= $user['id'] ?>">Zablokuj</button>
+                                        <button class="button button--outline admin__block" type="submit" name="action" value="block">Zablokuj</button>
                                     <?php endif; ?>
                                 </form>
-                                <?php if ($user['status'] !== 'blocked'): ?>
-                                    <!-- Okienko z powodem blokady otwiera atrybut popover, jak menu konta – bez JavaScriptu. -->
-                                    <form class="card admin__block-form" id="block-<?= $user['id'] ?>" action="/admin/users/<?= $user['id'] ?>#users" method="post" popover>
-                                        <input type="hidden" name="action" value="block">
-                                        <div class="field">
-                                            <label for="block-reason-<?= $user['id'] ?>">Powód blokady: <?= htmlspecialchars($user['name']) ?></label>
-                                            <textarea id="block-reason-<?= $user['id'] ?>" name="reason" rows="3" maxlength="<?= $maxReasonLength ?>" required></textarea>
-                                        </div>
-                                        <div class="actions actions--end">
-                                            <button class="button button--secondary" type="button" popovertarget="block-<?= $user['id'] ?>" popovertargetaction="hide">Anuluj</button>
-                                            <button class="button button--danger" type="submit">Zablokuj</button>
-                                        </div>
-                                    </form>
-                                <?php endif; ?>
                             </td>
                         </tr>
                     <?php endforeach; ?>

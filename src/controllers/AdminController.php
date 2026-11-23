@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
-use App\Form\BlockUserForm;
 use App\Form\UserFilterForm;
 
 // TODO: Laboratorium 9 – panel tylko dla zalogowanego administratora (rola z sesji).
@@ -60,19 +59,31 @@ final class AdminController extends AppController
         ['id' => 3, 'name' => 'Tomasz Wrona', 'email' => 'tomasz.wrona@example.com', 'isHost' => true, 'status' => 'active', 'lastSeen' => 'wczoraj 21:40'],
         ['id' => 4, 'name' => 'Marta Zielińska', 'email' => 'marta.zielinska@example.com', 'isHost' => false, 'status' => 'active', 'lastSeen' => 'wczoraj 21:05'],
         ['id' => 5, 'name' => 'Tomasz Wójcik', 'email' => 'tomasz.wojcik@example.com', 'isHost' => false, 'status' => 'active', 'lastSeen' => 'wczoraj 16:30'],
-        ['id' => 6, 'name' => 'Adam Nowicki', 'email' => 'adam.nowicki@example.com', 'isHost' => false, 'status' => 'blocked', 'lastSeen' => '12.11',
-            'blockReason' => 'spam w prośbach o rezerwację'],
+        ['id' => 6, 'name' => 'Adam Nowicki', 'email' => 'adam.nowicki@example.com', 'isHost' => false, 'status' => 'blocked', 'lastSeen' => '12.11'],
     ];
 
     public function dashboard(): void
     {
         $form = new UserFilterForm($_GET);
+        $isValid = $form->isValid();
 
-        if (!$form->isValid()) {
+        if (!$isValid) {
             http_response_code(400);
         }
 
-        $this->renderDashboard($form, $form->errors());
+        $this->render('admin', [
+            'pageTitle' => 'Panel administratora – PoGodzinach',
+            'stylesheet' => 'admin',
+            'activeNav' => '',
+            'applications' => self::SAMPLE_APPLICATIONS,
+            'pendingVenues' => self::SAMPLE_PENDING_VENUES,
+            'users' => $isValid ? $this->findUsers($form) : [],
+            'groups' => UserFilterForm::GROUPS,
+            'form' => $form,
+            'errors' => $form->errors(),
+            'statusMessage' => $this->statusMessage(self::STATUS_MESSAGES),
+            'userStatusMessage' => $this->statusMessage(self::USER_STATUS_MESSAGES),
+        ]);
     }
 
     public function decideApplication(int $id): void
@@ -137,36 +148,7 @@ final class AdminController extends AppController
             return;
         }
 
-        if ($action === 'block') {
-            $form = new BlockUserForm($_POST);
-
-            if (!$form->isValid()) {
-                http_response_code(422);
-                $this->renderDashboard(new UserFilterForm([]), $form->errors());
-                return;
-            }
-        }
-
         $this->redirect('/admin?status=user-' . $action . '#users');
-    }
-
-    /** @param array<string, string> $errors błędy filtra użytkowników albo formularza blokady */
-    private function renderDashboard(UserFilterForm $form, array $errors): void
-    {
-        $this->render('admin', [
-            'pageTitle' => 'Panel administratora – PoGodzinach',
-            'stylesheet' => 'admin',
-            'activeNav' => '',
-            'applications' => self::SAMPLE_APPLICATIONS,
-            'pendingVenues' => self::SAMPLE_PENDING_VENUES,
-            'users' => $form->errors() === [] ? $this->findUsers($form) : [],
-            'groups' => UserFilterForm::GROUPS,
-            'maxReasonLength' => BlockUserForm::MAX_REASON_LENGTH,
-            'form' => $form,
-            'errors' => $errors,
-            'statusMessage' => $this->statusMessage(self::STATUS_MESSAGES),
-            'userStatusMessage' => $this->statusMessage(self::USER_STATUS_MESSAGES),
-        ]);
     }
 
     /* Użytkownik pasuje, gdy należy do wybranej grupy i ma szukaną frazę w imieniu albo e-mailu. */

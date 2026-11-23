@@ -152,21 +152,6 @@
     display: block;
 }
 
-/* Okienko „Zablokuj” z polem na powód; przeglądarka wyświetla je na środku ekranu nad stroną.
-   display ustawiamy tylko dla otwartego okienka – inaczej nadpisałby ukrywanie zamkniętego popover. */
-.admin__block-form {
-    width: min(26rem, 100% - 2 * var(--space-2));
-    padding: var(--space-3);
-    box-shadow: var(--shadow-soft);
-    color: var(--color-text);
-}
-
-.admin__block-form:popover-open {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-2);
-}
-
 .actions .admin__block,
 .actions .admin__unblock {
     border-color: var(--color-border);
