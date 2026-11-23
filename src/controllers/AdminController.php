@@ -21,15 +21,15 @@ final class AdminController extends AppController
     private const STATUS_MESSAGES = [
         'application-approve' => 'Wniosek zatwierdzony. Użytkownik dostanie rolę gospodarza, gdy decyzje o wnioskach trafią do bazy danych.',
         'application-reject' => 'Wniosek odrzucony. Decyzja zapisze się, gdy decyzje o wnioskach trafią do bazy danych.',
-        'venue-publish' => 'Lokal opublikowany. Decyzja zapisze się w kolejnym kroku.',
-        'venue-reject' => 'Lokal odrzucony. Decyzja zapisze się w kolejnym kroku.',
+        'venue-publish' => 'Lokal opublikowany – jest już widoczny w Odkrywaj.',
+        'venue-reject' => 'Lokal odrzucony – gospodarz zobaczy status w swoim panelu.',
     ];
 
     // Akcje na kontach przekierowują do tabeli użytkowników (#users), więc ich komunikat pokazuje się przy tabeli.
     private const USER_STATUS_MESSAGES = [
-        'user-block' => 'Użytkownik zablokowany. Zmiana zapisze się w kolejnym kroku.',
-        'user-unblock' => 'Użytkownik odblokowany. Zmiana zapisze się w kolejnym kroku.',
-        'user-revoke-host' => 'Rola gospodarza odebrana. Zmiana zapisze się w kolejnym kroku.',
+        'user-block' => 'Użytkownik zablokowany.',
+        'user-unblock' => 'Użytkownik odblokowany.',
+        'user-revoke-host' => 'Rola gospodarza odebrana.',
     ];
 
     private UserRepository $users;
@@ -104,6 +104,8 @@ final class AdminController extends AppController
             return;
         }
 
+        $venue->setStatus($decision === 'publish' ? 'published' : 'rejected');
+        $this->venues->update($venue);
         $this->redirect('/admin?status=venue-' . $decision);
     }
 
@@ -135,6 +137,12 @@ final class AdminController extends AppController
             return;
         }
 
+        match ($action) {
+            'block' => $user->block(),
+            'unblock' => $user->unblock(),
+            'revoke-host' => $user->revokeHostRole(),
+        };
+        $this->users->update($user);
         $this->redirect('/admin?status=user-' . $action . '#users');
     }
 }
