@@ -817,20 +817,28 @@ textarea[aria-invalid="true"] {
     font-weight: 600;
 }
 
-.account-menu a {
+/* „Wyloguj się” to przycisk formularza (POST /logout), więc wygląda tak samo jak linki menu. */
+.account-menu a,
+.account-menu button {
     display: flex;
     align-items: center;
     gap: 0.625rem;
+    width: 100%;
     height: 2.75rem;
     padding: 0 0.625rem;
+    border: 0;
     border-radius: 0.625rem;
+    background: none;
     color: var(--color-text);
+    font: inherit;
     font-size: 0.875rem;
     font-weight: 500;
     text-decoration: none;
+    cursor: pointer;
 }
 
-.account-menu a:hover {
+.account-menu a:hover,
+.account-menu button:hover {
     background: var(--color-surface-muted);
 }
 

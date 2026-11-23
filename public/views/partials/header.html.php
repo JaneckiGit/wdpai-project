@@ -38,7 +38,6 @@
     </nav>
 
     <!-- Atrybut popover: przeglądarka sama otwiera menu po kliknięciu avatara i zamyka je klawiszem Esc albo kliknięciem obok. -->
-    <!-- TODO: Laboratorium 9 – działające „Zmień hasło” i „Usuń konto”. -->
     <button class="avatar" type="button" popovertarget="account-menu" aria-label="Konto: <?= htmlspecialchars($currentUser['name']) ?>"></button>
     <div class="account-menu" id="account-menu" popover>
         <div class="account-menu__user">
@@ -52,6 +51,9 @@
         <a href="/account/password"><i class="fa-solid fa-lock" aria-hidden="true"></i> Zmień hasło</a>
         <a class="account-menu__danger" href="/account/delete"><i class="fa-solid fa-trash" aria-hidden="true"></i> Usuń konto</a>
         <hr>
-        <a href="/login"><i class="fa-solid fa-right-from-bracket" aria-hidden="true"></i> Wyloguj się</a>
+        <!-- Wylogowanie zmienia stan, więc jest formularzem POST, a nie linkiem (jak w Laboratorium 9). -->
+        <form action="/logout" method="post">
+            <button type="submit"><i class="fa-solid fa-right-from-bracket" aria-hidden="true"></i> Wyloguj się</button>
+        </form>
     </div>
 </header>
