@@ -7,8 +7,6 @@ namespace App\Form;
 /* Pola jak w rejestracji z Laboratorium 9, plus zgoda na regulamin. */
 final class RegisterForm extends Form
 {
-    private const MIN_PASSWORD_LENGTH = 8;
-
     public readonly string $name;
     public readonly string $email;
     public readonly bool $termsAccepted;
@@ -31,14 +29,7 @@ final class RegisterForm extends Form
         }
 
         $this->requireEmail('email', $this->email);
-
-        if (mb_strlen($this->password) < self::MIN_PASSWORD_LENGTH) {
-            $this->addError('password', 'Hasło musi mieć co najmniej 8 znaków.');
-        }
-
-        if ($this->password !== $this->passwordConfirmation) {
-            $this->addError('passwordConfirmation', 'Hasła nie są takie same.');
-        }
+        $this->requireNewPassword('password', $this->password, 'passwordConfirmation', $this->passwordConfirmation);
 
         if (!$this->termsAccepted) {
             $this->addError('terms', 'Zaakceptuj regulamin, aby założyć konto.');
