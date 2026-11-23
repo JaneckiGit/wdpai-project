@@ -12,6 +12,26 @@ final class DefaultController extends AppController
         $this->redirect('/venues');
     }
 
+    public function terms(): void
+    {
+        $this->renderInProgress('Regulamin');
+    }
+
+    public function contact(): void
+    {
+        $this->renderInProgress('Kontakt');
+    }
+
+    /* Strona z linku w stopce lub formularzu, której treść jeszcze powstaje. */
+    private function renderInProgress(string $heading): void
+    {
+        $this->render('in-progress', [
+            'pageTitle' => $heading . ' – PoGodzinach',
+            'activeNav' => '',
+            'heading' => $heading,
+        ]);
+    }
+
     public function notFound(): void
     {
         $this->render('not-found', [
