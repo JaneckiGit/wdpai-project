@@ -56,10 +56,10 @@ Gotowy jest szkielet MVC z laboratoriów oraz szablony HTML pięciu widoków z p
 | Strona główna | Adres `/` przekierowuje do Odkrywaj |
 | Logowanie | E-mail i hasło; walidacja i przekierowanie do Odkrywaj (bez sprawdzania hasła, które dojdzie w Laboratorium 9) |
 | Rejestracja | Formularz z walidacją po stronie serwera jak w Laboratorium 9; po poprawnym wysłaniu przekierowanie na logowanie z komunikatem (zapis konta w bazie w Laboratorium 9) |
-| Odkrywaj | Mapa Mapbox z pinezkami cen obok kolumny kart lokali; filtry celu i trybu jako linki (`?purpose=…&mode=…`) oraz fraza z wyszukiwarki w nagłówku; na telefonie przełącznik „Rolki / Mapa” |
-| Moje rezerwacje | Lista rezerwacji z bazy PostgreSQL (lokal, termin, status: oczekuje, potwierdzona, odrzucona, anulowana); „Anuluj rezerwację” przy oczekującej lub potwierdzonej zmienia status na „anulowana” |
-| Lokal i rezerwacja | Lokal o id z adresu: ścieżka, zdjęcie, gospodarz, opis, cele, oferta, udogodnienia, wejście i podpisy rolek „Nagrane tutaj”; panel rezerwacji jak w prototypie: tryb, cel, 7 kafelków dni i lista godzin z okien dostępności gospodarza, liczba miejsc z przyciskami −/+ i podsumowanie kwoty (`reservation.js`); poprawna prośba zapisuje się w bazie jako oczekująca; nieznane id daje 404 |
-| Panel gospodarza | Tylko dla gospodarza – pozostali są przekierowywani do wniosku o rolę (rola z `$currentUser`, w Laboratorium 9 z sesji). Powitanie zalogowanego gospodarza i przycisk „Dodaj lokal”; oczekujące rezerwacje z bazy w lokalach gospodarza (lista przewijana w karcie) z terminem, czasem do wygaśnięcia (24 h od wysłania), celem, trybem i kwotą; Akceptuj / Odrzuć zmieniają status rezerwacji w bazie (komunikat po przekierowaniu); karty lokali gospodarza z cenami trybów |
+| Odkrywaj | Opublikowane lokale z bazy: mapa Mapbox z pinezkami cen obok kolumny kart lokali; filtry celu i trybu jako linki (`?purpose=…&mode=…`) oraz fraza z wyszukiwarki w nagłówku zawężają zapytanie SQL; na telefonie przełącznik „Rolki / Mapa” |
+| Moje rezerwacje | Rezerwacje zalogowanego konta z bazy PostgreSQL (lokal, termin, status: oczekuje, potwierdzona, odrzucona, anulowana); „Anuluj rezerwację” przy oczekującej lub potwierdzonej zmienia status na „anulowana”, cudza rezerwacja daje 404 |
+| Lokal i rezerwacja | Opublikowany lokal z bazy o id z adresu: ścieżka, zdjęcie, gospodarz, opis, cele, oferta z okien dostępności, udogodnienia i sposób wejścia (instrukcja wejścia nie jest pokazywana przed akceptacją); panel rezerwacji jak w prototypie: tryb, cel, 7 kafelków dni i lista godzin z okien dostępności gospodarza, liczba miejsc z przyciskami −/+ i podsumowanie kwoty (`reservation.js`); poprawna prośba zapisuje się w bazie jako oczekująca; nieznane id albo lokal nieopublikowany daje 404 |
+| Panel gospodarza | Tylko dla gospodarza – pozostali są przekierowywani do wniosku o rolę (rola z `$currentUser`, w Laboratorium 9 z sesji). Powitanie zalogowanego gospodarza i przycisk „Dodaj lokal”; oczekujące rezerwacje z bazy w lokalach gospodarza (lista przewijana w karcie) z najemcą, terminem, czasem do wygaśnięcia (24 h od wysłania), celem, trybem i kwotą z ceny okna; Akceptuj / Odrzuć zmieniają status rezerwacji w bazie (komunikat po przekierowaniu); karty lokali gospodarza z bazy ze statusem (szkic, czeka na weryfikację, opublikowany, odrzucony) i cenami trybów – stronę lokalu otwiera tylko karta opublikowanego |
 | Zostań gospodarzem | Adres `/host/apply`: wniosek o rolę gospodarza w czterech kartach (dane kontaktowe z imieniem i nazwiskiem z konta, firma z NIP-em, pierwszy lokal, opis z licznikiem znaków), zgoda na regulamin i karta „Jak to działa”; walidacja w `HostApplicationForm`, po wysłaniu komunikat (zapis wniosku i zatwierdzanie przez administratora w Laboratoriach 8–9) |
 | Dodaj lokal | Formularz według prototypu: kroki po lewej (po wysłaniu „!” przy sekcji z błędem i „✓” przy pozostałych), nazwa, typ, adres z mapą Mapbox i pinezką do przeciągnięcia (współrzędne trafiają do formularza), opis z licznikiem znaków, karty celów, pola zdjęć i rolki, tabela okien dostępności z przyciskami „Dodaj okno” i usuwania, sposób wejścia, pasek z przyciskami; walidacja wykrywa nakładające się okna; szkic i wysłanie do weryfikacji |
 | Panel administratora | Adres `/admin` (link i dostęp tylko dla administratora dojdą z rolami w Laboratorium 9): wnioski o rolę gospodarza z danymi firmy i lokalu, lokale do akceptacji, tabela użytkowników z działającą wyszukiwarką (`?q=`) i filtrami grup (`?group=hosts`, `?group=blocked`); przyciski decyzji to formularze POST z walidacją i komunikatem po przekierowaniu: zatwierdź / odrzuć wniosek, opublikuj / odrzuć lokal, odbierz rolę gospodarza, zablokuj i odblokuj (komunikat po akcji na koncie pokazuje się przy tabeli użytkowników); zapis decyzji w bazie dojdzie z tabelami wniosków, lokali i kont |
@@ -67,7 +67,7 @@ Gotowy jest szkielet MVC z laboratoriów oraz szablony HTML pięciu widoków z p
 | Regulamin, Kontakt | Strony z linków w stopce i formularzach (`/terms`, `/contact`) z informacją na środku, że są w przygotowaniu |
 | Obsługa błędów | Kontrolowane odpowiedzi 400, 404, 409, 422 i 500 (sekcja „Formularze i obsługa błędów”) |
 
-Widoki to semantyczny HTML. W pełni ostylowane są widoki Logowanie, Rejestracja, Odkrywaj, Lokal i rezerwacja, Moje rezerwacje, Panel gospodarza, Zostań gospodarzem, Dodaj lokal, Panel administratora, Zmień hasło, Usuń konto, Regulamin i Kontakt, a także wspólny nagłówek z nawigacją i menu konta i stopka (opis w sekcji „Style CSS”), pozostałe widoki mają tylko style bazowe (kolory, fonty, linki, fokus). Na każdej stronie działa motyw jasny i ciemny (Laboratorium 5, sekcja „Motyw jasny i ciemny”). Dane w widokach są przykładowe, wzięte z prototypu – listy oznaczone komentarzem `TODO` będą wyświetlane w pętli z danych z bazy. Formularze są sprawdzane po stronie serwera. Rezerwacje są zapisywane w PostgreSQL (Laboratorium 7, sekcja „Baza danych”); dane z pozostałych formularzy nie są jeszcze nigdzie zapisywane (Laboratoria 8–9). Lokale w Odkrywaj i na stronie lokalu to przykładowa tablica w `VenueController`, którą filtry naprawdę zawężają; w Laboratorium 8 zastąpi ją baza. Pliki z formularza „Dodaj lokal” nie są jeszcze zapisywane (Laboratorium 13); przesuwanie pinezki po wpisaniu adresu (geokodowanie przez Fetch API) dojdzie w Laboratorium 11. Ochrona CSRF i sprawdzanie hasła dojdą w Laboratorium 9. Regulamin i Kontakt to strony „w trakcie przygotowania”. Przełącznika języka jeszcze nie ma.
+Widoki to semantyczny HTML. W pełni ostylowane są widoki Logowanie, Rejestracja, Odkrywaj, Lokal i rezerwacja, Moje rezerwacje, Panel gospodarza, Zostań gospodarzem, Dodaj lokal, Panel administratora, Zmień hasło, Usuń konto, Regulamin i Kontakt, a także wspólny nagłówek z nawigacją i menu konta i stopka (opis w sekcji „Style CSS”), pozostałe widoki mają tylko style bazowe (kolory, fonty, linki, fokus). Na każdej stronie działa motyw jasny i ciemny (Laboratorium 5, sekcja „Motyw jasny i ciemny”). Lokale, konto w nagłówku, rezerwacje i panel gospodarza korzystają z PostgreSQL (Laboratoria 7–8, sekcja „Baza danych”); panel administratora ma jeszcze przykładowe dane z prototypu. Formularze są sprawdzane po stronie serwera. Rezerwacje są zapisywane w bazie; dane z pozostałych formularzy nie są jeszcze nigdzie zapisywane (kolejne kroki Laboratorium 8 i Laboratorium 9). Pliki z formularza „Dodaj lokal” nie są jeszcze zapisywane (Laboratorium 13); przesuwanie pinezki po wpisaniu adresu (geokodowanie przez Fetch API) dojdzie w Laboratorium 11. Ochrona CSRF i sprawdzanie hasła dojdą w Laboratorium 9. Regulamin i Kontakt to strony „w trakcie przygotowania”. Przełącznika języka jeszcze nie ma.
 
 ## Tech stack
 
@@ -91,11 +91,19 @@ docker compose up --build -d
 docker compose exec php composer dump-autoload   # generuje vendor/autoload.php
 ```
 
-Przy pierwszym starcie z pustą bazą kontener `db` wykonuje po kolei skrypty z `database/` – tworzy tabele i wgrywa dane demonstracyjne (sekcja „Baza danych”). Dane zostają potem w wolumenie `pg-data`, także po `docker compose down`. Skrypty startowe działają tylko na pustej bazie, więc gdy wolumen `pg-data` powstał wcześniej, nowe skrypty trzeba wykonać ręcznie (polecenie bierze nazwę użytkownika i bazy ze zmiennych kontenera `db`):
+Przy pierwszym starcie z pustą bazą kontener `db` wykonuje po kolei skrypty z `database/` – tworzy tabele i wgrywa dane demonstracyjne (sekcja „Baza danych”). Dane zostają potem w wolumenie `pg-data`, także po `docker compose down`. Skrypty startowe działają tylko na pustej bazie, więc gdy wolumen `pg-data` powstał wcześniej, nowe skrypty trzeba wykonać ręcznie (polecenie bierze nazwę użytkownika i bazy ze zmiennych kontenera `db`). Baza z samą tabelą `reservations` (Laboratorium 7) potrzebuje skryptów 02–07:
 
 ```bash
-for f in database/0[2-6]-*.sql; do docker compose exec -T db sh -c 'psql -U "$POSTGRES_USER" -d "$POSTGRES_DB"' < "$f"; done
+for f in database/0[2-7]-*.sql; do docker compose exec -T db sh -c 'psql -U "$POSTGRES_USER" -d "$POSTGRES_DB"' < "$f"; done
 ```
+
+Baza, która ma już skrypty 02–06, potrzebuje tylko nowego:
+
+```bash
+docker compose exec -T db sh -c 'psql -U "$POSTGRES_USER" -d "$POSTGRES_DB"' < database/07-add-reservation-keys.sql
+```
+
+Bez nowych tabel strony czytające lokale i konto kończą się błędem 500 (`relation "users" does not exist` w `docker compose logs php`).
 
 Jeśli wolumen `pg-data` powstał wcześniej z innym hasłem, PostgreSQL pomija inicjalizację, a strony z rezerwacjami kończą się błędem 500 (`password authentication failed` w `docker compose logs php`) – wtedy `docker compose down -v` (usuwa dane bazy) i ponowny start, który wykona wszystkie skrypty od nowa.
 
@@ -164,15 +172,15 @@ Bardziej szczegółowe reguły (np. `App\Controller\`, `App\Model\`) mają pierw
 |---|---|---|
 | Front Controller | `public/index.php` | Konfiguracja błędów i strefy czasowej, rejestracja tras, uruchomienie routera, obsługa 404 i 500 |
 | Router | `src/Routing.php` | Dopasowanie metody i adresu do kontrolera i akcji |
-| Kontroler bazowy | `src/controllers/AppController.php` | Wspólne renderowanie widoków i stron błędów, `isPost()`, `redirect()`, komunikaty statusu; każdy widok dostaje `$currentUser` – do Laboratorium 9 przykładowego gospodarza Piotra Nowaka (nagłówek, menu konta, powitanie w panelu; flaga `isHost` decyduje, czy `/host` pokazuje panel, czy przekierowuje do wniosku) |
+| Kontroler bazowy | `src/controllers/AppController.php` | Wspólne renderowanie widoków i stron błędów, `isPost()`, `redirect()`, komunikaty statusu; każdy widok dostaje `$currentUser` – encję `User` wczytaną z bazy raz na żądanie; do Laboratorium 9 jest to konto demo gospodarza `piotr.nowak@example.com` (nagłówek, menu konta, powitanie w panelu; `isHost()` decyduje, czy `/host` pokazuje panel, czy przekierowuje do wniosku). Strona błędu 500 podaje `currentUser => null`, więc działa także przy awarii bazy |
 | Kontrolery | `src/controllers/*Controller.php` | Wybór widoku i danych dla danej trasy, koordynacja formularza i przekierowania |
 | Formularze | `src/forms/*Form.php` | Dane wpisane przez użytkownika i reguły ich walidacji |
 | Połączenie z bazą | `config.php`, `src/Database.php` | Dane połączenia (ze zmiennych środowiskowych) i utworzenie obiektu PDO z wyjątkami, wynikami jako tablice asocjacyjne i natywnymi prepared statements |
-| Repozytoria | `src/repositories/*Repository.php` | Cały SQL danej tabeli i zamiana wierszy na modele |
-| Modele | `src/models/*.php` | Dane jednego rekordu z typami; nie znają PDO ani SQL |
+| Repozytoria | `src/repositories/*Repository.php` | Cały SQL danej tabeli i zamiana wierszy na modele (`VenueRepository`, `ReservationRepository`, `UserRepository`) |
+| Modele | `src/models/*.php` | Encje jednego rekordu z prywatnymi polami i getterami (`Venue`, `AvailabilityWindow`, `Reservation`, `User`) oraz Value Object `HourRange`; nie znają PDO ani SQL |
 | Layout | `public/views/layout.html.php` | Wspólny dokument HTML: `<head>`, skrypt motywu, arkusze stylów (opcjonalny arkusz widoku ze zmiennej `$stylesheet`), przełącznik motywu, `theme.js` |
 | Widoki | `public/views/*.html.php` | Semantyczny HTML z danymi od kontrolera |
-| Wspólne fragmenty widoków | `public/views/partials/*.html.php` | Nagłówek z nawigacją i menu konta, lewa kolumna logowania i rejestracji, stopka, lista błędów formularza, komunikat statusu lista celów rezerwacji z etykietami i ikonami (`purposes.php`), typy lokalu (`venue-types.php`, klucze w `Form::VENUE_TYPES`) , skróty dni tygodnia (`day-names.php`) oraz funkcja inicjałów do kółek z osobą (`initials.php`), dołączane do widoków przez `require` |
+| Wspólne fragmenty widoków | `public/views/partials/*.html.php` | Nagłówek z nawigacją i menu konta, lewa kolumna logowania i rejestracji, stopka, lista błędów formularza, komunikat statusu lista celów rezerwacji z etykietami i ikonami (`purposes.php`), typy lokalu (`venue-types.php`, klucze w `Form::VENUE_TYPES`) , udogodnienia z ikonami i opisami (`amenities.php`), skróty dni tygodnia (`day-names.php`) oraz funkcja inicjałów do kółek z osobą (`initials.php`), dołączane do widoków przez `require` |
 | Autoloader | `composer.json`, `vendor/autoload.php` | Wczytywanie plików klas na podstawie namespace |
 
 Nagłówek i stopka są wspólne dla wielu widoków, więc nie są kopiowane do każdego szablonu. Widok dołącza je instrukcją `<?php require __DIR__ . '/partials/header.html.php'; ?>`. Dołączony plik ma dostęp do tych samych zmiennych co widok, dlatego nagłówek korzysta ze zmiennej `$activeNav` przekazanej z kontrolera i oznacza bieżącą pozycję menu atrybutem `aria-current="page"`. Działa to też w drugą stronę: nagłówek ustawia zmienną `$themeToggleInHeader`, a layout (wykonywany po widoku w tej samej metodzie `render()`) dołącza pływający przełącznik motywu tylko wtedy, gdy tej zmiennej nie ma.
@@ -189,6 +197,7 @@ PostgreSQL 17 działa w usłudze `db`, a PHP łączy się z nią przez PDO (`pdo
 | `04-create-venues.sql` | Lokale, ich cele, udogodnienia, okna dostępności i dni okien |
 | `05-create-host-applications.sql` | Wnioski o rolę gospodarza |
 | `06-demo-data.sql` | Dane demonstracyjne (konta, 5 lokali, okna, wnioski) |
+| `07-add-reservation-keys.sql` | Klucze obce rezerwacji do konta (`user_id`) i lokalu (`venue_id`) |
 
 ```mermaid
 erDiagram
@@ -198,6 +207,8 @@ erDiagram
     VENUES ||--o{ VENUE_AMENITIES : "ma"
     VENUES ||--o{ AVAILABILITY_WINDOWS : "udostępnia"
     AVAILABILITY_WINDOWS ||--o{ WINDOW_DAYS : "obejmuje"
+    USERS ||--o{ RESERVATIONS : "rezerwuje"
+    VENUES ||--o{ RESERVATIONS : "przyjmuje"
 
     USERS {
         bigint id PK
@@ -266,7 +277,8 @@ erDiagram
     }
     RESERVATIONS {
         bigint id PK
-        bigint venue_id "klucz obcy do VENUES dojdzie w kolejnym kroku"
+        bigint user_id FK "najemca"
+        bigint venue_id FK
         varchar mode "seats | exclusive"
         varchar purpose "work | meetings | shoots | events"
         date reservation_date
@@ -279,7 +291,7 @@ erDiagram
     }
 ```
 
-**Klucze obce i `ON DELETE`.** Wszystkie klucze obce mają `ON DELETE CASCADE`: usunięcie konta usuwa jego lokale i wnioski (strona „Usuń konto” to zapowiada), a usunięcie lokalu – jego cele, udogodnienia i okna, bo bez lokalu nie mają znaczenia; usunięcie okna usuwa jego dni. `ON UPDATE` zostaje domyślne, bo identyfikatory nadaje baza i się nie zmieniają. `reservations.venue_id` dostanie klucz obcy razem z `user_id` w kolejnym kroku, gdy aplikacja zacznie czytać lokale i konta z bazy.
+**Klucze obce i `ON DELETE`.** Wszystkie klucze obce mają `ON DELETE CASCADE`: usunięcie konta usuwa jego lokale i wnioski (strona „Usuń konto” to zapowiada), a usunięcie lokalu – jego cele, udogodnienia i okna, bo bez lokalu nie mają znaczenia; usunięcie okna usuwa jego dni. Tak samo rezerwacje (skrypt 07): bez lokalu albo konta najemcy nie mają sensu. `ON UPDATE` zostaje domyślne, bo identyfikatory nadaje baza i się nie zmieniają. Skrypt 07 przed `SET NOT NULL` przypisuje rezerwacje zapisane wcześniej (bez `user_id`) do konta demo, z którego aplikacja rezerwuje do Laboratorium 9, więc działa także na bazie z istniejącymi wierszami.
 
 **Normalizacja.** Cele, udogodnienia i dni okna są osobnymi wierszami z kluczem złożonym, a nie listą w jednej kolumnie; ceny i liczba miejsc należą do okna dostępności, bo gospodarz może mieć kilka okien w jednym trybie z różnymi cenami.
 
@@ -298,7 +310,7 @@ erDiagram
 | `anna.kowalska@example.com` | Najemca z oczekującym wnioskiem o rolę gospodarza |
 | `adam.nowicki@example.com` | Konto zablokowane |
 
-Na tym etapie aplikacja zapisuje i czyta z bazy rezerwacje; lokale, konta, wnioski i panel administratora przechodzą na tabele z diagramu w kolejnych krokach Laboratorium 8.
+Na tym etapie aplikacja czyta z bazy lokale (z celami, udogodnieniami i oknami), konto w nagłówku i rezerwacje; wnioski i panel administratora przechodzą na tabele z diagramu w kolejnym kroku Laboratorium 8.
 
 Statusy zmieniają akcje aplikacji:
 
@@ -308,7 +320,29 @@ Statusy zmieniają akcje aplikacji:
 | Gospodarz akceptuje albo odrzuca prośbę w swoim lokalu | `POST /host/requests/{id}` | `pending` → `accepted` / `rejected` |
 | Najemca anuluje rezerwację | `POST /reservations/{id}/cancel` | `pending` / `accepted` → `cancelled` |
 
-Przepływ od żądania do danych: przeglądarka → `public/index.php` i router → kontroler (`VenueController`, `ReservationController`, `HostController`) → `ReservationRepository` → PDO → PostgreSQL → wiersz tablicy → model `Reservation` → kontroler i widok. Kontroler tworzy repozytorium w konstruktorze z połączeniem z `(new Database())->connect()`; repozytorium wykonuje SQL wyłącznie przez `prepare()` i `execute()` z parametrami (`query()` tylko dla stałego zapytania bez danych z zewnątrz), więc dane użytkownika nie stają się częścią składni zapytania. Błąd połączenia kończy się stroną 500, a szczegóły trafiają do logu.
+Przepływ od żądania do danych: przeglądarka → `public/index.php` i router → kontroler (`VenueController`, `ReservationController`, `HostController`) → repozytorium (`VenueRepository`, `ReservationRepository`, `UserRepository`) → PDO → PostgreSQL → wiersz tablicy → encja (`Venue`, `Reservation`, `User`) → kontroler i widok, który czyta dane getterami (`$venue->getName()`). Kontroler tworzy repozytoria w konstruktorze z jednym połączeniem z `(new Database())->connect()`; repozytorium wykonuje SQL wyłącznie przez `prepare()` i `execute()` z parametrami (`query()` tylko dla stałego zapytania bez danych z zewnątrz), więc dane użytkownika nie stają się częścią składni zapytania. Błąd połączenia kończy się stroną 500, a szczegóły trafiają do logu.
+
+### Mapowanie wierszy na obiekty (Laboratorium 8)
+
+Repozytorium pobiera wiersz jako tablicę asocjacyjną i ręcznie zamienia go na encję (`mapRowToVenue()`, `mapRowToReservation()`, `mapRowToUser()`), a widok używa już tylko getterów – nie zna nazw kolumn ani struktury bazy. Porównanie trybów pobierania z instrukcji:
+
+| Tryb | Co zwraca | Dlaczego nie / dlaczego tak w projekcie |
+|---|---|---|
+| `PDO::FETCH_ASSOC` | Tablicę `['name' => …]` | Używany: domyślny tryb z `Database.php`; daje pełną kontrolę nad mapowaniem |
+| `PDO::FETCH_OBJ` | Obiekt `stdClass` (`$row->name`) | Krótsza składnia, ale to nie jest klasa aplikacji – bez metod i typów |
+| `PDO::FETCH_CLASS` | Obiekt wskazanej klasy | Wymaga publicznych właściwości o nazwach kolumn i omija konstruktor; encje mają prywatne pola z typami |
+
+Ręczne mapowanie robi też to, czego `FETCH_CLASS` nie zrobi: rzutuje `NUMERIC` (PDO zwraca go jako napis, np. `'15.00'`) na `float`, zamienia napis z `string_agg` (np. `'work,meetings'`) na tablicę kodów, tworzy `DateTimeImmutable` i Value Object `HourRange` z godzin okna.
+
+Typy obiektów z instrukcji w projekcie:
+
+| Typ | Klasa | Cechy |
+|---|---|---|
+| Entity (encja) | `Venue`, `AvailabilityWindow`, `Reservation`, `User` | Ma id (tożsamość), odwzorowuje wiersz, zawiera logikę, np. `Venue::isPublished()`, `Venue::getWindow($mode)`, `AvailabilityWindow::isOpenOn($weekday)` |
+| Value Object | `HourRange` | Bez id, niemutowalny, walidacja w konstruktorze (godziny 0–24, początek przed końcem); `includes($hour)` sprawdza godziny rezerwacji w `ReservationForm` |
+| DTO | – | Dojdzie przy zapisie lokalu z formularza „Dodaj lokal” (kolejny krok) |
+
+Odczyt lokalu to dwa zapytania: lokal z gospodarzem (`JOIN users`) oraz celami i udogodnieniami sklejonymi przez `string_agg` w podzapytaniach, a potem okna lokalu z dniami (też `string_agg`). Podzapytania zamiast `JOIN`-ów z tabelami celów, udogodnień i okien, bo każdy taki `JOIN` mnożyłby wiersze lokalu. Rezerwacje łączą się z lokalem i kontem najemcy (`JOIN venues`, `JOIN users`), więc panel gospodarza filtruje prośby po `venues.host_id` w SQL.
 
 ## Routing
 
@@ -359,7 +393,7 @@ curl -i http://localhost:8080/venues/abc
 curl -i "http://localhost:8080/venues?purpose=zzz"
 ```
 
-Drugi adres zwraca 404, bo `{id}` przyjmuje tylko cyfry. Pierwszy wyświetla widok lokalu, a formularz rezerwacji wysyła dane na `/venues/2/reservations`. Trzeci zwraca 400, bo cel spoza listy jest błędem. Lokal o id spoza przykładowych danych (np. `/venues/9`) też zwraca 404.
+Drugi adres zwraca 404, bo `{id}` przyjmuje tylko cyfry. Pierwszy wyświetla widok lokalu, a formularz rezerwacji wysyła dane na `/venues/2/reservations`. Trzeci zwraca 400, bo cel spoza listy jest błędem. Lokal, którego nie ma w bazie (np. `/venues/9`) albo który nie jest opublikowany (`/venues/4` – czeka na akceptację), też zwraca 404.
 
 ## Formularze i obsługa błędów
 
@@ -388,7 +422,7 @@ Przepływ formularza (wzorzec Post/Redirect/Get):
 |---|---|
 | 303 | Poprawny formularz – przekierowanie (`redirect()`) |
 | 400 | Nieznana decyzja gospodarza lub administratora, nieznana akcja na koncie użytkownika, niepoprawne filtry w adresie |
-| 404 | Nieznany adres lub metoda, identyfikator niebędący liczbą, nieistniejący lokal lub rezerwacja, prośba z cudzego lokalu albo już z decyzją, nieistniejący wniosek, lokal do akceptacji albo użytkownik |
+| 404 | Nieznany adres lub metoda, identyfikator niebędący liczbą, nieistniejący lub nieopublikowany lokal, nieistniejąca lub cudza rezerwacja, prośba z cudzego lokalu albo już z decyzją, nieistniejący wniosek, lokal do akceptacji albo użytkownik |
 | 409 | Anulowanie rezerwacji odrzuconej albo już anulowanej; blokada zablokowanego, odblokowanie aktywnego albo odebranie roli komuś, kto nie jest gospodarzem |
 | 422 | Błędne dane w formularzu `POST` |
 | 500 | Nieoczekiwany błąd, np. brak połączenia z bazą – strona bez szczegółów technicznych |
@@ -519,12 +553,22 @@ Laboratorium 7 jest wykonane na tabeli `reservations` zamiast `projects` – prz
 - `config.php` czyta użytkownika, hasło i nazwę bazy ze zmiennych `POSTGRES_*` (z `.env`, przekazanych usłudze `php` w `docker-compose.yaml`) zamiast stałych `'docker'` – instrukcja sama zaleca to dla prawdziwej aplikacji, a `.env` z Laboratorium 1 ma już te wartości. Wartości ze zmiennych wymagają `define()`, bo `const` przyjmuje tylko wyrażenia znane przed uruchomieniem; `DB_HOST` i `DB_PORT` zostały stałymi z instrukcji;
 - usługa `db` zostaje z Laboratorium 1 (obraz z `docker/db/Dockerfile`, port 5433, dane z `.env`); z bloku z Laboratorium 7 doszły wolumen na dane (podpięty zadeklarowany już `pg-data` zamiast nowego `postgres_data`) i `healthcheck` z `pg_isready` dla użytkownika i bazy z `.env`; katalog skryptów startowych (`/docker-entrypoint-initdb.d`) wskazuje na `database/` zamiast pustego `docker/db/` z Laboratorium 1, żeby `docker compose up` na pustej bazie od razu tworzył schemat i dane demonstracyjne zamiast ręcznego uruchamiania skryptu z kroku 4;
 - repozytorium tworzy kontroler w konstruktorze, jak w Laboratorium 9 (`$this->users`), a nie `index.php` (krok 10) – router tworzy kontrolery bez argumentów;
-- repozytorium ma dodatkowo `findByStatus()` dla panelu gospodarza, a listę kolumn odczytu trzyma raz w stałej `SELECT` zamiast w każdej metodzie; `update()` zmienia tylko status, bo aplikacja nie edytuje innych pól wysłanej prośby; `delete()` jest zgodnie z zadaniem 5 (CRUD), ale aplikacja go nie wywołuje – anulowanie zmienia status, żeby historia rezerwacji została;
+- repozytorium ma dodatkowo `findByUser()` (Moje rezerwacje) i `findPendingByHost()` (panel gospodarza), a listę kolumn odczytu trzyma raz w stałej `SELECT` zamiast w każdej metodzie; `findAll()` z instrukcji zostało, choć aplikacja pokazuje tylko rezerwacje jednego konta; `update()` zmienia tylko status, bo aplikacja nie edytuje innych pól wysłanej prośby; `delete()` jest zgodnie z zadaniem 5 (CRUD), ale aplikacja go nie wywołuje – anulowanie zmienia status, żeby historia rezerwacji została;
 - model `Reservation` ma obok `setId()` z instrukcji `setStatus()`, bo akceptacja, odrzucenie i anulowanie zmieniają status przed `update()`;
 - tabela ma jeden dodatkowy indeks (`status`, filtr panelu gospodarza) zamiast dwóch – żadne zapytanie nie sortuje po `created_at`;
-- `venue_id` nie ma jeszcze klucza obcego, bo lokale są przykładową tablicą w `VenueController` (Laboratorium 8), a najemcą każdej rezerwacji jest przykładowy użytkownik (Laboratorium 9), więc gospodarz Piotr Nowak widzi w panelu własne prośby;
+- tabela z Laboratorium 7 nie miała kluczy obcych, bo lokali i kont nie było jeszcze w bazie; doszły w skrypcie 07 razem z kolumną `user_id` (Laboratorium 8). Do Laboratorium 9 aplikacja rezerwuje z konta demo `piotr.nowak@example.com`, więc gospodarz Piotr Nowak widzi w panelu także własne prośby;
 - skrypt testowy z kroku 11 (`var_dump`) nie trafił do repozytorium – zapis i odczyt sprawdzono formularzami aplikacji i w `psql`;
 - tabela `users` ma kolumny i unikalny indeks e-maila 1:1 z Laboratorium 9 (`BIGSERIAL`, `TIMESTAMP`), a dodane kolumny (`is_host`, `is_admin`, `blocked_at`, `last_seen_at`) używają `TIMESTAMPTZ` jak reszta schematu; tabela powstała wcześniej niż logowanie, bo lokale, rezerwacje i wnioski potrzebują właściciela.
+
+Laboratorium 8 (mapowanie obiektów) jest wykonane na lokalach, oknach dostępności, kontach i rezerwacjach zamiast tabeli `cards`. Jak w instrukcji są: katalog `src/models/` z encjami (prywatne pola, konstruktor, gettery, metody z logiką), zapytanie z `FETCH_ASSOC` i ręczne mapowanie tablicy na obiekt w repozytorium, widoki na getterach zamiast kluczy tablic oraz Value Object wzorowany na `CardMetadata`. Świadome różnice:
+
+- metody nazywają się `find()` / `findBy…()` jak w repozytorium z Laboratorium 7, a nie `getCard()`; repozytorium dostaje połączenie w konstruktorze (konwencja z Laboratorium 7) zamiast wołać `$this->database->connect()` w każdej metodzie, a parametry przekazuje tablicą do `execute()` zamiast `bindParam()` – wynik jest ten sam;
+- `fetch()` nie podaje `PDO::FETCH_ASSOC`, bo to domyślny tryb ustawiony w `Database.php` (1:1 z Laboratorium 7);
+- encje deklarują pola z typami w konstruktorze (`private int $id` – promocja właściwości z PHP 8) zamiast pól bez typu i przypisań w ciele konstruktora;
+- `FETCH_CLASS` nie jest używany (opisany w tabeli w sekcji „Baza danych”), bo wymaga publicznych pól;
+- `HourRange` ma akcesory bez przedrostka `get` jak `CardMetadata` (`start()`, `end()`), a błąd zgłasza `InvalidArgumentException` zamiast ogólnego `Exception`;
+- DTO z instrukcji (`CreateCardDTO`) dojdzie przy zapisie lokalu z formularza „Dodaj lokal”;
+- kolumn bez odpowiednika w prototypie bazy nie dodano: zdjęcia i rolka zostają ilustracją do Laboratorium 13, podpis rolki to nazwa lokalu, teksty udogodnień są w `partials/amenities.php` (w bazie tylko kody, jak przy celach), a dni okna są wypisywane z numerów dni (np. „pon–pt”, „niedziele”).
 
 ## Znane ograniczenia
 
@@ -535,6 +579,8 @@ Wynikają z konfiguracji z laboratorium, do rozwiązania w kolejnych etapach:
 | Nginx ma domyślny limit 1 MB na żądanie | Upload większego pliku kończy się błędem 413, mimo limitu 512M w PHP | Dodać `client_max_body_size 512M;` w `nginx.conf` |
 | Brak `.dockerignore` | `COPY . .` kopiuje `.env` i `.git` do obrazu PHP | Dodać `.dockerignore` przed publikacją obrazu (np. przy deployu) |
 | Katalog `vendor/` nie jest w repozytorium i nie jest generowany przy starcie kontenera | Po sklonowaniu repo i `docker compose up` aplikacja zwraca `Fatal error`, dopóki nie uruchomi się `composer dump-autoload` | Uruchamiać `composer dump-autoload` przy starcie kontenera `php` (np. w `command` w `docker-compose.yaml`) |
+| Strona lokalu i rezerwacja biorą jedno okno na tryb (`Venue::getWindow()`), a schemat i formularz „Dodaj lokal” pozwalają na kilka okien w tym samym trybie | Drugie okno w tym samym trybie nie byłoby osobno wybieralne w panelu rezerwacji | Wybór okna w panelu rezerwacji albo jedno okno na tryb w formularzu – do decyzji przy zapisie lokalu |
+| Zajętość nie jest liczona | Każda godzina pokazuje komplet wolnych miejsc, a limit to stałe 4 miejsca na prośbę | Policzyć zajęte miejsca z rezerwacji `pending` i `accepted` w wybranym dniu i godzinach |
 | Widoki leżą w katalogu publicznym `public/views/` | Szablon można otworzyć bezpośrednio, np. `/views/venue.html.php` – PHP wyświetla wtedy ostrzeżenia o brakujących zmiennych razem ze ścieżką pliku | Przenieść widoki poza `public/` (np. do `src/views/`) albo zablokować `/views/` w `nginx.conf` |
 
 ## Struktura projektu
@@ -543,7 +589,7 @@ Wynikają z konfiguracji z laboratorium, do rozwiązania w kolejnych etapach:
 .
 ├── AGENTS.md             # zasady pracy dla agentów AI w tym repozytorium
 ├── config.php            # dane połączenia z bazą (ze zmiennych środowiskowych)
-├── database/             # numerowane skrypty SQL: schemat (01–05) i dane demo (06), wykonywane przy starcie pustej bazy
+├── database/             # numerowane skrypty SQL: schemat (01–05, 07) i dane demo (06), wykonywane przy starcie pustej bazy
 ├── docker-compose.yaml   # definicja usług
 ├── .env.example          # wzór zmiennych środowiskowych
 ├── composer.json         # reguły autoloadingu PSR-4
@@ -563,7 +609,7 @@ Wynikają z konfiguracji z laboratorium, do rozwiązania w kolejnych etapach:
 │   ├── Database.php      # połączenie PDO z PostgreSQL (App\Database)
 │   ├── controllers/      # AppController i kontrolery aplikacji (App\Controller)
 │   ├── forms/            # formularze i ich walidacja (App\Form)
-│   ├── models/           # modele danych, np. Reservation (App\Model)
+│   ├── models/           # encje (Venue, AvailabilityWindow, Reservation, User) i Value Object HourRange (App\Model)
 │   └── repositories/     # zapytania SQL i mapowanie wierszy na modele (App\Repository)
 └── vendor/               # autoloader Composera (generowany, poza repozytorium)
 ```
