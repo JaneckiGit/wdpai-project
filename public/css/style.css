@@ -217,6 +217,13 @@ input:focus-visible {
     color: var(--color-text);
 }
 
+/* Przycisk akcji, której nie da się cofnąć, np. „Usuń konto”. */
+.button--danger,
+.button--danger:hover {
+    background: var(--color-danger-text);
+    color: var(--color-surface);
+}
+
 .field {
     display: flex;
     flex-direction: column;
@@ -461,6 +468,28 @@ input:focus {
     padding: 1.25rem var(--space-2) var(--space-5);
 }
 
+/* Wąska strona z jednym formularzem albo krótką treścią: konto, Regulamin, Kontakt. */
+.page--narrow {
+    max-width: 36rem;
+}
+
+/* Strona „w trakcie przygotowania” (Regulamin, Kontakt): ikona, tytuł i tekst na środku ekranu. */
+.in-progress {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    min-height: 60vh;
+    text-align: center;
+}
+
+.in-progress .icon-tile {
+    width: 3.5rem;
+    height: 3.5rem;
+    font-size: 1.5rem;
+}
+
 /* :where() nie dodaje specyficzności, więc klasa z arkusza strony (np. margin-top adresu) może nadpisać ten margines. */
 .page :where(p, ul, figure) {
     margin: 0;
@@ -618,6 +647,10 @@ input:focus {
     gap: 0.375rem;
     min-height: 2.5rem;
     padding: 0 var(--space-2);
+}
+
+.actions--end {
+    justify-content: flex-end;
 }
 
 /* Karta sekcji formularza z numerem przed tytułem (Dodaj lokal, wniosek o rolę gospodarza) i siatka pól. */

@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Controller\AccountController;
 use App\Controller\AdminController;
 use App\Controller\DefaultController;
 use App\Controller\HostController;
@@ -27,6 +28,10 @@ set_error_handler(static function (int $severity, string $message, string $file,
 $routing = new Routing();
 
 $routing->get('/', DefaultController::class, 'index');
+$routing->get('/terms', DefaultController::class, 'terms');
+$routing->get('/contact', DefaultController::class, 'contact');
+$routing->get('/account/password', AccountController::class, 'password');
+$routing->get('/account/delete', AccountController::class, 'delete');
 $routing->get('/login', SecurityController::class, 'login');
 $routing->post('/login', SecurityController::class, 'login');
 $routing->get('/register', SecurityController::class, 'register');
