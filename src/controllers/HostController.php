@@ -82,8 +82,7 @@ final class HostController extends AppController
 
         return [
             'id' => $reservation->getId(),
-            // TODO: Laboratorium 9 – najemca z konta (user_id); do tego czasu rezerwuje przykładowy użytkownik.
-            'guest' => $this->currentUser()->getName(),
+            'guest' => $reservation->getGuestName(),
             'venueName' => $reservation->getVenueName(),
             'date' => $reservation->getDate(),
             'from' => $reservation->getStartHour(),

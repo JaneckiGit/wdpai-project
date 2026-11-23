@@ -11,23 +11,27 @@ use PDO;
 final class ReservationRepository
 {
     // Wspólny początek zapytań odczytu – kolumny wypisane raz zamiast w każdej metodzie.
-    // JOIN venues dokłada nazwę lokalu; obie tabele mają kolumny id, status i created_at, więc każda ma przedrostek tabeli.
-    private const SELECT = 'SELECT reservations.id, reservations.venue_id, venues.name AS venue_name, reservations.mode,
-            reservations.purpose, reservations.reservation_date, reservations.start_hour, reservations.end_hour,
-            reservations.seats, reservations.status, reservations.created_at, reservations.updated_at
+    // JOIN-y dokładają nazwę lokalu i najemcy; tabele mają wspólne kolumny (id, name, status), więc każda ma przedrostek tabeli.
+    private const SELECT = 'SELECT reservations.id, reservations.user_id, users.name AS guest_name,
+            reservations.venue_id, venues.name AS venue_name, reservations.mode, reservations.purpose,
+            reservations.reservation_date, reservations.start_hour, reservations.end_hour, reservations.seats,
+            reservations.status, reservations.created_at, reservations.updated_at
          FROM reservations
-         JOIN venues ON venues.id = reservations.venue_id';
+         JOIN venues ON venues.id = reservations.venue_id
+         JOIN users ON users.id = reservations.user_id';
 
     public function __construct(private PDO $database)
     {
     }
 
-    /** @return list<Reservation> */
-    public function findAll(): array
+    /** @return list<Reservation> rezerwacje jednego najemcy (Moje rezerwacje) */
+    public function findByUser(int $userId): array
     {
-        $statement = $this->database->query(
-            self::SELECT . ' ORDER BY reservations.reservation_date, reservations.start_hour'
+        $statement = $this->database->prepare(
+            self::SELECT . ' WHERE reservations.user_id = :user_id
+             ORDER BY reservations.reservation_date, reservations.start_hour'
         );
+        $statement->execute(['user_id' => $userId]);
 
         $reservations = [];
         foreach ($statement->fetchAll() as $row) {
@@ -69,11 +73,12 @@ final class ReservationRepository
     public function save(Reservation $reservation): void
     {
         $statement = $this->database->prepare(
-            'INSERT INTO reservations (venue_id, mode, purpose, reservation_date, start_hour, end_hour, seats, status)
-             VALUES (:venue_id, :mode, :purpose, :reservation_date, :start_hour, :end_hour, :seats, :status)
+            'INSERT INTO reservations (user_id, venue_id, mode, purpose, reservation_date, start_hour, end_hour, seats, status)
+             VALUES (:user_id, :venue_id, :mode, :purpose, :reservation_date, :start_hour, :end_hour, :seats, :status)
              RETURNING id'
         );
         $statement->execute([
+            'user_id' => $reservation->getUserId(),
             'venue_id' => $reservation->getVenueId(),
             'mode' => $reservation->getMode(),
             'purpose' => $reservation->getPurpose(),
@@ -119,6 +124,7 @@ final class ReservationRepository
     {
         return new Reservation(
             (int) $row['id'],
+            (int) $row['user_id'],
             (int) $row['venue_id'],
             (string) $row['mode'],
             (string) $row['purpose'],
@@ -130,6 +136,7 @@ final class ReservationRepository
             new DateTimeImmutable((string) $row['created_at']),
             new DateTimeImmutable((string) $row['updated_at']),
             (string) $row['venue_name'],
+            (string) $row['guest_name'],
         );
     }
 }

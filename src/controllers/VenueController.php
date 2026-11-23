@@ -79,6 +79,7 @@ final class VenueController extends AppController
             // Zaznaczone godziny idą jedna po drugiej, np. [18, 19, 20], więc rezerwacja kończy się o 21:00.
             $this->reservations->save(new Reservation(
                 null,
+                $this->currentUser()->getId(),
                 $id,
                 $form->mode,
                 $form->purpose,

@@ -10,6 +10,7 @@ final class Reservation
 {
     public function __construct(
         private ?int $id,
+        private int $userId,
         private int $venueId,
         private string $mode,
         private string $purpose,
@@ -20,8 +21,9 @@ final class Reservation
         private string $status,
         private ?DateTimeImmutable $createdAt = null,
         private ?DateTimeImmutable $updatedAt = null,
-        // Nazwa lokalu z JOIN-a – repozytorium ją dokłada, nowa rezerwacja jej nie potrzebuje.
+        // Nazwy lokalu i najemcy z JOIN-ów – repozytorium je dokłada, nowa rezerwacja ich nie potrzebuje.
         private ?string $venueName = null,
+        private ?string $guestName = null,
     ) {
     }
 
@@ -33,6 +35,11 @@ final class Reservation
     public function setId(int $id): void
     {
         $this->id = $id;
+    }
+
+    public function getUserId(): int
+    {
+        return $this->userId;
     }
 
     public function getVenueId(): int
@@ -94,5 +101,10 @@ final class Reservation
     public function getVenueName(): ?string
     {
         return $this->venueName;
+    }
+
+    public function getGuestName(): ?string
+    {
+        return $this->guestName;
     }
 }
