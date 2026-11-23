@@ -89,10 +89,15 @@ cd wdpai-project
 cp .env.example .env   # następnie ustaw własne hasła w .env
 docker compose up --build -d
 docker compose exec php composer dump-autoload   # generuje vendor/autoload.php
-docker compose exec -T db sh -c 'psql -U "$POSTGRES_USER" -d "$POSTGRES_DB"' < database/01-create-reservations.sql   # tworzy tabelę rezerwacji (raz)
 ```
 
-Skrypt z `database/` uruchamia się raz, na pustej bazie – dane zostają potem w wolumenie `pg-data`, także po `docker compose down`. Polecenie bierze nazwę użytkownika i bazy ze zmiennych kontenera `db`, więc nie trzeba ich wpisywać. Jeśli wolumen `pg-data` powstał wcześniej z innym hasłem, PostgreSQL pomija inicjalizację, a strony z rezerwacjami kończą się błędem 500 (`password authentication failed` w `docker compose logs php`) – wtedy `docker compose down -v` (usuwa dane bazy), ponowny start i skrypt z `database/`.
+Przy pierwszym starcie z pustą bazą kontener `db` wykonuje po kolei skrypty z `database/` – tworzy tabele i wgrywa dane demonstracyjne (sekcja „Baza danych”). Dane zostają potem w wolumenie `pg-data`, także po `docker compose down`. Skrypty startowe działają tylko na pustej bazie, więc gdy wolumen `pg-data` powstał wcześniej, nowe skrypty trzeba wykonać ręcznie (polecenie bierze nazwę użytkownika i bazy ze zmiennych kontenera `db`):
+
+```bash
+for f in database/0[2-6]-*.sql; do docker compose exec -T db sh -c 'psql -U "$POSTGRES_USER" -d "$POSTGRES_DB"' < "$f"; done
+```
+
+Jeśli wolumen `pg-data` powstał wcześniej z innym hasłem, PostgreSQL pomija inicjalizację, a strony z rezerwacjami kończą się błędem 500 (`password authentication failed` w `docker compose logs php`) – wtedy `docker compose down -v` (usuwa dane bazy) i ponowny start, który wykona wszystkie skrypty od nowa.
 
 Katalog `vendor/` nie jest w repozytorium, więc bez `composer dump-autoload` aplikacja kończy się błędem `Fatal error` (brak `vendor/autoload.php`).
 
@@ -114,7 +119,7 @@ Porty po stronie komputera można zmienić w `.env` (`APP_PORT`, `POSTGRES_PORT`
 
 **pgAdmin** – zaloguj się danymi `PGADMIN_DEFAULT_EMAIL` / `PGADMIN_DEFAULT_PASSWORD` z `.env`, a następnie dodaj serwer: host `db`, port `5432` (port wewnątrz sieci Dockera, nie 5433), baza, użytkownik i hasło z `POSTGRES_*`.
 
-**Skrypty startowe bazy** – pliki `*.sql` i `*.sh` z `docker/db/` są wykonywane przy starcie kontenera z pustą bazą.
+**Skrypty startowe bazy** – pliki `*.sql` z `database/` są wykonywane po kolei (według numeru w nazwie) przy starcie kontenera z pustą bazą.
 
 **Ollama** – usługa jest zakomentowana w `docker-compose.yaml` (patrz „Różnice względem konfiguracji z laboratorium”). Aby ją włączyć, usuń znaki `#` z bloku `ollama` i z wolumenu `ollama_data`, a następnie uruchom `docker compose up -d`. API będzie dostępne pod http://localhost:11434. Docker Desktop na macOS nie udostępnia kontenerom GPU, więc modele działają na CPU; na Linux/Windows z kartą NVIDIA można dodać `gpus: all`.
 
@@ -174,26 +179,126 @@ Nagłówek i stopka są wspólne dla wielu widoków, więc nie są kopiowane do 
 
 ## Baza danych
 
-PostgreSQL 17 działa w usłudze `db`, a PHP łączy się z nią przez PDO (`pdo_pgsql`) pod nazwą hosta `db`. Na tym etapie (Laboratorium 7) w bazie są prośby o rezerwację – jedna tabela utworzona skryptem `database/01-create-reservations.sql`:
+PostgreSQL 17 działa w usłudze `db`, a PHP łączy się z nią przez PDO (`pdo_pgsql`) pod nazwą hosta `db`. Schemat i dane demonstracyjne tworzą numerowane skrypty z `database/`, wykonywane po kolei przy pierwszym starcie z pustą bazą (jak migracje – każda zmiana schematu to kolejny plik):
+
+| Skrypt | Zawartość |
+|---|---|
+| `01-create-reservations.sql` | Prośby o rezerwację (Laboratorium 7) |
+| `02-create-updated-at-trigger.sql` | Funkcja `set_updated_at()` i wyzwalacz na `reservations` |
+| `03-create-users.sql` | Konta – kolumny z Laboratorium 9 oraz role i stan konta |
+| `04-create-venues.sql` | Lokale, ich cele, udogodnienia, okna dostępności i dni okien |
+| `05-create-host-applications.sql` | Wnioski o rolę gospodarza |
+| `06-demo-data.sql` | Dane demonstracyjne (konta, 5 lokali, okna, wnioski) |
 
 ```mermaid
 erDiagram
+    USERS ||--o{ VENUES : "jest gospodarzem"
+    USERS ||--o{ HOST_APPLICATIONS : "składa"
+    VENUES ||--o{ VENUE_PURPOSES : "pozwala na"
+    VENUES ||--o{ VENUE_AMENITIES : "ma"
+    VENUES ||--o{ AVAILABILITY_WINDOWS : "udostępnia"
+    AVAILABILITY_WINDOWS ||--o{ WINDOW_DAYS : "obejmuje"
+
+    USERS {
+        bigint id PK
+        varchar name
+        varchar email UK "unikalny bez względu na wielkość liter"
+        varchar password_hash
+        timestamp created_at
+        boolean is_host
+        boolean is_admin
+        timestamptz blocked_at "NULL = konto aktywne"
+        timestamptz last_seen_at
+    }
+    HOST_APPLICATIONS {
+        bigint id PK
+        bigint user_id FK
+        varchar first_name
+        varchar last_name
+        varchar phone
+        varchar company_name
+        char nip "10 cyfr"
+        varchar venue_name
+        varchar venue_type
+        varchar address
+        text message
+        varchar status "pending | approved | rejected"
+        timestamptz created_at
+        timestamptz decided_at
+    }
+    VENUES {
+        bigint id PK
+        bigint host_id FK
+        varchar name
+        varchar type "NULL tylko w szkicu"
+        varchar address
+        varchar district
+        numeric latitude
+        numeric longitude
+        text description
+        varchar entry_mode "staff | key"
+        text entry_instructions
+        varchar status "draft | pending | published | rejected"
+        timestamptz created_at
+        timestamptz updated_at "ustawia wyzwalacz"
+    }
+    VENUE_PURPOSES {
+        bigint venue_id PK, FK
+        varchar purpose PK "work | meetings | shoots | events"
+    }
+    VENUE_AMENITIES {
+        bigint venue_id PK, FK
+        varchar amenity PK "wifi | sockets | daylight | projector | coffee"
+    }
+    AVAILABILITY_WINDOWS {
+        bigint id PK
+        bigint venue_id FK
+        varchar mode "seats | exclusive"
+        smallint start_hour
+        smallint end_hour
+        smallint capacity "miejsca albo osoby"
+        numeric price "za godzinę"
+        smallint min_hours
+    }
+    WINDOW_DAYS {
+        bigint window_id PK, FK
+        smallint weekday PK "1 = poniedziałek … 7 = niedziela"
+    }
     RESERVATIONS {
-        bigint id PK "GENERATED ALWAYS AS IDENTITY"
-        bigint venue_id "lokal; klucz obcy w Laboratorium 8"
+        bigint id PK
+        bigint venue_id "klucz obcy do VENUES dojdzie w kolejnym kroku"
         varchar mode "seats | exclusive"
         varchar purpose "work | meetings | shoots | events"
         date reservation_date
-        smallint start_hour "0–23"
-        smallint end_hour "start_hour < end_hour <= 24"
-        smallint seats "tylko w trybie seats, inaczej NULL"
+        smallint start_hour
+        smallint end_hour
+        smallint seats "tylko w trybie seats"
         varchar status "pending | accepted | rejected | cancelled"
         timestamptz created_at
-        timestamptz updated_at
+        timestamptz updated_at "ustawia wyzwalacz"
     }
 ```
 
-Ograniczenia `CHECK` pilnują dozwolonych trybów, celów, godzin i statusów niezależnie od kodu PHP – np. `INSERT` ze statusem `'expired'` baza odrzuca błędem `reservations_status_check`. Indeks `reservations_status_idx` przyspiesza filtr panelu gospodarza (`WHERE status = 'pending'`). Gdy lokale i konta trafią do bazy, tabela dostanie klucze obce `venue_id` → `venues` i `user_id` → `users`, a diagram pokaże relacje jeden lokal → wiele rezerwacji i jeden użytkownik → wiele rezerwacji.
+**Klucze obce i `ON DELETE`.** Wszystkie klucze obce mają `ON DELETE CASCADE`: usunięcie konta usuwa jego lokale i wnioski (strona „Usuń konto” to zapowiada), a usunięcie lokalu – jego cele, udogodnienia i okna, bo bez lokalu nie mają znaczenia; usunięcie okna usuwa jego dni. `ON UPDATE` zostaje domyślne, bo identyfikatory nadaje baza i się nie zmieniają. `reservations.venue_id` dostanie klucz obcy razem z `user_id` w kolejnym kroku, gdy aplikacja zacznie czytać lokale i konta z bazy.
+
+**Normalizacja.** Cele, udogodnienia i dni okna są osobnymi wierszami z kluczem złożonym, a nie listą w jednej kolumnie; ceny i liczba miejsc należą do okna dostępności, bo gospodarz może mieć kilka okien w jednym trybie z różnymi cenami.
+
+**Ograniczenia.** `CHECK` pilnują dozwolonych wartości (typy, tryby, cele, statusy, dni 1–7, godziny, dodatnie ceny i liczby miejsc, NIP z 10 cyfr, minimalny czas nie dłuższy niż okno) niezależnie od kodu PHP – np. `INSERT` ze statusem `'expired'` baza odrzuca błędem `reservations_status_check`. `venues_complete_check` pozwala zapisać szkic z samą nazwą, ale lokal wysłany do weryfikacji musi mieć komplet danych. Unikalny indeks `users_email_unique` (z Laboratorium 9) blokuje dwa konta z tym samym e-mailem niezależnie od wielkości liter, a częściowy indeks `host_applications_one_pending` – drugi oczekujący wniosek tej samej osoby. Indeksy na `status` i kluczach obcych przyspieszają filtry list (np. oczekujące prośby, lokale do akceptacji).
+
+**Wyzwalacz.** `set_updated_at()` ustawia `updated_at` przy każdym `UPDATE` tabel `reservations` i `venues`, więc zapytania w repozytoriach nie muszą o tym pamiętać.
+
+**Dane demonstracyjne.** `06-demo-data.sql` tworzy fikcyjne konta, trzy opublikowane lokale (id 1–3, te same co w dotychczasowych adresach), dwa lokale czekające na akceptację, ich okna dostępności i trzy wnioski o rolę gospodarza. Wszystkie konta demo mają hasło `Demo1234` (w bazie tylko hash z `password_hash()`; logowanie dojdzie w Laboratorium 9):
+
+| Konto | Rola |
+|---|---|
+| `admin@example.com` | Administrator |
+| `piotr.nowak@example.com` | Gospodarz: Bar Lampion, Kawiarnia Ziarno, Piwnica Lampion (czeka na akceptację) |
+| `tomasz.wrona@example.com` | Gospodarz: Kawiarnia Pod Zegarem |
+| `marta.zielinska@example.com` | Najemca |
+| `anna.kowalska@example.com` | Najemca z oczekującym wnioskiem o rolę gospodarza |
+| `adam.nowicki@example.com` | Konto zablokowane |
+
+Na tym etapie aplikacja zapisuje i czyta z bazy rezerwacje; lokale, konta, wnioski i panel administratora przechodzą na tabele z diagramu w kolejnych krokach Laboratorium 8.
 
 Statusy zmieniają akcje aplikacji:
 
@@ -409,16 +514,17 @@ Materiały Laboratorium 6 omawiają podstawy PHP i programowanie obiektowe, ale 
 - błędy walidacji dostają status 422, podczas gdy kod z Laboratorium 9 zwraca wtedy domyślne 200;
 - katalog `src/forms/` i wpis w `composer.json` naśladują konwencję `src/models/` i `src/repositories/` z Laboratorium 7.
 
-Laboratorium 7 jest wykonane na tabeli `reservations` zamiast `projects` – przykład z projektami został usunięty razem z kodem z Laboratorium 2, a rezerwacje mają w aplikacji działające akcje dla wszystkich statusów. Jak w instrukcji są: `src/Database.php` (1:1), skrypt w `database/` uruchamiany ręcznie przez `psql`, typy i ograniczenia tabeli (`GENERATED ALWAYS AS IDENTITY`, `NOT NULL`, nazwane `CHECK`, `TIMESTAMPTZ` z `DEFAULT CURRENT_TIMESTAMP`), model z konstruktorem i getterami, metody repozytorium (`findAll`, `find`, `save` z `RETURNING id`, `update`, `delete`, `mapRowTo…`) oraz wpisy `App\Model\` i `App\Repository\` w `composer.json`. Świadome różnice:
+Laboratorium 7 jest wykonane na tabeli `reservations` zamiast `projects` – przykład z projektami został usunięty razem z kodem z Laboratorium 2, a rezerwacje mają w aplikacji działające akcje dla wszystkich statusów. Jak w instrukcji są: `src/Database.php` (1:1), skrypty w `database/` (polecenie `psql` z instrukcji nadal działa), typy i ograniczenia tabeli (`GENERATED ALWAYS AS IDENTITY`, `NOT NULL`, nazwane `CHECK`, `TIMESTAMPTZ` z `DEFAULT CURRENT_TIMESTAMP`), model z konstruktorem i getterami, metody repozytorium (`findAll`, `find`, `save` z `RETURNING id`, `update`, `delete`, `mapRowTo…`) oraz wpisy `App\Model\` i `App\Repository\` w `composer.json`. Świadome różnice:
 
 - `config.php` czyta użytkownika, hasło i nazwę bazy ze zmiennych `POSTGRES_*` (z `.env`, przekazanych usłudze `php` w `docker-compose.yaml`) zamiast stałych `'docker'` – instrukcja sama zaleca to dla prawdziwej aplikacji, a `.env` z Laboratorium 1 ma już te wartości. Wartości ze zmiennych wymagają `define()`, bo `const` przyjmuje tylko wyrażenia znane przed uruchomieniem; `DB_HOST` i `DB_PORT` zostały stałymi z instrukcji;
-- usługa `db` zostaje z Laboratorium 1 (obraz z `docker/db/Dockerfile`, port 5433, dane z `.env`); z bloku z Laboratorium 7 doszły wolumen na dane (podpięty zadeklarowany już `pg-data` zamiast nowego `postgres_data`) i `healthcheck` z `pg_isready` dla użytkownika i bazy z `.env`;
+- usługa `db` zostaje z Laboratorium 1 (obraz z `docker/db/Dockerfile`, port 5433, dane z `.env`); z bloku z Laboratorium 7 doszły wolumen na dane (podpięty zadeklarowany już `pg-data` zamiast nowego `postgres_data`) i `healthcheck` z `pg_isready` dla użytkownika i bazy z `.env`; katalog skryptów startowych (`/docker-entrypoint-initdb.d`) wskazuje na `database/` zamiast pustego `docker/db/` z Laboratorium 1, żeby `docker compose up` na pustej bazie od razu tworzył schemat i dane demonstracyjne zamiast ręcznego uruchamiania skryptu z kroku 4;
 - repozytorium tworzy kontroler w konstruktorze, jak w Laboratorium 9 (`$this->users`), a nie `index.php` (krok 10) – router tworzy kontrolery bez argumentów;
 - repozytorium ma dodatkowo `findByStatus()` dla panelu gospodarza, a listę kolumn odczytu trzyma raz w stałej `SELECT` zamiast w każdej metodzie; `update()` zmienia tylko status, bo aplikacja nie edytuje innych pól wysłanej prośby; `delete()` jest zgodnie z zadaniem 5 (CRUD), ale aplikacja go nie wywołuje – anulowanie zmienia status, żeby historia rezerwacji została;
 - model `Reservation` ma obok `setId()` z instrukcji `setStatus()`, bo akceptacja, odrzucenie i anulowanie zmieniają status przed `update()`;
 - tabela ma jeden dodatkowy indeks (`status`, filtr panelu gospodarza) zamiast dwóch – żadne zapytanie nie sortuje po `created_at`;
 - `venue_id` nie ma jeszcze klucza obcego, bo lokale są przykładową tablicą w `VenueController` (Laboratorium 8), a najemcą każdej rezerwacji jest przykładowy użytkownik (Laboratorium 9), więc gospodarz Piotr Nowak widzi w panelu własne prośby;
-- skrypt testowy z kroku 11 (`var_dump`) nie trafił do repozytorium – zapis i odczyt sprawdzono formularzami aplikacji i w `psql`.
+- skrypt testowy z kroku 11 (`var_dump`) nie trafił do repozytorium – zapis i odczyt sprawdzono formularzami aplikacji i w `psql`;
+- tabela `users` ma kolumny i unikalny indeks e-maila 1:1 z Laboratorium 9 (`BIGSERIAL`, `TIMESTAMP`), a dodane kolumny (`is_host`, `is_admin`, `blocked_at`, `last_seen_at`) używają `TIMESTAMPTZ` jak reszta schematu; tabela powstała wcześniej niż logowanie, bo lokale, rezerwacje i wnioski potrzebują właściciela.
 
 ## Znane ograniczenia
 
@@ -426,7 +532,6 @@ Wynikają z konfiguracji z laboratorium, do rozwiązania w kolejnych etapach:
 
 | Ograniczenie | Skutek | Rozwiązanie |
 |---|---|---|
-| Tabelę `reservations` tworzy się ręcznie skryptem z `database/` (krok 4 Laboratorium 7) | Po sklonowaniu repo i pierwszym `docker compose up` strony z rezerwacjami zwracają 500, dopóki nie uruchomi się skryptu | Przenieść skrypt do `docker/db/` (wykonywany przy starcie z pustą bazą) albo wprowadzić numerowane migracje |
 | Nginx ma domyślny limit 1 MB na żądanie | Upload większego pliku kończy się błędem 413, mimo limitu 512M w PHP | Dodać `client_max_body_size 512M;` w `nginx.conf` |
 | Brak `.dockerignore` | `COPY . .` kopiuje `.env` i `.git` do obrazu PHP | Dodać `.dockerignore` przed publikacją obrazu (np. przy deployu) |
 | Katalog `vendor/` nie jest w repozytorium i nie jest generowany przy starcie kontenera | Po sklonowaniu repo i `docker compose up` aplikacja zwraca `Fatal error`, dopóki nie uruchomi się `composer dump-autoload` | Uruchamiać `composer dump-autoload` przy starcie kontenera `php` (np. w `command` w `docker-compose.yaml`) |
@@ -438,7 +543,7 @@ Wynikają z konfiguracji z laboratorium, do rozwiązania w kolejnych etapach:
 .
 ├── AGENTS.md             # zasady pracy dla agentów AI w tym repozytorium
 ├── config.php            # dane połączenia z bazą (ze zmiennych środowiskowych)
-├── database/             # skrypty SQL tworzące tabele (01-create-reservations.sql)
+├── database/             # numerowane skrypty SQL: schemat (01–05) i dane demo (06), wykonywane przy starcie pustej bazy
 ├── docker-compose.yaml   # definicja usług
 ├── .env.example          # wzór zmiennych środowiskowych
 ├── composer.json         # reguły autoloadingu PSR-4

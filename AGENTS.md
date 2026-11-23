@@ -14,7 +14,7 @@ PoGodzinach to aplikacja webowa do wynajmu lokali na godziny, w czasie gdy stoj�
 - `src/forms/` — formularze i ich walidacja w namespace `App\Form`, dziedziczące po `Form`.
 - `config.php`, `src/Database.php` — dane połączenia (ze zmiennych `POSTGRES_*`) i połączenie PDO z PostgreSQL.
 - `src/repositories/` — cały SQL tabeli i mapowanie wierszy na modele (`App\Repository`); `src/models/` — modele danych bez SQL (`App\Model`).
-- `database/` — skrypty SQL tworzące tabele, uruchamiane ręcznie przez `psql`.
+- `database/` — numerowane skrypty SQL (schemat i dane demo), wykonywane przy starcie pustej bazy; zmiana schematu to nowy plik z kolejnym numerem.
 - `docker/`, `docker-compose.yaml` — środowisko uruchomieniowe.
 
 Pełny opis architektury, tras i stylów jest w `README.md`.
@@ -35,7 +35,7 @@ Pełny opis architektury, tras i stylów jest w `README.md`.
 ## Uruchamianie i weryfikacja
 - Start: `docker compose up --build -d`
 - Autoloader po sklonowaniu repozytorium: `docker compose exec php composer dump-autoload`
-- Tabele w pustej bazie: `docker compose exec -T db sh -c 'psql -U "$POSTGRES_USER" -d "$POSTGRES_DB"' < database/01-create-reservations.sql`
+- Nowy skrypt w istniejącej bazie: `docker compose exec -T db sh -c 'psql -U "$POSTGRES_USER" -d "$POSTGRES_DB"' < database/NN-nazwa.sql` (pusta baza wykonuje wszystkie skrypty sama przy starcie).
 - SQL tylko w repozytoriach i tylko przez `prepare()` / `execute()` z parametrami – bez sklejania wartości z zapytaniem.
 - Składnia: `docker compose exec -T php php -l ścieżka/do/pliku.php`
 - Po zmianie trasy sprawdź poprawny adres i odpowiedź 404, np. `curl -i http://localhost:8080/venues/abc`.
