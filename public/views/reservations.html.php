@@ -23,7 +23,7 @@ $statusLabels = [
         <?php foreach ($reservations as $reservation): ?>
             <?php $date = $reservation->getDate(); ?>
             <li class="card reservation">
-                <a href="/venues/<?= $reservation->getVenueId() ?>"><?= htmlspecialchars($venues[$reservation->getVenueId()]['name']) ?></a>
+                <a href="/venues/<?= $reservation->getVenueId() ?>"><?= htmlspecialchars($reservation->getVenueName()) ?></a>
                 <span class="muted"><?= $dayNames[(int) $date->format('N')] . ' ' . $date->format('d.m') ?>, <?= $reservation->getStartHour() ?>:00–<?= $reservation->getEndHour() ?>:00</span>
                 <span class="badge badge--<?= $statusLabels[$reservation->getStatus()][1] ?>"><?= $statusLabels[$reservation->getStatus()][0] ?></span>
                 <?php if (in_array($reservation->getStatus(), $cancellableStatuses, true)): ?>

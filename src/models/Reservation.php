@@ -20,6 +20,8 @@ final class Reservation
         private string $status,
         private ?DateTimeImmutable $createdAt = null,
         private ?DateTimeImmutable $updatedAt = null,
+        // Nazwa lokalu z JOIN-a – repozytorium ją dokłada, nowa rezerwacja jej nie potrzebuje.
+        private ?string $venueName = null,
     ) {
     }
 
@@ -87,5 +89,10 @@ final class Reservation
     public function getUpdatedAt(): ?DateTimeImmutable
     {
         return $this->updatedAt;
+    }
+
+    public function getVenueName(): ?string
+    {
+        return $this->venueName;
     }
 }

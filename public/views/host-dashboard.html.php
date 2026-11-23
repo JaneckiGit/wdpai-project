@@ -4,6 +4,13 @@ $initials = require __DIR__ . '/partials/initials.php';
 $dayNames = require __DIR__ . '/partials/day-names.php';
 $modes = ['seats' => ['Miejsca do pracy', 'fa-laptop'], 'exclusive' => ['Na wyłączność', 'fa-key']];
 $money = static fn (float $amount): string => number_format($amount, 2, ',', ' ') . ' zł';
+// Status lokalu: etykieta i kolor plakietki.
+$venueStatuses = [
+    'draft' => ['Szkic', 'muted'],
+    'pending' => ['Czeka na weryfikację', 'warning'],
+    'published' => ['Opublikowany', 'success'],
+    'rejected' => ['Odrzucony', 'danger'],
+];
 ?>
 <?php require __DIR__ . '/partials/header.html.php'; ?>
 
@@ -65,20 +72,21 @@ $money = static fn (float $amount): string => number_format($amount, 2, ',', ' '
 
             <ul class="venue-tiles">
                 <?php foreach ($venues as $venue): ?>
+                    <?php [$seats, $exclusive] = [$venue->getWindow('seats'), $venue->getWindow('exclusive')]; ?>
                     <li>
-                        <a class="card venue-tile" href="/venues/<?= $venue['id'] ?>">
+                        <!-- Stronę lokalu ma tylko opublikowany lokal; pozostałe kafelki są linkiem bez adresu (nieklikalne). -->
+                        <a class="card venue-tile"<?= $venue->isPublished() ? ' href="/venues/' . $venue->getId() . '"' : '' ?>>
                             <img src="/images/login-hero.svg" alt="">
                             <div>
-                                <h3><?= htmlspecialchars($venue['name']) ?></h3>
-                                <!-- TODO: Laboratorium 8 – status lokalu z bazy (szkic, czeka na weryfikację, opublikowany). -->
-                                <span class="badge badge--success">Opublikowany</span>
-                                <p class="muted"><?= htmlspecialchars($venue['district'] . ' · ' . $venue['address']) ?></p>
+                                <h3><?= htmlspecialchars($venue->getName()) ?></h3>
+                                <span class="badge badge--<?= $venueStatuses[$venue->getStatus()][1] ?>"><?= $venueStatuses[$venue->getStatus()][0] ?></span>
+                                <p class="muted"><?= htmlspecialchars($venue->getLocation()) ?></p>
                                 <p class="venue-tile__offers">
-                                    <?php if ($venue['seatPrice'] !== null): ?>
-                                        <span class="badge badge--seats">Miejsca do pracy · <?= $venue['seatPrice'] ?> zł/h</span>
+                                    <?php if ($seats !== null): ?>
+                                        <span class="badge badge--seats">Miejsca do pracy · <?= $seats->getPrice() ?> zł/h</span>
                                     <?php endif; ?>
-                                    <?php if ($venue['exclusivePrice'] !== null): ?>
-                                        <span class="badge badge--exclusive">Na wyłączność · <?= $venue['exclusivePrice'] ?> zł/h</span>
+                                    <?php if ($exclusive !== null): ?>
+                                        <span class="badge badge--exclusive">Na wyłączność · <?= $exclusive->getPrice() ?> zł/h</span>
                                     <?php endif; ?>
                                 </p>
                             </div>

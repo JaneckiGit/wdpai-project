@@ -11,8 +11,12 @@ use PDO;
 final class ReservationRepository
 {
     // Wspólny początek zapytań odczytu – kolumny wypisane raz zamiast w każdej metodzie.
-    private const SELECT = 'SELECT id, venue_id, mode, purpose, reservation_date, start_hour, end_hour, seats, status, created_at, updated_at
-         FROM reservations';
+    // JOIN venues dokłada nazwę lokalu; obie tabele mają kolumny id, status i created_at, więc każda ma przedrostek tabeli.
+    private const SELECT = 'SELECT reservations.id, reservations.venue_id, venues.name AS venue_name, reservations.mode,
+            reservations.purpose, reservations.reservation_date, reservations.start_hour, reservations.end_hour,
+            reservations.seats, reservations.status, reservations.created_at, reservations.updated_at
+         FROM reservations
+         JOIN venues ON venues.id = reservations.venue_id';
 
     public function __construct(private PDO $database)
     {
@@ -22,7 +26,7 @@ final class ReservationRepository
     public function findAll(): array
     {
         $statement = $this->database->query(
-            self::SELECT . ' ORDER BY reservation_date, start_hour'
+            self::SELECT . ' ORDER BY reservations.reservation_date, reservations.start_hour'
         );
 
         $reservations = [];
@@ -33,13 +37,14 @@ final class ReservationRepository
         return $reservations;
     }
 
-    /** @return list<Reservation> */
-    public function findByStatus(string $status): array
+    /** @return list<Reservation> prośby czekające na decyzję gospodarza we wszystkich jego lokalach */
+    public function findPendingByHost(int $hostId): array
     {
         $statement = $this->database->prepare(
-            self::SELECT . ' WHERE status = :status ORDER BY reservation_date, start_hour'
+            self::SELECT . " WHERE reservations.status = 'pending' AND venues.host_id = :host_id
+             ORDER BY reservations.reservation_date, reservations.start_hour"
         );
-        $statement->execute(['status' => $status]);
+        $statement->execute(['host_id' => $hostId]);
 
         $reservations = [];
         foreach ($statement->fetchAll() as $row) {
@@ -52,7 +57,7 @@ final class ReservationRepository
     public function find(int $id): ?Reservation
     {
         $statement = $this->database->prepare(
-            self::SELECT . ' WHERE id = :id'
+            self::SELECT . ' WHERE reservations.id = :id'
         );
         $statement->execute(['id' => $id]);
 
@@ -124,6 +129,7 @@ final class ReservationRepository
             (string) $row['status'],
             new DateTimeImmutable((string) $row['created_at']),
             new DateTimeImmutable((string) $row['updated_at']),
+            (string) $row['venue_name'],
         );
     }
 }

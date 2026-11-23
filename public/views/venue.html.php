@@ -1,26 +1,33 @@
 <?php
 $purposes = require __DIR__ . '/partials/purposes.php';
+$amenities = require __DIR__ . '/partials/amenities.php';
 $dayNames = require __DIR__ . '/partials/day-names.php';
 $monthNames = [1 => 'styczeń', 'luty', 'marzec', 'kwiecień', 'maj', 'czerwiec', 'lipiec', 'sierpień', 'wrzesień', 'październik', 'listopad', 'grudzień'];
+$weekdaysPlural = [1 => 'poniedziałki', 'wtorki', 'środy', 'czwartki', 'piątki', 'soboty', 'niedziele'];
 
-// Teksty i ceny obu trybów; strona pokazuje tylko tryby, dla których gospodarz ma okno dostępności.
-// TODO: Laboratorium 8 – wolne miejsca w godzinie liczone z zapisanych rezerwacji.
+// Stałe teksty obu trybów; strona pokazuje tylko tryby, dla których gospodarz ma okno dostępności.
 $modes = [
-    'seats' => ['name' => 'Miejsca do pracy', 'choice' => 'Miejsce do pracy', 'icon' => 'fa-laptop',
-        'price' => $venue['seatPrice'], 'unit' => 'za miejsce',
-        'details' => $venue['seatCount'] . ' miejsc · rezerwujesz pojedyncze miejsca',
-        'free' => $venue['seatCount'] . ' z ' . $venue['seatCount'] . ' wolnych'],
-    'exclusive' => ['name' => 'Na wyłączność', 'choice' => 'Cały lokal', 'icon' => 'fa-key',
-        'price' => $venue['exclusivePrice'], 'unit' => 'za cały lokal',
-        'details' => 'do ' . $venue['capacity'] . ' osób · min. ' . $form::MIN_HOURS . ' h',
-        'free' => 'wolne'],
+    'seats' => ['name' => 'Miejsca do pracy', 'choice' => 'Miejsce do pracy', 'icon' => 'fa-laptop', 'unit' => 'za miejsce'],
+    'exclusive' => ['name' => 'Na wyłączność', 'choice' => 'Cały lokal', 'icon' => 'fa-key', 'unit' => 'za cały lokal'],
 ];
-$activeMode = isset($venue['windows'][$form->mode]) ? $form->mode : array_key_first($venue['windows']);
+// Okno ma kolejne dni tygodnia (np. pon–pt) albo jeden dzień, który pokazujemy jako „niedziele”.
+$daysLabel = static fn ($window): string => count($window->getDays()) === 1
+    ? $weekdaysPlural[$window->getDays()[0]]
+    : $dayNames[$window->getDays()[0]] . '–' . $dayNames[$window->getDays()[count($window->getDays()) - 1]];
+$offerDetails = static fn ($window): string => $window->getMode() === 'seats'
+    ? $window->getCapacity() . ' miejsc · rezerwujesz pojedyncze miejsca'
+    : 'do ' . $window->getCapacity() . ' osób · min. ' . $window->getMinHours() . ' h';
+// TODO: wolne miejsca w godzinie liczone z zapisanych rezerwacji (zajętość nie jest jeszcze liczona).
+$freeLabel = static fn ($window): string => $window->getMode() === 'seats'
+    ? $window->getCapacity() . ' z ' . $window->getCapacity() . ' wolnych'
+    : 'wolne';
+$activeWindow = $venue->getWindow($form->mode) ?? $venue->getWindows()[0];
+$entryLabels = ['staff' => 'na miejscu będzie pracownik', 'key' => 'przekazanie klucza'];
 
 // Cele, na które gospodarz nie pozwala – do zdania pod listą dozwolonych celów.
 $deniedPurposes = [];
 foreach ($purposes as $value => [$label]) {
-    if (!in_array($value, $venue['purposes'], true)) {
+    if (!in_array($value, $venue->getPurposes(), true)) {
         $deniedPurposes[] = mb_strtolower($label);
     }
 }
@@ -35,53 +42,55 @@ $initials = require __DIR__ . '/partials/initials.php';
     <nav class="breadcrumbs" aria-label="Ścieżka">
         <ol>
             <li><a href="/venues">Odkrywaj</a></li>
-            <li><a href="/venues?q=<?= urlencode($venue['district']) ?>"><?= htmlspecialchars($venue['district']) ?></a></li>
-            <li aria-current="page"><?= htmlspecialchars($venue['name']) ?></li>
+            <?php if ($venue->getDistrict() !== null): ?>
+                <li><a href="/venues?q=<?= urlencode($venue->getDistrict()) ?>"><?= htmlspecialchars($venue->getDistrict()) ?></a></li>
+            <?php endif; ?>
+            <li aria-current="page"><?= htmlspecialchars($venue->getName()) ?></li>
         </ol>
     </nav>
 
-    <h1><?= htmlspecialchars($venue['name']) ?></h1>
+    <h1><?= htmlspecialchars($venue->getName()) ?></h1>
     <p class="venue__address">
         <i class="fa-solid fa-location-dot" aria-hidden="true"></i>
-        <?= htmlspecialchars($venue['district'] . ', ' . $venue['address']) ?>
+        <?= htmlspecialchars($venue->getLocation()) ?>
     </p>
 
     <div class="venue__layout">
         <section class="venue__media" aria-label="Zdjęcia i rolki">
-            <!-- TODO: Laboratorium 13 – wideo rolki gospodarza zamiast ilustracji. -->
+            <!-- TODO: Laboratorium 13 – wideo rolki i zdjęcia przesłane przez gospodarza zamiast ilustracji. -->
             <figure class="reel reel--host">
                 <img src="/images/login-hero.svg" alt="">
-                <figcaption><?= htmlspecialchars($venue['reelTitle']) ?></figcaption>
+                <figcaption><?= htmlspecialchars($venue->getName()) ?></figcaption>
             </figure>
 
             <ul class="venue-photos" aria-label="Zdjęcia lokalu dodane przez gospodarza">
-                <?php foreach ($venue['photos'] as $photo): ?>
+                <?php for ($photo = 1; $photo <= 4; $photo++): ?>
                     <li>
-                        <img src="<?= htmlspecialchars($photo) ?>" alt="Zdjęcie lokalu">
+                        <img src="/images/login-hero.svg" alt="Zdjęcie lokalu">
                     </li>
-                <?php endforeach; ?>
+                <?php endfor; ?>
             </ul>
         </section>
 
         <div class="venue__details">
             <section class="card host-card">
-                <span class="initials" aria-hidden="true"><?= htmlspecialchars($initials($venue['host'])) ?></span>
+                <span class="initials" aria-hidden="true"><?= htmlspecialchars($initials($venue->getHostName())) ?></span>
                 <div>
                     <p class="muted">Gospodarz</p>
-                    <h2><?= htmlspecialchars($venue['host']) ?></h2>
+                    <h2><?= htmlspecialchars($venue->getHostName()) ?></h2>
                     <p class="muted">potwierdza prośby w ciągu 24 h</p>
                 </div>
             </section>
 
             <section>
                 <h2>O lokalu</h2>
-                <p><?= htmlspecialchars($venue['description']) ?></p>
+                <p><?= htmlspecialchars($venue->getDescription()) ?></p>
             </section>
 
             <section>
                 <h2>Dozwolone cele</h2>
                 <ul class="purpose-list">
-                    <?php foreach ($venue['purposes'] as $purpose): ?>
+                    <?php foreach ($venue->getPurposes() as $purpose): ?>
                         <li class="chip"><i class="fa-solid <?= $purposes[$purpose][1] ?>" aria-hidden="true"></i> <?= $purposes[$purpose][0] ?></li>
                     <?php endforeach; ?>
                 </ul>
@@ -92,14 +101,15 @@ $initials = require __DIR__ . '/partials/initials.php';
 
             <section>
                 <h2>Oferta</h2>
-                <?php foreach ($venue['windows'] as $mode => $window): ?>
+                <?php foreach ($venue->getWindows() as $window): ?>
+                    <?php $mode = $window->getMode(); ?>
                     <article class="card offer">
                         <div>
                             <span class="badge badge--<?= $mode ?>"><i class="fa-solid <?= $modes[$mode]['icon'] ?>" aria-hidden="true"></i> <?= $modes[$mode]['name'] ?></span>
-                            <h3><?= htmlspecialchars($window['label']) ?> <?= $window['from'] ?>:00–<?= $window['to'] ?>:00</h3>
-                            <p class="muted"><?= $modes[$mode]['details'] ?></p>
+                            <h3><?= $daysLabel($window) ?> <?= $window->getHours()->start() ?>:00–<?= $window->getHours()->end() ?>:00</h3>
+                            <p class="muted"><?= $offerDetails($window) ?></p>
                         </div>
-                        <p class="offer__price"><strong><?= $modes[$mode]['price'] ?> zł/h</strong> <?= $modes[$mode]['unit'] ?></p>
+                        <p class="offer__price"><strong><?= $window->getPrice() ?> zł/h</strong> <?= $modes[$mode]['unit'] ?></p>
                     </article>
                 <?php endforeach; ?>
             </section>
@@ -107,7 +117,8 @@ $initials = require __DIR__ . '/partials/initials.php';
             <section>
                 <h2>Udogodnienia</h2>
                 <ul class="amenities">
-                    <?php foreach ($venue['amenities'] as [$icon, $name, $note]): ?>
+                    <?php foreach ($venue->getAmenities() as $amenity): ?>
+                        <?php [$icon, $name, $note] = $amenities[$amenity]; ?>
                         <li>
                             <span class="icon-tile"><i class="fa-solid <?= $icon ?>" aria-hidden="true"></i></span>
                             <span><strong><?= htmlspecialchars($name) ?></strong><?= htmlspecialchars($note) ?></span>
@@ -118,24 +129,25 @@ $initials = require __DIR__ . '/partials/initials.php';
 
             <section class="entry">
                 <span class="icon-tile"><i class="fa-solid fa-user-check" aria-hidden="true"></i></span>
-                <p><strong>Wejście: <?= htmlspecialchars($venue['entry']) ?></strong> Szczegóły wejścia zobaczysz po akceptacji rezerwacji.</p>
+                <p><strong>Wejście: <?= $entryLabels[$venue->getEntryMode()] ?></strong> Szczegóły wejścia zobaczysz po akceptacji rezerwacji.</p>
             </section>
         </div>
 
         <aside class="card reservation-panel" id="reservation" aria-labelledby="reservation-heading">
             <div class="reservation-panel__title">
                 <h2 id="reservation-heading">Rezerwacja</h2>
-                <p><strong data-price><?= $modes[$activeMode]['price'] ?> zł/h</strong> <span data-unit><?= $modes[$activeMode]['unit'] ?></span></p>
+                <p><strong data-price><?= $activeWindow->getPrice() ?> zł/h</strong> <span data-unit><?= $modes[$activeWindow->getMode()]['unit'] ?></span></p>
             </div>
 
-            <form class="app-form" action="/venues/<?= $venue['id'] ?>/reservations#reservation" method="post">
+            <form class="app-form" action="/venues/<?= $venue->getId() ?>/reservations#reservation" method="post">
                 <?php require __DIR__ . '/partials/form-errors.html.php'; ?>
 
                 <fieldset class="mode-switch">
                     <legend class="visually-hidden">Tryb rezerwacji</legend>
-                    <?php foreach ($venue['windows'] as $mode => $window): ?>
+                    <?php foreach ($venue->getWindows() as $window): ?>
+                        <?php $mode = $window->getMode(); ?>
                         <label>
-                            <input type="radio" name="mode" value="<?= $mode ?>" data-price="<?= $modes[$mode]['price'] ?>" data-unit="<?= $modes[$mode]['unit'] ?>" <?= $mode === $activeMode ? 'checked' : '' ?>>
+                            <input type="radio" name="mode" value="<?= $mode ?>" data-price="<?= $window->getPrice() ?>" data-unit="<?= $modes[$mode]['unit'] ?>" <?= $window === $activeWindow ? 'checked' : '' ?>>
                             <i class="fa-solid <?= $modes[$mode]['icon'] ?>" aria-hidden="true"></i> <?= $modes[$mode]['choice'] ?>
                         </label>
                     <?php endforeach; ?>
@@ -146,7 +158,7 @@ $initials = require __DIR__ . '/partials/initials.php';
                     <div class="select">
                         <i class="fa-solid <?= $purposes[$form->purpose][1] ?? 'fa-laptop' ?>" aria-hidden="true" data-purpose-icon></i>
                         <select id="purpose" name="purpose" <?= $form->invalidAttributes('purpose') ?>>
-                            <?php foreach ($venue['purposes'] as $purpose): ?>
+                            <?php foreach ($venue->getPurposes() as $purpose): ?>
                                 <option value="<?= $purpose ?>" data-icon="<?= $purposes[$purpose][1] ?>" <?= $form->purpose === $purpose ? 'selected' : '' ?>><?= $purposes[$purpose][0] ?></option>
                             <?php endforeach; ?>
                         </select>
@@ -155,15 +167,16 @@ $initials = require __DIR__ . '/partials/initials.php';
                 </div>
 
                 <!-- Dni i godziny każdego trybu; pola niewybranego trybu są wyłączone (disabled), więc formularz ich nie wysyła. -->
-                <?php foreach ($venue['windows'] as $mode => $window): ?>
-                    <fieldset class="slots" data-mode="<?= $mode ?>" <?= $mode === $activeMode ? '' : 'disabled hidden' ?>>
+                <?php foreach ($venue->getWindows() as $window): ?>
+                    <?php $mode = $window->getMode(); ?>
+                    <fieldset class="slots" data-mode="<?= $mode ?>" <?= $window === $activeWindow ? '' : 'disabled hidden' ?>>
                         <div class="slots__header">
                             <span id="date-<?= $mode ?>">Data</span>
                             <span class="muted"><?= $monthNames[(int) $days[0]->format('n')] ?></span>
                         </div>
                         <div class="day-chips" role="group" aria-labelledby="date-<?= $mode ?>" <?= $form->invalidAttributes('date') ?>>
                             <?php foreach ($days as $day): ?>
-                                <?php $isOpen = in_array((int) $day->format('N'), $window['days'], true); ?>
+                                <?php $isOpen = $window->isOpenOn((int) $day->format('N')); ?>
                                 <label class="day-chip">
                                     <input type="radio" name="date" value="<?= $day->format('Y-m-d') ?>" data-label="<?= $dayNames[(int) $day->format('N')] . ' ' . $day->format('d.m') ?>" <?= $isOpen ? '' : 'disabled' ?> <?= $form->date === $day->format('Y-m-d') ? 'checked' : '' ?>>
                                     <?= $dayNames[(int) $day->format('N')] ?>
@@ -178,11 +191,11 @@ $initials = require __DIR__ . '/partials/initials.php';
                             <span class="muted" data-selected></span>
                         </div>
                         <div class="hour-list" role="group" aria-labelledby="hours-<?= $mode ?>" <?= $form->invalidAttributes('hours') ?>>
-                            <?php for ($hour = $window['from']; $hour < $window['to']; $hour++): ?>
+                            <?php for ($hour = $window->getHours()->start(); $hour < $window->getHours()->end(); $hour++): ?>
                                 <label class="hour-row">
                                     <input type="checkbox" name="hours[]" value="<?= $hour ?>" <?= in_array($hour, $form->hours, true) ? 'checked' : '' ?>>
                                     <strong><?= $hour ?>:00</strong>
-                                    <span class="muted">· <?= $modes[$mode]['free'] ?></span>
+                                    <span class="muted">· <?= $freeLabel($window) ?></span>
                                     <span class="hour-row__bar" aria-hidden="true"></span>
                                 </label>
                             <?php endfor; ?>

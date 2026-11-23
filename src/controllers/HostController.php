@@ -8,7 +8,9 @@ use App\Database;
 use App\Form\HostApplicationForm;
 use App\Form\VenueForm;
 use App\Model\Reservation;
+use App\Model\Venue;
 use App\Repository\ReservationRepository;
+use App\Repository\VenueRepository;
 
 final class HostController extends AppController
 {
@@ -27,11 +29,14 @@ final class HostController extends AppController
         'sent' => 'Wniosek jest poprawny. Administrator sprawdzi go, gdy aplikacja będzie miała bazę danych – decyzję dostaniesz e-mailem.',
     ];
 
+    private VenueRepository $venues;
     private ReservationRepository $reservations;
 
     public function __construct()
     {
-        $this->reservations = new ReservationRepository((new Database())->connect());
+        $database = (new Database())->connect();
+        $this->venues = new VenueRepository($database);
+        $this->reservations = new ReservationRepository($database);
     }
 
     public function dashboard(): void
@@ -42,12 +47,8 @@ final class HostController extends AppController
         }
 
         $venues = $this->hostVenues();
-
-        // Prośby to oczekujące rezerwacje w lokalach zalogowanego gospodarza.
-        $requests = array_filter(
-            $this->reservations->findByStatus('pending'),
-            static fn (Reservation $reservation): bool => isset($venues[$reservation->getVenueId()]),
-        );
+        // Prośby to oczekujące rezerwacje w lokalach zalogowanego gospodarza (repozytorium łączy je z lokalami JOIN-em).
+        $requests = $this->reservations->findPendingByHost($this->currentUser()->getId());
 
         $this->render('host-dashboard', [
             'pageTitle' => 'Panel gospodarza – PoGodzinach',
@@ -59,21 +60,23 @@ final class HostController extends AppController
         ]);
     }
 
-    /** @return array<int, array> lokale zalogowanego gospodarza, kluczem jest id lokalu */
+    /** @return array<int, Venue> lokale zalogowanego gospodarza w każdym statusie, kluczem jest id lokalu */
     private function hostVenues(): array
     {
-        return array_filter(
-            array_column(VenueController::SAMPLE_VENUES, null, 'id'),
-            fn (array $venue): bool => $venue['host'] === $this->currentUser()->getName(),
-        );
+        $venues = [];
+        foreach ($this->venues->findByHost($this->currentUser()->getId()) as $venue) {
+            $venues[$venue->getId()] = $venue;
+        }
+
+        return $venues;
     }
 
-    /* Dane prośby do widoku; kwota to miejsca × godziny × cena za miejsce albo godziny × cena za cały lokal. */
-    private function requestDetails(Reservation $reservation, array $venue): array
+    /* Dane prośby do widoku; kwota to miejsca × godziny × cena okna (za miejsce albo za cały lokal). */
+    private function requestDetails(Reservation $reservation, Venue $venue): array
     {
         $isSeats = $reservation->getMode() === 'seats';
         $hours = $reservation->getEndHour() - $reservation->getStartHour();
-        $price = $isSeats ? $venue['seatPrice'] : $venue['exclusivePrice'];
+        $price = $venue->getWindow($reservation->getMode())->getPrice();
         $count = $isSeats ? $reservation->getSeats() : 1;
         $hoursSinceSent = intdiv(time() - $reservation->getCreatedAt()->getTimestamp(), 3600);
 
@@ -81,7 +84,7 @@ final class HostController extends AppController
             'id' => $reservation->getId(),
             // TODO: Laboratorium 9 – najemca z konta (user_id); do tego czasu rezerwuje przykładowy użytkownik.
             'guest' => $this->currentUser()->getName(),
-            'venueName' => $venue['name'],
+            'venueName' => $reservation->getVenueName(),
             'date' => $reservation->getDate(),
             'from' => $reservation->getStartHour(),
             'to' => $reservation->getEndHour(),

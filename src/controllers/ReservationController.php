@@ -31,7 +31,6 @@ final class ReservationController extends AppController
             'stylesheet' => 'reservations',
             'activeNav' => 'reservations',
             'reservations' => $this->reservations->findAll(),
-            'venues' => array_column(VenueController::SAMPLE_VENUES, null, 'id'),
             'cancellableStatuses' => self::CANCELLABLE_STATUSES,
             'statusMessage' => $this->statusMessage(self::STATUS_MESSAGES),
         ]);
