@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Model;
 
+use DateTimeImmutable;
+
 /*
  * Encja lokalu (Laboratorium 8): wiersz tabeli venues razem z celami, udogodnieniami i oknami dostępności.
  * Szkic wymaga tylko nazwy, dlatego część pól może być pusta (null), dopóki gospodarz nie wyśle lokalu do weryfikacji.
@@ -28,6 +30,7 @@ final class Venue
         private ?string $description,
         private string $entryMode,
         private string $status,
+        private DateTimeImmutable $createdAt,
         private array $purposes,
         private array $amenities,
         private array $windows,
@@ -103,6 +106,17 @@ final class Venue
     public function isPublished(): bool
     {
         return $this->status === 'published';
+    }
+
+    /* Decyzja administratora: opublikowanie albo odrzucenie lokalu czekającego na weryfikację. */
+    public function setStatus(string $status): void
+    {
+        $this->status = $status;
+    }
+
+    public function getCreatedAt(): DateTimeImmutable
+    {
+        return $this->createdAt;
     }
 
     /** @return string[] */

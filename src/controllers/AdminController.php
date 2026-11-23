@@ -4,7 +4,11 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
+use App\Database;
 use App\Form\UserFilterForm;
+use App\Repository\HostApplicationRepository;
+use App\Repository\UserRepository;
+use App\Repository\VenueRepository;
 
 // TODO: Laboratorium 9 – panel tylko dla zalogowanego administratora (rola z sesji).
 final class AdminController extends AppController
@@ -13,54 +17,32 @@ final class AdminController extends AppController
     private const VENUE_DECISIONS = ['publish', 'reject'];
     private const USER_ACTIONS = ['block', 'unblock', 'revoke-host'];
 
-    // TODO: Laboratorium 8 – decyzje zapisane w bazie zamiast samego komunikatu.
+    // TODO: Laboratorium 8 – zapis decyzji o wnioskach (status wniosku i rola gospodarza w jednej transakcji).
     private const STATUS_MESSAGES = [
-        'application-approve' => 'Wniosek zatwierdzony. Użytkownik dostanie rolę gospodarza, gdy wnioski trafią do bazy danych.',
-        'application-reject' => 'Wniosek odrzucony. Decyzja zapisze się, gdy wnioski trafią do bazy danych.',
-        'venue-publish' => 'Lokal opublikowany. Pojawi się w Odkrywaj, gdy lokale trafią do bazy danych.',
-        'venue-reject' => 'Lokal odrzucony. Decyzja zapisze się, gdy lokale trafią do bazy danych.',
+        'application-approve' => 'Wniosek zatwierdzony. Użytkownik dostanie rolę gospodarza, gdy decyzje o wnioskach trafią do bazy danych.',
+        'application-reject' => 'Wniosek odrzucony. Decyzja zapisze się, gdy decyzje o wnioskach trafią do bazy danych.',
+        'venue-publish' => 'Lokal opublikowany. Decyzja zapisze się w kolejnym kroku.',
+        'venue-reject' => 'Lokal odrzucony. Decyzja zapisze się w kolejnym kroku.',
     ];
 
     // Akcje na kontach przekierowują do tabeli użytkowników (#users), więc ich komunikat pokazuje się przy tabeli.
     private const USER_STATUS_MESSAGES = [
-        'user-block' => 'Użytkownik zablokowany. Blokada zapisze się, gdy konta trafią do bazy danych.',
-        'user-unblock' => 'Użytkownik odblokowany. Zmiana zapisze się, gdy konta trafią do bazy danych.',
-        'user-revoke-host' => 'Rola gospodarza odebrana. Zmiana zapisze się, gdy konta trafią do bazy danych.',
+        'user-block' => 'Użytkownik zablokowany. Zmiana zapisze się w kolejnym kroku.',
+        'user-unblock' => 'Użytkownik odblokowany. Zmiana zapisze się w kolejnym kroku.',
+        'user-revoke-host' => 'Rola gospodarza odebrana. Zmiana zapisze się w kolejnym kroku.',
     ];
 
-    // TODO: Laboratorium 8 – wnioski, lokale do akceptacji i użytkownicy z bazy zamiast przykładowych danych.
-    private const SAMPLE_APPLICATIONS = [
-        ['id' => 1, 'name' => 'Anna Kowalska', 'email' => 'anna.kowalska@example.com', 'sent' => 'dziś 9:40', 'waitingHours' => 2,
-            'phone' => '+48 601 234 567', 'company' => 'Witraż Anna Kowalska', 'nip' => '676-248-10-35',
-            'venue' => 'Pracownia Szkła Witraż', 'venueDetails' => 'ul. Józefińska 12, Podgórze · Pracownia',
-            'message' => 'Prowadzę pracownię witrażu w Podgórzu. Od poniedziałku do środy po 16:00 pracownia stoi pusta – chcę ją udostępniać na warsztaty, sesje zdjęciowe i spotkania do 10 osób.'],
-        ['id' => 2, 'name' => 'Paweł Kruk', 'email' => 'pawel.kruk@example.com', 'sent' => 'wczoraj 18:15', 'waitingHours' => 17,
-            'phone' => '+48 512 880 341', 'company' => 'Echo Studio sp. z o.o.', 'nip' => '945-221-77-60',
-            'venue' => 'Studio Nagrań Echo', 'venueDetails' => 'ul. Grzegórzecka 21, Grzegórzki · Studio',
-            'message' => 'Studio nagrań z salą 40 m². W weekendy do 14:00 stoi wolne – na podcasty, sesje i małe szkolenia.'],
-        ['id' => 3, 'name' => 'Monika Sowa', 'email' => 'monika.sowa@example.com', 'sent' => 'wczoraj 11:02', 'waitingHours' => 31,
-            'phone' => '+48 698 117 402', 'company' => 'Księgarnia Strona s.c.', 'nip' => '677-239-51-08',
-            'venue' => 'Księgarnia Strona', 'venueDetails' => 'ul. Miodowa 9, Kazimierz · Księgarnia z kawiarnią',
-            'message' => 'Po 19:00 księgarnia jest zamknięta. Chcemy wynajmować antresolę na spotkania autorskie i kluby książki.'],
-    ];
+    private UserRepository $users;
+    private VenueRepository $venues;
+    private HostApplicationRepository $applications;
 
-    private const SAMPLE_PENDING_VENUES = [
-        ['id' => 4, 'name' => 'Piwnica Lampion', 'host' => 'Piotr Nowak', 'address' => 'ul. Szewska 14, Stare Miasto', 'sent' => 'dziś 8:15',
-            'purposes' => ['meetings', 'events'], 'seatPrice' => null, 'seatCount' => null, 'exclusivePrice' => 180, 'capacity' => 24,
-            'hasReel' => false],
-        ['id' => 5, 'name' => 'Atelier Len', 'host' => 'Joanna Wrona', 'address' => 'ul. Krakowska 30, Kazimierz', 'sent' => 'wczoraj 20:30',
-            'purposes' => ['work', 'shoots'], 'seatPrice' => 16, 'seatCount' => 8, 'exclusivePrice' => 140, 'capacity' => 12,
-            'hasReel' => true],
-    ];
-
-    private const SAMPLE_USERS = [
-        ['id' => 1, 'name' => 'Anna Kowalska', 'email' => 'anna.kowalska@example.com', 'isHost' => false, 'status' => 'application', 'lastSeen' => 'dziś 9:40'],
-        ['id' => 2, 'name' => 'Piotr Nowak', 'email' => 'piotr.nowak@example.com', 'isHost' => true, 'status' => 'active', 'lastSeen' => 'dziś 8:15'],
-        ['id' => 3, 'name' => 'Tomasz Wrona', 'email' => 'tomasz.wrona@example.com', 'isHost' => true, 'status' => 'active', 'lastSeen' => 'wczoraj 21:40'],
-        ['id' => 4, 'name' => 'Marta Zielińska', 'email' => 'marta.zielinska@example.com', 'isHost' => false, 'status' => 'active', 'lastSeen' => 'wczoraj 21:05'],
-        ['id' => 5, 'name' => 'Tomasz Wójcik', 'email' => 'tomasz.wojcik@example.com', 'isHost' => false, 'status' => 'active', 'lastSeen' => 'wczoraj 16:30'],
-        ['id' => 6, 'name' => 'Adam Nowicki', 'email' => 'adam.nowicki@example.com', 'isHost' => false, 'status' => 'blocked', 'lastSeen' => '12.11'],
-    ];
+    public function __construct()
+    {
+        $database = (new Database())->connect();
+        $this->users = new UserRepository($database);
+        $this->venues = new VenueRepository($database);
+        $this->applications = new HostApplicationRepository($database);
+    }
 
     public function dashboard(): void
     {
@@ -75,9 +57,9 @@ final class AdminController extends AppController
             'pageTitle' => 'Panel administratora – PoGodzinach',
             'stylesheet' => 'admin',
             'activeNav' => '',
-            'applications' => self::SAMPLE_APPLICATIONS,
-            'pendingVenues' => self::SAMPLE_PENDING_VENUES,
-            'users' => $isValid ? $this->findUsers($form) : [],
+            'applications' => $this->applications->findPending(),
+            'pendingVenues' => $this->venues->findByStatus('pending'),
+            'users' => $isValid ? $this->users->findForAdmin($form->group === 'hosts', $form->group === 'blocked', $form->query) : [],
             'groups' => UserFilterForm::GROUPS,
             'form' => $form,
             'errors' => $form->errors(),
@@ -95,8 +77,10 @@ final class AdminController extends AppController
             return;
         }
 
-        if (!in_array($id, array_column(self::SAMPLE_APPLICATIONS, 'id'), true)) {
-            $this->renderError(404, 'Nie znaleziono wniosku', 'Wniosek o podanym numerze nie istnieje.');
+        $application = $this->applications->find($id);
+
+        if ($application === null || $application->getStatus() !== 'pending') {
+            $this->renderError(404, 'Nie znaleziono wniosku', 'Wniosek o podanym numerze nie istnieje albo ma już decyzję.');
             return;
         }
 
@@ -112,7 +96,10 @@ final class AdminController extends AppController
             return;
         }
 
-        if (!in_array($id, array_column(self::SAMPLE_PENDING_VENUES, 'id'), true)) {
+        $venue = $this->venues->find($id);
+
+        // Decyzja tylko dla lokalu w weryfikacji – ponowne wysłanie formularza po decyzji daje 404.
+        if ($venue === null || $venue->getStatus() !== 'pending') {
             $this->renderError(404, 'Nie znaleziono lokalu', 'Lokal o podanym numerze nie czeka na akceptację.');
             return;
         }
@@ -130,17 +117,17 @@ final class AdminController extends AppController
             return;
         }
 
-        $user = array_column(self::SAMPLE_USERS, null, 'id')[$id] ?? null;
+        $user = $this->users->find($id);
 
-        if ($user === null) {
+        if ($user === null || $user->isAdmin()) {
             $this->renderError(404, 'Nie znaleziono użytkownika', 'Użytkownik o podanym numerze nie istnieje.');
             return;
         }
 
         $isAllowed = match ($action) {
-            'block' => $user['status'] !== 'blocked',
-            'unblock' => $user['status'] === 'blocked',
-            'revoke-host' => $user['isHost'],
+            'block' => !$user->isBlocked(),
+            'unblock' => $user->isBlocked(),
+            'revoke-host' => $user->isHost(),
         };
 
         if (!$isAllowed) {
@@ -149,16 +136,5 @@ final class AdminController extends AppController
         }
 
         $this->redirect('/admin?status=user-' . $action . '#users');
-    }
-
-    /* Użytkownik pasuje, gdy należy do wybranej grupy i ma szukaną frazę w imieniu albo e-mailu. */
-    private function findUsers(UserFilterForm $form): array
-    {
-        return array_values(array_filter(
-            self::SAMPLE_USERS,
-            static fn (array $user): bool => ($form->group !== 'hosts' || $user['isHost'])
-                && ($form->group !== 'blocked' || $user['status'] === 'blocked')
-                && ($form->query === '' || mb_stripos($user['name'] . ' ' . $user['email'], $form->query) !== false),
-        ));
     }
 }

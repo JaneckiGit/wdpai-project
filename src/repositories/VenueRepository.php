@@ -7,6 +7,7 @@ namespace App\Repository;
 use App\Model\AvailabilityWindow;
 use App\Model\HourRange;
 use App\Model\Venue;
+use DateTimeImmutable;
 use PDO;
 
 final class VenueRepository
@@ -18,7 +19,7 @@ final class VenueRepository
      */
     private const SELECT = "SELECT venues.id, venues.host_id, users.name AS host_name, venues.name, venues.type,
             venues.address, venues.district, venues.latitude, venues.longitude, venues.description,
-            venues.entry_mode, venues.status,
+            venues.entry_mode, venues.status, venues.created_at,
             (SELECT string_agg(purpose, ',' ORDER BY array_position(ARRAY['work', 'meetings', 'shoots', 'events'], purpose::text))
                 FROM venue_purposes WHERE venue_id = venues.id) AS purposes,
             (SELECT string_agg(amenity, ',' ORDER BY array_position(ARRAY['wifi', 'sockets', 'daylight', 'projector', 'coffee'], amenity::text))
@@ -66,6 +67,17 @@ final class VenueRepository
         return $this->mapRowsToVenues($statement->fetchAll());
     }
 
+    /** @return list<Venue> lokale w danym statusie, od najstarszego (panel administratora: 'pending') */
+    public function findByStatus(string $status): array
+    {
+        $statement = $this->database->prepare(
+            self::SELECT . ' WHERE venues.status = :status ORDER BY venues.created_at'
+        );
+        $statement->execute(['status' => $status]);
+
+        return $this->mapRowsToVenues($statement->fetchAll());
+    }
+
     public function find(int $id): ?Venue
     {
         $statement = $this->database->prepare(
@@ -76,6 +88,18 @@ final class VenueRepository
         $row = $statement->fetch();
 
         return $row === false ? null : $this->mapRowToVenue($row);
+    }
+
+    /* Administrator zmienia tylko status lokalu; updated_at ustawia wyzwalacz venues_set_updated_at. */
+    public function update(Venue $venue): void
+    {
+        $statement = $this->database->prepare(
+            'UPDATE venues SET status = :status WHERE id = :id'
+        );
+        $statement->execute([
+            'id' => $venue->getId(),
+            'status' => $venue->getStatus(),
+        ]);
     }
 
     /** @return list<AvailabilityWindow> okna lokalu, najpierw miejsca do pracy, potem wyłączność */
@@ -130,6 +154,7 @@ final class VenueRepository
             $row['description'],
             (string) $row['entry_mode'],
             (string) $row['status'],
+            new DateTimeImmutable((string) $row['created_at']),
             self::splitCodes($row['purposes']),
             self::splitCodes($row['amenities']),
             $this->findWindows((int) $row['id']),

@@ -1,6 +1,10 @@
 <?php
 $purposes = require __DIR__ . '/partials/purposes.php';
 $initials = require __DIR__ . '/partials/initials.php';
+$venueTypes = require __DIR__ . '/partials/venue-types.php';
+$relativeTime = require __DIR__ . '/partials/relative-time.php';
+// Status konta w tabeli: blokada ma pierwszeństwo przed wnioskiem w toku.
+$userStatus = static fn ($user): string => $user->isBlocked() ? 'blocked' : ($user->hasPendingApplication() ? 'application' : 'active');
 $statuses = [
     'application' => ['Wniosek w toku', 'warning', 'fa-regular fa-clock'],
     'active' => ['Aktywne', 'success', 'fa-regular fa-circle-check'],
@@ -22,25 +26,26 @@ $filterUrl = static fn (string $group): string => '/admin?' . http_build_query(a
 
         <ul>
             <?php foreach ($applications as $application): ?>
+                <?php $hoursWaiting = $application->getHoursWaiting(); ?>
                 <li class="list-item">
-                    <span class="initials" aria-hidden="true"><?= htmlspecialchars($initials($application['name'])) ?></span>
+                    <span class="initials" aria-hidden="true"><?= htmlspecialchars($initials($application->getFullName())) ?></span>
                     <div>
-                        <h3><?= htmlspecialchars($application['name']) ?></h3>
-                        <p class="muted"><?= htmlspecialchars($application['email']) ?> · konto „Szukam przestrzeni”</p>
+                        <h3><?= htmlspecialchars($application->getFullName()) ?></h3>
+                        <p class="muted"><?= htmlspecialchars($application->getEmail()) ?> · konto „Szukam przestrzeni”</p>
                     </div>
-                    <span class="badge <?= $application['waitingHours'] >= 24 ? 'badge--warning' : 'badge--muted' ?>">
+                    <span class="badge <?= $hoursWaiting >= 24 ? 'badge--warning' : 'badge--muted' ?>">
                         <i class="fa-regular fa-clock" aria-hidden="true"></i>
-                        <?= $application['waitingHours'] >= 24 ? 'czeka ' . $application['waitingHours'] . ' h · ' : 'wysłany ' ?><?= $application['sent'] ?>
+                        <?= $hoursWaiting >= 24 ? 'czeka ' . $hoursWaiting . ' h · ' : 'wysłany ' ?><?= $relativeTime($application->getCreatedAt()) ?>
                     </span>
 
                     <dl class="list-item__row application">
-                        <div><dt>Telefon</dt><dd><?= htmlspecialchars($application['phone']) ?></dd></div>
-                        <div><dt>Firma</dt><dd><?= htmlspecialchars($application['company']) ?> <span class="muted">NIP <?= htmlspecialchars($application['nip']) ?></span></dd></div>
-                        <div><dt>Lokal</dt><dd><?= htmlspecialchars($application['venue']) ?> <span class="muted"><?= htmlspecialchars($application['venueDetails']) ?></span></dd></div>
+                        <div><dt>Telefon</dt><dd><?= htmlspecialchars($application->getPhone()) ?></dd></div>
+                        <div><dt>Firma</dt><dd><?= htmlspecialchars($application->getCompanyName()) ?> <span class="muted">NIP <?= $application->getFormattedNip() ?></span></dd></div>
+                        <div><dt>Lokal</dt><dd><?= htmlspecialchars($application->getVenueName()) ?> <span class="muted"><?= htmlspecialchars($application->getAddress() . ' · ' . $venueTypes[$application->getVenueType()]) ?></span></dd></div>
                     </dl>
-                    <p class="list-item__row">„<?= htmlspecialchars($application['message']) ?>”</p>
+                    <p class="list-item__row">„<?= htmlspecialchars($application->getMessage()) ?>”</p>
 
-                    <form class="list-item__row actions actions--end" action="/admin/applications/<?= $application['id'] ?>" method="post">
+                    <form class="list-item__row actions actions--end" action="/admin/applications/<?= $application->getId() ?>" method="post">
                         <button class="button button--outline" type="submit" name="decision" value="reject">Odrzuć</button>
                         <button class="button" type="submit" name="decision" value="approve"><i class="fa-solid fa-check" aria-hidden="true"></i> Zatwierdź</button>
                     </form>
@@ -54,30 +59,29 @@ $filterUrl = static fn (string $group): string => '/admin?' . http_build_query(a
 
         <ul class="pending-venues">
             <?php foreach ($pendingVenues as $venue): ?>
+                <?php [$seats, $exclusive] = [$venue->getWindow('seats'), $venue->getWindow('exclusive')]; ?>
                 <li class="card pending-venue">
                     <img src="/images/login-hero.svg" alt="">
                     <div>
-                        <h3><?= htmlspecialchars($venue['name']) ?></h3>
-                        <span class="badge badge--muted"><?= $venue['sent'] ?></span>
-                        <p class="muted"><?= htmlspecialchars($venue['host'] . ' · ' . $venue['address']) ?></p>
+                        <h3><?= htmlspecialchars($venue->getName()) ?></h3>
+                        <span class="badge badge--muted"><?= $relativeTime($venue->getCreatedAt()) ?></span>
+                        <p class="muted"><?= htmlspecialchars($venue->getHostName() . ' · ' . $venue->getLocation()) ?></p>
                         <p class="pending-venue__tags">
-                            <?php foreach ($venue['purposes'] as $purpose): ?>
+                            <?php foreach ($venue->getPurposes() as $purpose): ?>
                                 <span class="chip chip--small"><i class="fa-solid <?= $purposes[$purpose][1] ?>" aria-hidden="true"></i> <?= $purposes[$purpose][0] ?></span>
                             <?php endforeach; ?>
                         </p>
                         <p class="pending-venue__tags">
-                            <?php if ($venue['seatPrice'] !== null): ?>
-                                <span class="badge badge--seats"><i class="fa-solid fa-laptop" aria-hidden="true"></i> Miejsca do pracy · <?= $venue['seatCount'] ?> × <?= $venue['seatPrice'] ?> zł/h</span>
+                            <?php if ($seats !== null): ?>
+                                <span class="badge badge--seats"><i class="fa-solid fa-laptop" aria-hidden="true"></i> Miejsca do pracy · <?= $seats->getCapacity() ?> × <?= $seats->getPrice() ?> zł/h</span>
                             <?php endif; ?>
-                            <?php if ($venue['exclusivePrice'] !== null): ?>
-                                <span class="badge badge--exclusive"><i class="fa-solid fa-key" aria-hidden="true"></i> Na wyłączność · <?= $venue['exclusivePrice'] ?> zł/h</span>
-                                <span class="muted">do <?= $venue['capacity'] ?> osób</span>
+                            <?php if ($exclusive !== null): ?>
+                                <span class="badge badge--exclusive"><i class="fa-solid fa-key" aria-hidden="true"></i> Na wyłączność · <?= $exclusive->getPrice() ?> zł/h</span>
+                                <span class="muted">do <?= $exclusive->getCapacity() ?> osób</span>
                             <?php endif; ?>
-                            <span class="badge <?= $venue['hasReel'] ? 'badge--warning' : 'badge--muted' ?>">
-                                <i class="fa-solid fa-video" aria-hidden="true"></i> <?= $venue['hasReel'] ? 'Rolka czeka na zatwierdzenie' : 'Bez rolki' ?>
-                            </span>
+                            <!-- TODO: Laboratorium 13 – plakietka rolki czekającej na zatwierdzenie, gdy gospodarz będzie mógł ją przesłać. -->
                         </p>
-                        <form class="actions" action="/admin/venues/<?= $venue['id'] ?>" method="post">
+                        <form class="actions" action="/admin/venues/<?= $venue->getId() ?>" method="post">
                             <button class="button button--outline" type="submit" name="decision" value="reject">Odrzuć</button>
                             <button class="button" type="submit" name="decision" value="publish"><i class="fa-solid fa-check" aria-hidden="true"></i> Opublikuj</button>
                         </form>
@@ -117,29 +121,30 @@ $filterUrl = static fn (string $group): string => '/admin?' . http_build_query(a
                 </thead>
                 <tbody>
                     <?php foreach ($users as $user): ?>
+                        <?php $status = $userStatus($user); ?>
                         <tr>
                             <td>
                                 <span class="admin__user">
-                                    <span class="initials" aria-hidden="true"><?= htmlspecialchars($initials($user['name'])) ?></span>
-                                    <span><strong><?= htmlspecialchars($user['name']) ?></strong> <span class="muted"><?= htmlspecialchars($user['email']) ?></span></span>
+                                    <span class="initials" aria-hidden="true"><?= htmlspecialchars($initials($user->getName())) ?></span>
+                                    <span><strong><?= htmlspecialchars($user->getName()) ?></strong> <span class="muted"><?= htmlspecialchars($user->getEmail()) ?></span></span>
                                 </span>
                             </td>
                             <td>
                                 <span class="badge badge--muted">Najemca</span>
-                                <?php if ($user['isHost']): ?>
+                                <?php if ($user->isHost()): ?>
                                     <span class="badge badge--exclusive"><i class="fa-solid fa-key" aria-hidden="true"></i> Gospodarz</span>
                                 <?php endif; ?>
                             </td>
                             <td>
-                                <span class="badge badge--<?= $statuses[$user['status']][1] ?>"><i class="<?= $statuses[$user['status']][2] ?>" aria-hidden="true"></i> <?= $statuses[$user['status']][0] ?></span>
+                                <span class="badge badge--<?= $statuses[$status][1] ?>"><i class="<?= $statuses[$status][2] ?>" aria-hidden="true"></i> <?= $statuses[$status][0] ?></span>
                             </td>
-                            <td><?= $user['lastSeen'] ?></td>
+                            <td><?= $user->getLastSeenAt() === null ? '—' : $relativeTime($user->getLastSeenAt()) ?></td>
                             <td>
-                                <form class="actions actions--end" action="/admin/users/<?= $user['id'] ?>" method="post">
-                                    <?php if ($user['isHost']): ?>
+                                <form class="actions actions--end" action="/admin/users/<?= $user->getId() ?>" method="post">
+                                    <?php if ($user->isHost()): ?>
                                         <button class="button button--outline" type="submit" name="action" value="revoke-host">Odbierz rolę gospodarza</button>
                                     <?php endif; ?>
-                                    <?php if ($user['status'] === 'blocked'): ?>
+                                    <?php if ($user->isBlocked()): ?>
                                         <button class="button button--outline admin__unblock" type="submit" name="action" value="unblock">Odblokuj</button>
                                     <?php else: ?>
                                         <button class="button button--outline admin__block" type="submit" name="action" value="block">Zablokuj</button>
