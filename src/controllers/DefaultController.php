@@ -12,6 +12,14 @@ final class DefaultController extends AppController
         $this->redirect('/venues');
     }
 
+    public function terms(): void
+    {
+        $this->render('terms', [
+            'pageTitle' => 'Regulamin – PoGodzinach',
+            'activeNav' => '',
+        ]);
+    }
+
     public function notFound(): void
     {
         $this->render('not-found', [

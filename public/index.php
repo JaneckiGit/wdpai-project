@@ -28,6 +28,7 @@ set_error_handler(static function (int $severity, string $message, string $file,
 $routing = new Routing();
 
 $routing->get('/', DefaultController::class, 'index');
+$routing->get('/terms', DefaultController::class, 'terms');
 $routing->get('/login', SecurityController::class, 'login');
 $routing->post('/login', SecurityController::class, 'login');
 $routing->get('/register', SecurityController::class, 'register');
