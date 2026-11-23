@@ -94,14 +94,16 @@ docker compose exec php composer dump-autoload   # generuje vendor/autoload.php
 Przy pierwszym starcie z pustą bazą kontener `db` wykonuje po kolei skrypty z `database/` – tworzy tabele i wgrywa dane demonstracyjne (sekcja „Baza danych”). Dane zostają potem w wolumenie `pg-data`, także po `docker compose down`. Skrypty startowe działają tylko na pustej bazie, więc gdy wolumen `pg-data` powstał wcześniej, nowe skrypty trzeba wykonać ręcznie (polecenie bierze nazwę użytkownika i bazy ze zmiennych kontenera `db`). Baza z samą tabelą `reservations` (Laboratorium 7) potrzebuje skryptów 02–07:
 
 ```bash
-for f in database/0[2-7]-*.sql; do docker compose exec -T db sh -c 'psql -U "$POSTGRES_USER" -d "$POSTGRES_DB"' < "$f"; done
+for f in database/0[2-7]-*.sql; do docker compose exec -T db sh -c 'psql -1 -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB"' < "$f" || break; done
 ```
 
 Baza, która ma już skrypty 02–06, potrzebuje tylko nowego:
 
 ```bash
-docker compose exec -T db sh -c 'psql -U "$POSTGRES_USER" -d "$POSTGRES_DB"' < database/07-add-reservation-keys.sql
+docker compose exec -T db sh -c 'psql -1 -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB"' < database/07-add-reservation-keys.sql
 ```
+
+`-1` wykonuje cały plik w jednej transakcji, a `ON_ERROR_STOP=1` przerywa go przy pierwszym błędzie – nieudany skrypt niczego nie zmienia i można go uruchomić ponownie.
 
 Bez nowych tabel strony czytające lokale i konto kończą się błędem 500 (`relation "users" does not exist` w `docker compose logs php`).
 
@@ -342,7 +344,7 @@ Typy obiektów z instrukcji w projekcie:
 | Value Object | `HourRange` | Bez id, niemutowalny, walidacja w konstruktorze (godziny 0–24, początek przed końcem); `includes($hour)` sprawdza godziny rezerwacji w `ReservationForm` |
 | DTO | – | Dojdzie przy zapisie lokalu z formularza „Dodaj lokal” (kolejny krok) |
 
-Odczyt lokalu to dwa zapytania: lokal z gospodarzem (`JOIN users`) oraz celami i udogodnieniami sklejonymi przez `string_agg` w podzapytaniach, a potem okna lokalu z dniami (też `string_agg`). Podzapytania zamiast `JOIN`-ów z tabelami celów, udogodnień i okien, bo każdy taki `JOIN` mnożyłby wiersze lokalu. Rezerwacje łączą się z lokalem i kontem najemcy (`JOIN venues`, `JOIN users`), więc panel gospodarza filtruje prośby po `venues.host_id` w SQL.
+Odczyt lokalu to dwa zapytania: lokal z gospodarzem (`JOIN users`) oraz celami i udogodnieniami sklejonymi przez `string_agg` w podzapytaniach, a potem okna lokalu z dniami (też `string_agg`); lista N lokali to więc 1 + N zapytań (przy kilku lokalach na stronie to wystarcza). Podzapytania zamiast `JOIN`-ów z tabelami celów, udogodnień i okien, bo każdy taki `JOIN` mnożyłby wiersze lokalu. Rezerwacje łączą się z lokalem i kontem najemcy (`JOIN venues`, `JOIN users`), więc panel gospodarza filtruje prośby po `venues.host_id` w SQL.
 
 ## Routing
 
