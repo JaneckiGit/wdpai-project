@@ -62,12 +62,12 @@ Gotowy jest szkielet MVC z laboratoriów oraz szablony HTML pięciu widoków z p
 | Panel gospodarza | Tylko dla gospodarza – pozostali są przekierowywani do wniosku o rolę (rola z `$currentUser`, w Laboratorium 9 z sesji). Powitanie zalogowanego gospodarza i przycisk „Dodaj lokal”; oczekujące rezerwacje z bazy w lokalach gospodarza (lista przewijana w karcie) z terminem, czasem do wygaśnięcia (24 h od wysłania), celem, trybem i kwotą; Akceptuj / Odrzuć zmieniają status rezerwacji w bazie (komunikat po przekierowaniu); karty lokali gospodarza z cenami trybów |
 | Zostań gospodarzem | Adres `/host/apply`: wniosek o rolę gospodarza w czterech kartach (dane kontaktowe z imieniem i nazwiskiem z konta, firma z NIP-em, pierwszy lokal, opis z licznikiem znaków), zgoda na regulamin i karta „Jak to działa”; walidacja w `HostApplicationForm`, po wysłaniu komunikat (zapis wniosku i zatwierdzanie przez administratora w Laboratoriach 8–9) |
 | Dodaj lokal | Formularz według prototypu: kroki po lewej (po wysłaniu „!” przy sekcji z błędem i „✓” przy pozostałych), nazwa, typ, adres z mapą Mapbox i pinezką do przeciągnięcia (współrzędne trafiają do formularza), opis z licznikiem znaków, karty celów, pola zdjęć i rolki, tabela okien dostępności z przyciskami „Dodaj okno” i usuwania, sposób wejścia, pasek z przyciskami; walidacja wykrywa nakładające się okna; szkic i wysłanie do weryfikacji |
-| Panel administratora | Adres `/admin` (link i dostęp tylko dla administratora dojdą z rolami w Laboratorium 9): wnioski o rolę gospodarza z danymi firmy i lokalu, lokale do akceptacji, tabela użytkowników z działającą wyszukiwarką (`?q=`) i filtrami grup (`?group=hosts`, `?group=blocked`); przyciski decyzji mają na razie tylko wygląd |
-| Konto | Strony z menu konta: „Zmień hasło” (`/account/password`: aktualne hasło, nowe co najmniej 8 znaków, powtórzenie) i „Usuń konto” (`/account/delete`: hasło i potwierdzenie) – na razie sam formularz, przyciski mają tylko wygląd; obsługa w Laboratorium 9 |
+| Panel administratora | Adres `/admin` (link i dostęp tylko dla administratora dojdą z rolami w Laboratorium 9): wnioski o rolę gospodarza z danymi firmy i lokalu, lokale do akceptacji, tabela użytkowników z działającą wyszukiwarką (`?q=`) i filtrami grup (`?group=hosts`, `?group=blocked`); przyciski decyzji to formularze POST z walidacją i komunikatem po przekierowaniu: zatwierdź / odrzuć wniosek, opublikuj / odrzuć lokal, odbierz rolę gospodarza, zablokuj i odblokuj (komunikat po akcji na koncie pokazuje się przy tabeli użytkowników); zapis decyzji w bazie dojdzie z tabelami wniosków, lokali i kont |
+| Konto | Strony z menu konta: „Zmień hasło” (`/account/password`: aktualne hasło, nowe co najmniej 8 znaków i inne niż aktualne, zgodne powtórzenie) i „Usuń konto” (`/account/delete`: hasło i potwierdzenie) z walidacją i komunikatem po przekierowaniu; „Wyloguj się” wysyła `POST /logout` i wraca do logowania. Sprawdzenie hasła, zapis i sesja dojdą w Laboratorium 9 |
 | Regulamin, Kontakt | Strony z linków w stopce i formularzach (`/terms`, `/contact`) z informacją na środku, że są w przygotowaniu |
 | Obsługa błędów | Kontrolowane odpowiedzi 400, 404, 409, 422 i 500 (sekcja „Formularze i obsługa błędów”) |
 
-Widoki to semantyczny HTML. W pełni ostylowane są widoki Logowanie, Rejestracja, Odkrywaj, Lokal i rezerwacja, Moje rezerwacje, Panel gospodarza, Zostań gospodarzem, Dodaj lokal, Panel administratora, Zmień hasło, Usuń konto, Regulamin i Kontakt, a także wspólny nagłówek z nawigacją i menu konta i stopka (opis w sekcji „Style CSS”), pozostałe widoki mają tylko style bazowe (kolory, fonty, linki, fokus). Na każdej stronie działa motyw jasny i ciemny (Laboratorium 5, sekcja „Motyw jasny i ciemny”). Dane w widokach są przykładowe, wzięte z prototypu – listy oznaczone komentarzem `TODO` będą wyświetlane w pętli z danych z bazy. Formularze są sprawdzane po stronie serwera. Rezerwacje są zapisywane w PostgreSQL (Laboratorium 7, sekcja „Baza danych”); dane z pozostałych formularzy nie są jeszcze nigdzie zapisywane (Laboratoria 8–9). Lokale w Odkrywaj i na stronie lokalu to przykładowa tablica w `VenueController`, którą filtry naprawdę zawężają; w Laboratorium 8 zastąpi ją baza. Pliki z formularza „Dodaj lokal” nie są jeszcze zapisywane (Laboratorium 13); przesuwanie pinezki po wpisaniu adresu (geokodowanie przez Fetch API) dojdzie w Laboratorium 11. Ochrona CSRF i sprawdzanie hasła dojdą w Laboratorium 9. Formularze „Zmień hasło” i „Usuń konto” nie są jeszcze wysyłane (Laboratorium 9), a Regulamin i Kontakt to strony „w trakcie przygotowania”. Przełącznika języka jeszcze nie ma.
+Widoki to semantyczny HTML. W pełni ostylowane są widoki Logowanie, Rejestracja, Odkrywaj, Lokal i rezerwacja, Moje rezerwacje, Panel gospodarza, Zostań gospodarzem, Dodaj lokal, Panel administratora, Zmień hasło, Usuń konto, Regulamin i Kontakt, a także wspólny nagłówek z nawigacją i menu konta i stopka (opis w sekcji „Style CSS”), pozostałe widoki mają tylko style bazowe (kolory, fonty, linki, fokus). Na każdej stronie działa motyw jasny i ciemny (Laboratorium 5, sekcja „Motyw jasny i ciemny”). Dane w widokach są przykładowe, wzięte z prototypu – listy oznaczone komentarzem `TODO` będą wyświetlane w pętli z danych z bazy. Formularze są sprawdzane po stronie serwera. Rezerwacje są zapisywane w PostgreSQL (Laboratorium 7, sekcja „Baza danych”); dane z pozostałych formularzy nie są jeszcze nigdzie zapisywane (Laboratoria 8–9). Lokale w Odkrywaj i na stronie lokalu to przykładowa tablica w `VenueController`, którą filtry naprawdę zawężają; w Laboratorium 8 zastąpi ją baza. Pliki z formularza „Dodaj lokal” nie są jeszcze zapisywane (Laboratorium 13); przesuwanie pinezki po wpisaniu adresu (geokodowanie przez Fetch API) dojdzie w Laboratorium 11. Ochrona CSRF i sprawdzanie hasła dojdą w Laboratorium 9. Regulamin i Kontakt to strony „w trakcie przygotowania”. Przełącznika języka jeszcze nie ma.
 
 ## Tech stack
 
@@ -212,15 +212,19 @@ Przepływ od żądania do danych: przeglądarka → `public/index.php` i router 
 | GET | `/` | `DefaultController::index` | przekierowanie do `/venues` |
 | GET | `/terms` | `DefaultController::terms` | `in-progress` (Regulamin – w przygotowaniu) |
 | GET | `/contact` | `DefaultController::contact` | `in-progress` (Kontakt – w przygotowaniu) |
-| GET | `/account/password` | `AccountController::password` | `account-password` (Zmień hasło) |
-| GET | `/account/delete` | `AccountController::delete` | `account-delete` (Usuń konto) |
+| GET, POST | `/account/password` | `AccountController::password` | `account-password` (Zmień hasło) |
+| GET, POST | `/account/delete` | `AccountController::delete` | `account-delete` (Usuń konto) |
 | GET, POST | `/login` | `SecurityController::login` | `login` |
 | GET, POST | `/register` | `SecurityController::register` | `register` |
+| POST | `/logout` | `SecurityController::logout` | przekierowanie do `/login` |
 | GET | `/venues` | `VenueController::index` | `venues` (Odkrywaj) |
 | GET | `/venues/{id}` (`id` – tylko cyfry) | `VenueController::show` | `venue` (Lokal i rezerwacja) |
 | POST | `/venues/{id}/reservations` | `VenueController::requestReservation` | przekierowanie albo `venue` z błędami |
 | GET | `/reservations` | `ReservationController::index` | `reservations` (Moje rezerwacje) |
 | GET | `/admin` | `AdminController::dashboard` | `admin` (Panel administratora) |
+| POST | `/admin/applications/{id}` | `AdminController::decideApplication` | przekierowanie albo `error` (400, 404) |
+| POST | `/admin/venues/{id}` | `AdminController::decideVenue` | przekierowanie albo `error` (400, 404) |
+| POST | `/admin/users/{id}` | `AdminController::updateUser` | przekierowanie albo `error` (400, 404, 409) |
 | POST | `/reservations/{id}/cancel` | `ReservationController::cancel` | przekierowanie albo `error` (404, 409) |
 | GET | `/host` | `HostController::dashboard` | `host-dashboard` (Panel gospodarza) |
 | GET, POST | `/host/apply` | `HostController::apply` | `host-application` (Zostań gospodarzem) |
@@ -234,7 +238,7 @@ Parametry zapytania (query parameters):
 |---|---|---|
 | `/venues` | `q`, `purpose`, `mode` | Wyszukiwanie i filtry, np. `/venues?q=Kazimierz&purpose=meetings`; niepoprawne wartości dają status 400 i listę błędów |
 | `/admin` | `q`, `group` | Wyszukiwanie użytkowników po imieniu lub e-mailu i grupa (`all`, `hosts`, `blocked`); nieznana grupa daje status 400 |
-| `/host`, `/host/apply`, `/venues/{id}`, `/reservations` | `status` | Komunikat po przekierowaniu, wybierany z listy dozwolonych; nieznana wartość jest ignorowana |
+| `/host`, `/host/apply`, `/venues/{id}`, `/reservations`, `/admin`, `/account/password`, `/login` | `status` | Komunikat po przekierowaniu, wybierany z listy dozwolonych; nieznana wartość jest ignorowana |
 
 Sprawdzenie z terminala:
 
@@ -263,7 +267,7 @@ Przepływ formularza (wzorzec Post/Redirect/Get):
 
 | Klasa | Formularz | Najważniejsze reguły |
 |---|---|---|
-| `Form` | Klasa abstrakcyjna | Wspólne reguły: poprawny e-mail, wybór z listy, długość tekstu, dodatnia liczba, zakres pełnych godzin, poprawna data; odporność na tablice zamiast tekstu (`email[]=x`) |
+| `Form` | Klasa abstrakcyjna | Wspólne reguły: poprawny e-mail, nowe hasło (co najmniej 8 znaków i zgodne powtórzenie – rejestracja i zmiana hasła), wybór z listy, długość tekstu, dodatnia liczba, zakres pełnych godzin, poprawna data; odporność na tablice zamiast tekstu (`email[]=x`) |
 | `LoginForm` | Logowanie | Poprawny e-mail, niepuste hasło |
 | `RegisterForm` | Rejestracja | Niepuste imię i nazwisko, poprawny e-mail, hasło co najmniej 8 znaków, zgodne powtórzenie hasła, zaakceptowany regulamin |
 | `ReservationForm` | Prośba o rezerwację | Tryb, w którym gospodarz ma okno, cel dozwolony w lokalu, dzień z najbliższych 7 dni i z dni okna, co najmniej 2 godziny z okna idące jedna po drugiej, 1–4 miejsca w trybie „Miejsca do pracy” |
@@ -272,13 +276,15 @@ Przepływ formularza (wzorzec Post/Redirect/Get):
 | `AvailabilityWindowForm` | Okno dostępności | Dni, godziny, tryb, liczba miejsc, cena, minimum godzin nie dłuższe niż okno; `overlaps()` wykrywa okna o wspólnym dniu i przecinających się godzinach |
 | `VenueFilterForm` | Filtry w Odkrywaj (GET) | Fraza do 100 znaków, cel i tryb z listy (domyślnie praca i miejsce do pracy) |
 | `UserFilterForm` | Filtry użytkowników w panelu administratora (GET) | Fraza do 100 znaków, grupa z listy (domyślnie wszyscy) |
+| `ChangePasswordForm` | Zmień hasło | Niepuste aktualne hasło, nowe hasło co najmniej 8 znaków i inne niż aktualne, zgodne powtórzenie |
+| `DeleteAccountForm` | Usuń konto | Niepuste hasło, zaznaczone potwierdzenie |
 
 | Status | Kiedy |
 |---|---|
 | 303 | Poprawny formularz – przekierowanie (`redirect()`) |
-| 400 | Nieznana decyzja gospodarza, niepoprawne filtry w adresie |
-| 404 | Nieznany adres lub metoda, identyfikator niebędący liczbą, nieistniejący lokal lub rezerwacja, prośba z cudzego lokalu albo już z decyzją |
-| 409 | Anulowanie rezerwacji odrzuconej albo już anulowanej |
+| 400 | Nieznana decyzja gospodarza lub administratora, nieznana akcja na koncie użytkownika, niepoprawne filtry w adresie |
+| 404 | Nieznany adres lub metoda, identyfikator niebędący liczbą, nieistniejący lokal lub rezerwacja, prośba z cudzego lokalu albo już z decyzją, nieistniejący wniosek, lokal do akceptacji albo użytkownik |
+| 409 | Anulowanie rezerwacji odrzuconej albo już anulowanej; blokada zablokowanego, odblokowanie aktywnego albo odebranie roli komuś, kto nie jest gospodarzem |
 | 422 | Błędne dane w formularzu `POST` |
 | 500 | Nieoczekiwany błąd, np. brak połączenia z bazą – strona bez szczegółów technicznych |
 
@@ -290,7 +296,7 @@ Dane wyświetlane z powrotem w HTML przechodzą przez `htmlspecialchars()`, wię
 
 | Plik | Zawartość |
 |---|---|
-| `public/css/style.css` | Zmienne CSS (tokeny projektu w wariancie jasnym i ciemnym), `box-sizing`, typografia, linki, fokus oraz wspólne komponenty: logo, przycisk, pola formularza z podpowiedzią, pole wyboru (checkbox), pole opisu (textarea) z licznikiem znaków (`.field__count`), karty sekcji formularza z numerem i siatka pól (`.form-section`, `.form-grid`), niższe pola w formularzach aplikacji (`.app-form`), przycisk drugorzędny (`.button--secondary`) i przycisk akcji nieodwracalnej (`.button--danger`), ścieżka (`.breadcrumbs`), karta (`.card`), plakietka celu (`.chip`) i plakietka trybu lub statusu (`.badge`), kontener strony (`.page`, wąski `.page--narrow`) i strona „w trakcie przygotowania” (`.in-progress`), kolumna z odstępem (`.stack`), szary podpis (`.muted`), kwadrat z ikoną (`.icon-tile`) kółko z inicjałami (`.initials`), wybrany filtr (`.chip[aria-current]`), plakietki statusu (`.badge--success`, `--warning`, `--danger`, `--muted`), karta z listą i licznikiem (`.panel`, `.count`, `.list-item`), przyciski decyzji (`.actions`, do prawej `.actions--end`, `.button--outline`) i pole wyszukiwania (`.search`) używane w kilku widokach, pola liczb bez strzałek w formularzach aplikacji, nagłówek z nawigacją (na telefonie dolny pasek) i menu konta pod avatarem (atrybut `popover` – otwieranie i zamykanie bez JavaScriptu), stopka, przełącznik motywu, klasa `visually-hidden` |
+| `public/css/style.css` | Zmienne CSS (tokeny projektu w wariancie jasnym i ciemnym), `box-sizing`, typografia, linki, fokus oraz wspólne komponenty: logo, przycisk, pola formularza z podpowiedzią, pole wyboru (checkbox), pole opisu (textarea) z licznikiem znaków (`.field__count`), karty sekcji formularza z numerem i siatka pól (`.form-section`, `.form-grid`), niższe pola w formularzach aplikacji (`.app-form`), przycisk drugorzędny (`.button--secondary`) i przycisk akcji nieodwracalnej (`.button--danger`), ścieżka (`.breadcrumbs`), karta (`.card`), plakietka celu (`.chip`) i plakietka trybu lub statusu (`.badge`), kontener strony (`.page`, wąski `.page--narrow`) i strona „w trakcie przygotowania” (`.in-progress`), kolumna z odstępem (`.stack`), szary podpis (`.muted`), kwadrat z ikoną (`.icon-tile`) kółko z inicjałami (`.initials`), wybrany filtr (`.chip[aria-current]`), plakietki statusu (`.badge--success`, `--warning`, `--danger`, `--muted`), karta z listą i licznikiem (`.panel`, `.count`, `.list-item`), przyciski decyzji (`.actions`, do prawej `.actions--end`, `.button--outline`) i pole wyszukiwania (`.search`) używane w kilku widokach, pola liczb bez strzałek w formularzach aplikacji, nagłówek z nawigacją (na telefonie dolny pasek) i menu konta pod avatarem (atrybut `popover` – otwieranie i zamykanie bez JavaScriptu; „Wyloguj się” to przycisk formularza wyglądający jak link), stopka, przełącznik motywu, klasa `visually-hidden` |
 | `public/css/login.css` | Układ widoków Logowanie i Rejestracja (dołączany przez layout, gdy kontroler przekaże `'stylesheet' => 'login'`) |
 | `public/css/venues.css` | Układ widoku Odkrywaj: pasek celu i trybu, mapa, karty lokali, przełącznik „Rolki / Mapa” na telefonie |
 | `public/css/venue.css` | Widok Lokal i rezerwacja według prototypu: rolka i „Nagrane tutaj”, karta gospodarza, cele, karty ofert z plakietkami, udogodnienia, wejście i panel rezerwacji: przełącznik trybu, kafelki dni i lista godzin (ukryte pola radio i checkbox, wybór wyróżnia `:has(:checked)`), licznik miejsc i podsumowanie; na telefonie jedna kolumna, od 1024 px panel obok treści (`position: sticky`), od 1280 px trzy kolumny |
@@ -396,6 +402,7 @@ Motyw z Laboratorium 5 korzysta 1:1 z kodu instrukcji: skrypt w `<head>`, znaczn
 Materiały Laboratorium 6 omawiają podstawy PHP i programowanie obiektowe, ale nie zawierają kodu formularzy, więc jego struktura (`src/forms/`, klasa abstrakcyjna `Form`, stałe klas, dziedziczenie) jest własnym rozwiązaniem. Elementy z późniejszych instrukcji użyte wcześniej, żeby nie zmieniać ich potem:
 
 - `isPost()` i `redirect()` w `AppController` oraz wzorzec jednej akcji dla `GET` i `POST` są 1:1 z Laboratorium 9;
+- wylogowanie ma trasę `POST /logout`, akcję `SecurityController::logout()` i przycisk w formularzu jak w Laboratorium 9; token CSRF i czyszczenie sesji dojdą razem z resztą Laboratorium 9, do tego czasu akcja tylko przekierowuje na `/login`;
 - rejestracja ma pola i reguły z Laboratorium 9 (`name`, `email`, `password`, `passwordConfirmation`, hasło co najmniej 8 znaków), sprawdzane w klasie `RegisterForm` zamiast w kontrolerze; doszła tylko zgoda na regulamin z projektu interfejsu; token CSRF i zapis w bazie dojdą razem z resztą Laboratorium 9;
 - lista błędów w `partials/form-errors.html.php` powstała z bloku z Laboratorium 9, a klasa `auth-form__errors` jest zastąpiona wspólną `form-errors`, bo lista działa w każdym formularzu;
 - błędy walidacji dostają status 422, podczas gdy kod z Laboratorium 9 zwraca wtedy domyślne 200;
