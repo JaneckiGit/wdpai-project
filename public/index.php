@@ -2,7 +2,6 @@
 
 declare(strict_types=1);
 
-use App\Controller\AccountController;
 use App\Controller\AdminController;
 use App\Controller\DefaultController;
 use App\Controller\HostController;
@@ -34,10 +33,6 @@ $routing->post('/login', SecurityController::class, 'login');
 $routing->get('/register', SecurityController::class, 'register');
 $routing->post('/register', SecurityController::class, 'register');
 $routing->post('/logout', SecurityController::class, 'logout');
-$routing->get('/account/password', AccountController::class, 'password');
-$routing->post('/account/password', AccountController::class, 'password');
-$routing->get('/account/delete', AccountController::class, 'delete');
-$routing->post('/account/delete', AccountController::class, 'delete');
 $routing->get('/venues', VenueController::class, 'index');
 $routing->get('/venues/{id}', VenueController::class, 'show');
 $routing->post('/venues/{id}/reservations', VenueController::class, 'requestReservation');

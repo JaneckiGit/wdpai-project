@@ -217,13 +217,6 @@ input:focus-visible {
     color: var(--color-text);
 }
 
-/* Przycisk akcji, której nie da się cofnąć: „Usuń konto”, „Zablokuj”. */
-.button--danger,
-.button--danger:hover {
-    background: var(--color-danger-text);
-    color: var(--color-surface);
-}
-
 .field {
     display: flex;
     flex-direction: column;
@@ -468,7 +461,7 @@ input:focus {
     padding: 1.25rem var(--space-2) var(--space-5);
 }
 
-/* Wąska strona z jednym formularzem, np. zmiana hasła i usunięcie konta. */
+/* Wąska strona z krótką treścią, np. Regulamin. */
 .page--narrow {
     max-width: 36rem;
 }

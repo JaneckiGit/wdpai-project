@@ -11,7 +11,6 @@ final class SecurityController extends AppController
 {
     private const LOGIN_STATUS_MESSAGES = [
         'registered' => 'Formularz rejestracji jest poprawny. Konto zostanie zapisane, gdy aplikacja będzie miała bazę danych.',
-        'account-deleted' => 'Formularz usunięcia konta jest poprawny. Konto zniknie, gdy konta trafią do bazy danych.',
     ];
 
     public function login(): void

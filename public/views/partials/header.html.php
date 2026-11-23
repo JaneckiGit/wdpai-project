@@ -38,6 +38,7 @@
     </nav>
 
     <!-- Atrybut popover: przeglądarka sama otwiera menu po kliknięciu avatara i zamyka je klawiszem Esc albo kliknięciem obok. -->
+    <!-- TODO: Laboratorium 9 – działające „Zmień hasło” i „Usuń konto”. -->
     <button class="avatar" type="button" popovertarget="account-menu" aria-label="Konto: <?= htmlspecialchars($currentUser['name']) ?>"></button>
     <div class="account-menu" id="account-menu" popover>
         <div class="account-menu__user">

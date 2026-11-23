@@ -13,7 +13,6 @@ abstract class Form
     protected const PURPOSES = ['work', 'meetings', 'shoots', 'events'];
     protected const MODES = ['seats', 'exclusive'];
     protected const VENUE_TYPES = ['cafe', 'bar', 'restaurant', 'workshop', 'studio', 'bookstore', 'gallery'];
-    protected const MIN_PASSWORD_LENGTH = 8;
 
     /** @var array<string, string> pole => komunikat błędu */
     private array $errors = [];
@@ -87,18 +86,6 @@ abstract class Form
     {
         if (filter_var($value, FILTER_VALIDATE_EMAIL) === false) {
             $this->addError($field, 'Podaj poprawny adres e-mail.');
-        }
-    }
-
-    /* Nowe hasło przy rejestracji i zmianie hasła: co najmniej 8 znaków i takie samo powtórzenie. */
-    protected function requireNewPassword(string $field, string $password, string $confirmationField, string $confirmation): void
-    {
-        if (mb_strlen($password) < self::MIN_PASSWORD_LENGTH) {
-            $this->addError($field, 'Hasło musi mieć co najmniej ' . self::MIN_PASSWORD_LENGTH . ' znaków.');
-        }
-
-        if ($password !== $confirmation) {
-            $this->addError($confirmationField, 'Hasła nie są takie same.');
         }
     }
 
