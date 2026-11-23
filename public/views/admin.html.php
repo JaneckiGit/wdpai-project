@@ -24,6 +24,10 @@ $filterUrl = static fn (string $group): string => '/admin?' . http_build_query(a
         <h2 id="applications-heading">Wnioski o rolę gospodarza <span class="count"><?= count($applications) ?></span></h2>
         <p class="muted">Po zatwierdzeniu użytkownik dostaje panel gospodarza.</p>
 
+        <?php if ($applications === []): ?>
+            <p class="muted">Brak wniosków do decyzji.</p>
+        <?php endif; ?>
+
         <ul>
             <?php foreach ($applications as $application): ?>
                 <?php $hoursWaiting = $application->getHoursWaiting(); ?>
@@ -56,6 +60,10 @@ $filterUrl = static fn (string $group): string => '/admin?' . http_build_query(a
 
     <section class="stack admin__section" aria-labelledby="venues-heading">
         <h2 class="section-title" id="venues-heading">Lokale do akceptacji <span class="count"><?= count($pendingVenues) ?></span></h2>
+
+        <?php if ($pendingVenues === []): ?>
+            <p class="muted">Brak lokali czekających na weryfikację.</p>
+        <?php endif; ?>
 
         <ul class="pending-venues">
             <?php foreach ($pendingVenues as $venue): ?>
