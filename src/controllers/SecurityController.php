@@ -11,6 +11,7 @@ final class SecurityController extends AppController
 {
     private const LOGIN_STATUS_MESSAGES = [
         'registered' => 'Formularz rejestracji jest poprawny. Konto zostanie zapisane, gdy aplikacja będzie miała bazę danych.',
+        'account-deleted' => 'Formularz usunięcia konta jest poprawny. Konto zniknie, gdy konta trafią do bazy danych.',
     ];
 
     public function login(): void
@@ -54,5 +55,11 @@ final class SecurityController extends AppController
             'form' => $form,
             'errors' => $form->errors(),
         ]);
+    }
+
+    public function logout(): void
+    {
+        // TODO: Laboratorium 9 – token CSRF, wyczyszczenie $_SESSION i ciasteczka sesji, session_destroy().
+        $this->redirect('/login');
     }
 }
