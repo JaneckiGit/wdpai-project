@@ -24,6 +24,21 @@ final class ReservationRepository
     {
     }
 
+    /** @return list<Reservation> */
+    public function findAll(): array
+    {
+        $statement = $this->database->query(
+            self::SELECT . ' ORDER BY reservations.reservation_date, reservations.start_hour'
+        );
+
+        $reservations = [];
+        foreach ($statement->fetchAll() as $row) {
+            $reservations[] = $this->mapRowToReservation($row);
+        }
+
+        return $reservations;
+    }
+
     /** @return list<Reservation> rezerwacje jednego najemcy (Moje rezerwacje) */
     public function findByUser(int $userId): array
     {
