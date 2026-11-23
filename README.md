@@ -398,6 +398,7 @@ Motyw z Laboratorium 5 korzysta 1:1 z kodu instrukcji: skrypt w `<head>`, znaczn
 - wartości tokenów pochodzą z palety PoGodzinach, nie z projektu referencyjnego; `--color-focus` jest pełnym kolorem zamiast koloru z 35% krycia (ten miał na tle kontrast poniżej 3:1), a `--color-primary` jest taki sam w obu motywach, bo biały tekst na `#B4532A` ma 5:1;
 - ogólnej reguły `button { background: var(--color-primary) }` z kroku 4 nie dodano – przyciski są stylowane klasami (`.button`, `.theme-toggle`), a reguła zmieniłaby też np. przycisk wyszukiwarki;
 - przełącznik ma `position: fixed` (wariant z instrukcji) na wszystkich stronach – nagłówek zostawia mu miejsce z prawej strony.
+- layout dołącza `style.css`, arkusz widoku i `theme.js` z czasem zmiany pliku w adresie (`?v=…`, `filemtime()`), bo bez tego przeglądarka po zmianie CSS potrafi długo używać starej wersji z pamięci podręcznej (np. przycisk „Wyloguj się” wyglądał jak domyślny przycisk systemowy).
 
 Materiały Laboratorium 6 omawiają podstawy PHP i programowanie obiektowe, ale nie zawierają kodu formularzy, więc jego struktura (`src/forms/`, klasa abstrakcyjna `Form`, stałe klas, dziedziczenie) jest własnym rozwiązaniem. Elementy z późniejszych instrukcji użyte wcześniej, żeby nie zmieniać ich potem:
 
