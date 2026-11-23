@@ -20,6 +20,10 @@ final class AdminController extends AppController
         'application-reject' => 'Wniosek odrzucony. Decyzja zapisze się, gdy wnioski trafią do bazy danych.',
         'venue-publish' => 'Lokal opublikowany. Pojawi się w Odkrywaj, gdy lokale trafią do bazy danych.',
         'venue-reject' => 'Lokal odrzucony. Decyzja zapisze się, gdy lokale trafią do bazy danych.',
+    ];
+
+    // Akcje na kontach przekierowują do tabeli użytkowników (#users), więc ich komunikat pokazuje się przy tabeli.
+    private const USER_STATUS_MESSAGES = [
         'user-block' => 'Użytkownik zablokowany. Blokada zapisze się, gdy konta trafią do bazy danych.',
         'user-unblock' => 'Użytkownik odblokowany. Zmiana zapisze się, gdy konta trafią do bazy danych.',
         'user-revoke-host' => 'Rola gospodarza odebrana. Zmiana zapisze się, gdy konta trafią do bazy danych.',
@@ -161,6 +165,7 @@ final class AdminController extends AppController
             'form' => $form,
             'errors' => $errors,
             'statusMessage' => $this->statusMessage(self::STATUS_MESSAGES),
+            'userStatusMessage' => $this->statusMessage(self::USER_STATUS_MESSAGES),
         ]);
     }
 

@@ -106,6 +106,9 @@ $filterUrl = static fn (string $group): string => '/admin?' . http_build_query(a
         </div>
 
         <?php require __DIR__ . '/partials/form-errors.html.php'; ?>
+        <?php if (isset($userStatusMessage)): ?>
+            <p class="status-message" role="status"><?= htmlspecialchars($userStatusMessage) ?></p>
+        <?php endif; ?>
 
         <div class="admin__table">
             <table>
@@ -135,7 +138,8 @@ $filterUrl = static fn (string $group): string => '/admin?' . http_build_query(a
                             </td>
                             <td><?= $user['lastSeen'] ?></td>
                             <td>
-                                <form class="actions actions--end" action="/admin/users/<?= $user['id'] ?>" method="post">
+                                <!-- #users w adresie: po wysłaniu (także przy błędzie 422) strona wraca do tabeli z komunikatem. -->
+                                <form class="actions actions--end" action="/admin/users/<?= $user['id'] ?>#users" method="post">
                                     <?php if ($user['isHost']): ?>
                                         <button class="button button--outline" type="submit" name="action" value="revoke-host">Odbierz rolę gospodarza</button>
                                     <?php endif; ?>
@@ -147,7 +151,7 @@ $filterUrl = static fn (string $group): string => '/admin?' . http_build_query(a
                                 </form>
                                 <?php if ($user['status'] !== 'blocked'): ?>
                                     <!-- Okienko z powodem blokady otwiera atrybut popover, jak menu konta – bez JavaScriptu. -->
-                                    <form class="card stack admin__block-form" id="block-<?= $user['id'] ?>" action="/admin/users/<?= $user['id'] ?>" method="post" popover>
+                                    <form class="card admin__block-form" id="block-<?= $user['id'] ?>" action="/admin/users/<?= $user['id'] ?>#users" method="post" popover>
                                         <input type="hidden" name="action" value="block">
                                         <div class="field">
                                             <label for="block-reason-<?= $user['id'] ?>">Powód blokady: <?= htmlspecialchars($user['name']) ?></label>
