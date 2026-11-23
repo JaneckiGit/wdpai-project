@@ -232,7 +232,7 @@ erDiagram
         varchar name
         varchar type "NULL tylko w szkicu"
         varchar address
-        varchar district
+        varchar district "nieobowiązkowa"
         numeric latitude
         numeric longitude
         text description
@@ -283,7 +283,7 @@ erDiagram
 
 **Normalizacja.** Cele, udogodnienia i dni okna są osobnymi wierszami z kluczem złożonym, a nie listą w jednej kolumnie; ceny i liczba miejsc należą do okna dostępności, bo gospodarz może mieć kilka okien w jednym trybie z różnymi cenami.
 
-**Ograniczenia.** `CHECK` pilnują dozwolonych wartości (typy, tryby, cele, statusy, dni 1–7, godziny, dodatnie ceny i liczby miejsc, NIP z 10 cyfr, minimalny czas nie dłuższy niż okno) niezależnie od kodu PHP – np. `INSERT` ze statusem `'expired'` baza odrzuca błędem `reservations_status_check`. `venues_complete_check` pozwala zapisać szkic z samą nazwą, ale lokal wysłany do weryfikacji musi mieć komplet danych. Unikalny indeks `users_email_unique` (z Laboratorium 9) blokuje dwa konta z tym samym e-mailem niezależnie od wielkości liter, a częściowy indeks `host_applications_one_pending` – drugi oczekujący wniosek tej samej osoby. Indeksy na `status` i kluczach obcych przyspieszają filtry list (np. oczekujące prośby, lokale do akceptacji).
+**Ograniczenia.** `CHECK` pilnują dozwolonych wartości (typy, tryby, cele, statusy, dni 1–7, godziny, dodatnie ceny i liczby miejsc, NIP z 10 cyfr, minimalny czas nie dłuższy niż okno) niezależnie od kodu PHP – np. `INSERT` ze statusem `'expired'` baza odrzuca błędem `reservations_status_check`. `venues_complete_check` pozwala zapisać szkic z samą nazwą, ale lokal wysłany do weryfikacji musi mieć komplet danych z formularza (dzielnica jest nieobowiązkowa, bo formularz jej nie zbiera). Unikalny indeks `users_email_unique` (z Laboratorium 9) blokuje dwa konta z tym samym e-mailem niezależnie od wielkości liter, a częściowy indeks `host_applications_one_pending` – drugi oczekujący wniosek tej samej osoby. Indeksy na `status` i kluczach obcych przyspieszają filtry list (np. oczekujące prośby, lokale do akceptacji).
 
 **Wyzwalacz.** `set_updated_at()` ustawia `updated_at` przy każdym `UPDATE` tabel `reservations` i `venues`, więc zapytania w repozytoriach nie muszą o tym pamiętać.
 

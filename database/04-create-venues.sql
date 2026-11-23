@@ -22,9 +22,10 @@ CREATE TABLE venues (
         CHECK (entry_mode IN ('staff', 'key')),
     CONSTRAINT venues_status_check
         CHECK (status IN ('draft', 'pending', 'published', 'rejected')),
-    -- Lokal wysłany do weryfikacji (albo już oceniony) musi mieć komplet danych.
+    -- Lokal wysłany do weryfikacji (albo już oceniony) musi mieć komplet danych z formularza „Dodaj lokal”.
+    -- Dzielnica jest nieobowiązkowa – formularz jej nie zbiera, mają ją tylko lokale z danych demonstracyjnych.
     CONSTRAINT venues_complete_check
-        CHECK (status = 'draft' OR (type IS NOT NULL AND address IS NOT NULL AND district IS NOT NULL
+        CHECK (status = 'draft' OR (type IS NOT NULL AND address IS NOT NULL
             AND latitude IS NOT NULL AND longitude IS NOT NULL AND description IS NOT NULL)),
     CONSTRAINT venues_coordinates_check
         CHECK (latitude BETWEEN -90 AND 90 AND longitude BETWEEN -180 AND 180)
