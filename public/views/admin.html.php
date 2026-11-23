@@ -11,9 +11,10 @@ $filterUrl = static fn (string $group): string => '/admin?' . http_build_query(a
 ?>
 <?php require __DIR__ . '/partials/header.html.php'; ?>
 
-<!-- TODO: Laboratorium 8 i 9 – przyciski decyzji zapiszą zmiany w bazie; do tego czasu mają tylko wygląd (type="button"). -->
 <main class="page stack admin">
     <h1>Panel administratora</h1>
+
+    <?php require __DIR__ . '/partials/status-message.html.php'; ?>
 
     <section class="card panel" aria-labelledby="applications-heading">
         <h2 id="applications-heading">Wnioski o rolę gospodarza <span class="count"><?= count($applications) ?></span></h2>
@@ -39,10 +40,10 @@ $filterUrl = static fn (string $group): string => '/admin?' . http_build_query(a
                     </dl>
                     <p class="list-item__row">„<?= htmlspecialchars($application['message']) ?>”</p>
 
-                    <div class="list-item__row actions admin__decision">
-                        <button class="button button--outline" type="button">Odrzuć</button>
-                        <button class="button" type="button"><i class="fa-solid fa-check" aria-hidden="true"></i> Zatwierdź</button>
-                    </div>
+                    <form class="list-item__row actions actions--end" action="/admin/applications/<?= $application['id'] ?>" method="post">
+                        <button class="button button--outline" type="submit" name="decision" value="reject">Odrzuć</button>
+                        <button class="button" type="submit" name="decision" value="approve"><i class="fa-solid fa-check" aria-hidden="true"></i> Zatwierdź</button>
+                    </form>
                 </li>
             <?php endforeach; ?>
         </ul>
@@ -76,10 +77,10 @@ $filterUrl = static fn (string $group): string => '/admin?' . http_build_query(a
                                 <i class="fa-solid fa-video" aria-hidden="true"></i> <?= $venue['hasReel'] ? 'Rolka czeka na zatwierdzenie' : 'Bez rolki' ?>
                             </span>
                         </p>
-                        <div class="actions">
-                            <button class="button button--outline" type="button">Odrzuć</button>
-                            <button class="button" type="button"><i class="fa-solid fa-check" aria-hidden="true"></i> Opublikuj</button>
-                        </div>
+                        <form class="actions" action="/admin/venues/<?= $venue['id'] ?>" method="post">
+                            <button class="button button--outline" type="submit" name="decision" value="reject">Odrzuć</button>
+                            <button class="button" type="submit" name="decision" value="publish"><i class="fa-solid fa-check" aria-hidden="true"></i> Opublikuj</button>
+                        </form>
                     </div>
                 </li>
             <?php endforeach; ?>
@@ -134,16 +135,30 @@ $filterUrl = static fn (string $group): string => '/admin?' . http_build_query(a
                             </td>
                             <td><?= $user['lastSeen'] ?></td>
                             <td>
-                                <div class="actions admin__user-actions">
-                                <?php if ($user['isHost']): ?>
-                                    <button class="button button--outline" type="button">Odbierz rolę gospodarza</button>
+                                <form class="actions actions--end" action="/admin/users/<?= $user['id'] ?>" method="post">
+                                    <?php if ($user['isHost']): ?>
+                                        <button class="button button--outline" type="submit" name="action" value="revoke-host">Odbierz rolę gospodarza</button>
+                                    <?php endif; ?>
+                                    <?php if ($user['status'] === 'blocked'): ?>
+                                        <button class="button button--outline admin__unblock" type="submit" name="action" value="unblock">Odblokuj</button>
+                                    <?php else: ?>
+                                        <button class="button button--outline admin__block" type="button" popovertarget="block-<?= $user['id'] ?>">Zablokuj</button>
+                                    <?php endif; ?>
+                                </form>
+                                <?php if ($user['status'] !== 'blocked'): ?>
+                                    <!-- Okienko z powodem blokady otwiera atrybut popover, jak menu konta – bez JavaScriptu. -->
+                                    <form class="card stack admin__block-form" id="block-<?= $user['id'] ?>" action="/admin/users/<?= $user['id'] ?>" method="post" popover>
+                                        <input type="hidden" name="action" value="block">
+                                        <div class="field">
+                                            <label for="block-reason-<?= $user['id'] ?>">Powód blokady: <?= htmlspecialchars($user['name']) ?></label>
+                                            <textarea id="block-reason-<?= $user['id'] ?>" name="reason" rows="3" maxlength="<?= $maxReasonLength ?>" required></textarea>
+                                        </div>
+                                        <div class="actions actions--end">
+                                            <button class="button button--secondary" type="button" popovertarget="block-<?= $user['id'] ?>" popovertargetaction="hide">Anuluj</button>
+                                            <button class="button button--danger" type="submit">Zablokuj</button>
+                                        </div>
+                                    </form>
                                 <?php endif; ?>
-                                <?php if ($user['status'] === 'blocked'): ?>
-                                    <button class="button button--outline admin__unblock" type="button">Odblokuj</button>
-                                <?php else: ?>
-                                    <button class="button button--outline admin__block" type="button">Zablokuj</button>
-                                <?php endif; ?>
-                                </div>
                             </td>
                         </tr>
                     <?php endforeach; ?>

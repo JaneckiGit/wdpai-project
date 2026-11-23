@@ -4,10 +4,6 @@
     gap: var(--space-2);
 }
 
-.admin__decision {
-    justify-content: flex-end;
-}
-
 /* Dane z wniosku w szarym polu: telefon, firma, lokal. */
 .application {
     display: grid;
@@ -156,8 +152,13 @@
     display: block;
 }
 
-.admin__user-actions {
-    justify-content: flex-end;
+/* Okienko „Zablokuj” z polem na powód; przeglądarka wyświetla je na środku ekranu nad stroną. */
+.admin__block-form {
+    width: min(26rem, 100% - 2 * var(--space-2));
+    padding: var(--space-3);
+    gap: var(--space-2);
+    box-shadow: var(--shadow-soft);
+    color: var(--color-text);
 }
 
 .actions .admin__block,
