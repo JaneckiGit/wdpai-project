@@ -17,8 +17,9 @@ abstract class AppController
             throw new \RuntimeException('View not found: ' . $template);
         }
 
-        // Każdy widok dostaje zalogowanego użytkownika (nagłówek, menu konta, powitanie w panelu).
-        extract($variables + ['currentUser' => self::CURRENT_USER], EXTR_SKIP);
+        // Każdy widok dostaje zalogowanego użytkownika (nagłówek, menu konta, powitanie w panelu)
+        // i pustą aktywną zakładkę, gdy kontroler jej nie poda (np. strona 404 albo błędu).
+        extract($variables + ['currentUser' => self::CURRENT_USER, 'activeNav' => ''], EXTR_SKIP);
 
         // Widok trafia do bufora, a wspólny layout wstawia go do <body> jako $content.
         ob_start();
