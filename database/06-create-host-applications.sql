@@ -10,13 +10,19 @@ CREATE TABLE host_applications (
     nip CHAR(10) NOT NULL,
     venue_name VARCHAR(120) NOT NULL,
     venue_type VARCHAR(20) NOT NULL REFERENCES venue_types (code) ON DELETE RESTRICT ON UPDATE CASCADE,
-    address VARCHAR(255) NOT NULL,
+    street VARCHAR(120) NOT NULL,
+    building_number VARCHAR(10) NOT NULL,
+    unit_number VARCHAR(10) NULL,
+    postal_code CHAR(6) NOT NULL,
+    city VARCHAR(80) NOT NULL,
     message TEXT NOT NULL,
     status VARCHAR(20) NOT NULL DEFAULT 'pending',
     created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     decided_at TIMESTAMPTZ NULL,
     CONSTRAINT host_applications_nip_check
         CHECK (nip ~ '^[0-9]{10}$'),
+    CONSTRAINT host_applications_postal_code_check
+        CHECK (postal_code ~ '^[0-9]{2}-[0-9]{3}$'),
     CONSTRAINT host_applications_status_check
         CHECK (status IN ('pending', 'approved', 'rejected'))
 );

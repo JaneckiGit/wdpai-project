@@ -1,8 +1,10 @@
--- Konta użytkowników. Pierwsze pięć kolumn i unikalny indeks e-maila są 1:1 z Laboratorium 9 (logowanie dojdzie tam),
--- dalsze kolumny opisują role i stan konta w PoGodzinach.
+-- Konta użytkowników. Kolumny i unikalny indeks e-maila pochodzą z Laboratorium 9 (logowanie dojdzie tam) z jedną zmianą:
+-- name z instrukcji jest rozbite na first_name i last_name, bo każda kolumna ma przechowywać daną atomową.
+-- Dalsze kolumny opisują role i stan konta w PoGodzinach.
 CREATE TABLE users (
     id BIGSERIAL PRIMARY KEY,
-    name VARCHAR(120) NOT NULL,
+    first_name VARCHAR(60) NOT NULL,
+    last_name VARCHAR(60) NOT NULL,
     email VARCHAR(255) NOT NULL,
     password_hash VARCHAR(255) NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,

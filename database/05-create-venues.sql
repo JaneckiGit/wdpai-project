@@ -8,7 +8,12 @@ CREATE TABLE venues (
     name VARCHAR(120) NOT NULL,
     -- Szkic wymaga tylko nazwy, dlatego pozostałe dane mogą być puste do wysłania do weryfikacji.
     type VARCHAR(20) NULL REFERENCES venue_types (code) ON DELETE RESTRICT ON UPDATE CASCADE,
-    address VARCHAR(255) NULL,
+    -- Adres rozbity na dane atomowe; numer lokalu i dzielnica są nieobowiązkowe.
+    street VARCHAR(120) NULL,
+    building_number VARCHAR(10) NULL,
+    unit_number VARCHAR(10) NULL,
+    postal_code CHAR(6) NULL,
+    city VARCHAR(80) NULL,
     district VARCHAR(80) NULL,
     latitude NUMERIC(9, 6) NULL,
     longitude NUMERIC(9, 6) NULL,
@@ -25,8 +30,11 @@ CREATE TABLE venues (
     -- Lokal wysłany do weryfikacji (albo już oceniony) musi mieć komplet danych z formularza „Dodaj lokal”.
     -- Dzielnica jest nieobowiązkowa – formularz jej nie zbiera, mają ją tylko lokale z danych demonstracyjnych.
     CONSTRAINT venues_complete_check
-        CHECK (status = 'draft' OR (type IS NOT NULL AND address IS NOT NULL
+        CHECK (status = 'draft' OR (type IS NOT NULL AND street IS NOT NULL AND building_number IS NOT NULL
+            AND postal_code IS NOT NULL AND city IS NOT NULL
             AND latitude IS NOT NULL AND longitude IS NOT NULL AND description IS NOT NULL)),
+    CONSTRAINT venues_postal_code_check
+        CHECK (postal_code ~ '^[0-9]{2}-[0-9]{3}$'),
     CONSTRAINT venues_coordinates_check
         CHECK (latitude BETWEEN -90 AND 90 AND longitude BETWEEN -180 AND 180)
 );

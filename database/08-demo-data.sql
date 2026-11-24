@@ -3,33 +3,33 @@
 -- Identyfikatory nadaje baza w kolejności wstawiania, a powiązania wiersze znajdują po e-mailu albo nazwie lokalu.
 \set demo_password_hash '$2y$10$PxIyDmL9ZrN28lJcLU6H4uY5ZS1LdbLGPMAXYv/EXmUhVMi.r8CHq'
 
-INSERT INTO users (name, email, password_hash, is_host, is_admin, blocked_at, last_seen_at) VALUES
-    ('Administrator PoGodzinach', 'admin@example.com', :'demo_password_hash', FALSE, TRUE, NULL, CURRENT_TIMESTAMP - INTERVAL '1 hour'),
-    ('Piotr Nowak', 'piotr.nowak@example.com', :'demo_password_hash', TRUE, FALSE, NULL, CURRENT_TIMESTAMP - INTERVAL '5 hours'),
-    ('Tomasz Wrona', 'tomasz.wrona@example.com', :'demo_password_hash', TRUE, FALSE, NULL, CURRENT_TIMESTAMP - INTERVAL '1 day'),
-    ('Joanna Wrona', 'joanna.wrona@example.com', :'demo_password_hash', TRUE, FALSE, NULL, CURRENT_TIMESTAMP - INTERVAL '2 days'),
-    ('Anna Kowalska', 'anna.kowalska@example.com', :'demo_password_hash', FALSE, FALSE, NULL, CURRENT_TIMESTAMP - INTERVAL '2 hours'),
-    ('Paweł Kruk', 'pawel.kruk@example.com', :'demo_password_hash', FALSE, FALSE, NULL, CURRENT_TIMESTAMP - INTERVAL '17 hours'),
-    ('Monika Sowa', 'monika.sowa@example.com', :'demo_password_hash', FALSE, FALSE, NULL, CURRENT_TIMESTAMP - INTERVAL '31 hours'),
-    ('Marta Zielińska', 'marta.zielinska@example.com', :'demo_password_hash', FALSE, FALSE, NULL, CURRENT_TIMESTAMP - INTERVAL '1 day'),
-    ('Tomasz Wójcik', 'tomasz.wojcik@example.com', :'demo_password_hash', FALSE, FALSE, NULL, CURRENT_TIMESTAMP - INTERVAL '29 hours'),
-    ('Adam Nowicki', 'adam.nowicki@example.com', :'demo_password_hash', FALSE, FALSE, CURRENT_TIMESTAMP - INTERVAL '10 days', CURRENT_TIMESTAMP - INTERVAL '11 days');
+INSERT INTO users (first_name, last_name, email, password_hash, is_host, is_admin, blocked_at, last_seen_at) VALUES
+    ('Administrator', 'PoGodzinach', 'admin@example.com', :'demo_password_hash', FALSE, TRUE, NULL, CURRENT_TIMESTAMP - INTERVAL '1 hour'),
+    ('Piotr', 'Nowak', 'piotr.nowak@example.com', :'demo_password_hash', TRUE, FALSE, NULL, CURRENT_TIMESTAMP - INTERVAL '5 hours'),
+    ('Tomasz', 'Wrona', 'tomasz.wrona@example.com', :'demo_password_hash', TRUE, FALSE, NULL, CURRENT_TIMESTAMP - INTERVAL '1 day'),
+    ('Joanna', 'Wrona', 'joanna.wrona@example.com', :'demo_password_hash', TRUE, FALSE, NULL, CURRENT_TIMESTAMP - INTERVAL '2 days'),
+    ('Anna', 'Kowalska', 'anna.kowalska@example.com', :'demo_password_hash', FALSE, FALSE, NULL, CURRENT_TIMESTAMP - INTERVAL '2 hours'),
+    ('Paweł', 'Kruk', 'pawel.kruk@example.com', :'demo_password_hash', FALSE, FALSE, NULL, CURRENT_TIMESTAMP - INTERVAL '17 hours'),
+    ('Monika', 'Sowa', 'monika.sowa@example.com', :'demo_password_hash', FALSE, FALSE, NULL, CURRENT_TIMESTAMP - INTERVAL '31 hours'),
+    ('Marta', 'Zielińska', 'marta.zielinska@example.com', :'demo_password_hash', FALSE, FALSE, NULL, CURRENT_TIMESTAMP - INTERVAL '1 day'),
+    ('Tomasz', 'Wójcik', 'tomasz.wojcik@example.com', :'demo_password_hash', FALSE, FALSE, NULL, CURRENT_TIMESTAMP - INTERVAL '29 hours'),
+    ('Adam', 'Nowicki', 'adam.nowicki@example.com', :'demo_password_hash', FALSE, FALSE, CURRENT_TIMESTAMP - INTERVAL '10 days', CURRENT_TIMESTAMP - INTERVAL '11 days');
 
 -- Trzy opublikowane lokale (kolejno id 1–3, jak w dotychczasowych adresach) i dwa czekające na akceptację.
-INSERT INTO venues (host_id, name, type, address, district, latitude, longitude, description, entry_mode, entry_instructions, status, created_at) VALUES
-    ((SELECT id FROM users WHERE email = 'piotr.nowak@example.com'), 'Bar Lampion', 'bar', 'ul. Szpitalna 9', 'Stare Miasto', 50.062300, 19.934300,
+INSERT INTO venues (host_id, name, type, street, building_number, postal_code, city, district, latitude, longitude, description, entry_mode, entry_instructions, status, created_at) VALUES
+    ((SELECT id FROM users WHERE email = 'piotr.nowak@example.com'), 'Bar Lampion', 'bar', 'ul. Szpitalna', '9', '31-024', 'Kraków', 'Stare Miasto', 50.062300, 19.934300,
         'Bar z lampami nad długim stołem i ceglaną ścianą. Do popołudnia, zanim zaczyna się wieczorna obsługa, sala jest cicha i jasna, a w niedziele można ją wynająć na wyłączność, np. na sesję zdjęciową.',
         'key', 'Klucz odbierzesz w sklepie obok.', 'published', CURRENT_TIMESTAMP - INTERVAL '60 days'),
-    ((SELECT id FROM users WHERE email = 'piotr.nowak@example.com'), 'Kawiarnia Ziarno', 'cafe', 'ul. Estery 8', 'Kazimierz', 50.051200, 19.946600,
+    ((SELECT id FROM users WHERE email = 'piotr.nowak@example.com'), 'Kawiarnia Ziarno', 'cafe', 'ul. Estery', '8', '31-056', 'Kraków', 'Kazimierz', 50.051200, 19.946600,
         'Kameralna kawiarnia na Kazimierzu z długim dębowym stołem, ceglaną ścianą i oknem na podwórko. Wieczorami, gdy kończymy obsługę gości, oddajemy salę do cichej pracy, a w poniedziałki – gdy kawiarnia jest nieczynna – cały lokal na wyłączność.',
         'staff', NULL, 'published', CURRENT_TIMESTAMP - INTERVAL '45 days'),
-    ((SELECT id FROM users WHERE email = 'tomasz.wrona@example.com'), 'Kawiarnia Pod Zegarem', 'cafe', 'ul. Długa 15', 'Kleparz', 50.066800, 19.942000,
+    ((SELECT id FROM users WHERE email = 'tomasz.wrona@example.com'), 'Kawiarnia Pod Zegarem', 'cafe', 'ul. Długa', '15', '31-147', 'Kraków', 'Kleparz', 50.066800, 19.942000,
         'Jasna kawiarnia z dużym zegarem nad barem i stołami przy oknach. Od rana do popołudnia jest tu miejsce do cichej pracy i krótkich spotkań.',
         'staff', NULL, 'published', CURRENT_TIMESTAMP - INTERVAL '30 days'),
-    ((SELECT id FROM users WHERE email = 'piotr.nowak@example.com'), 'Piwnica Lampion', 'bar', 'ul. Szewska 14', 'Stare Miasto', 50.062000, 19.934500,
+    ((SELECT id FROM users WHERE email = 'piotr.nowak@example.com'), 'Piwnica Lampion', 'bar', 'ul. Szewska', '14', '31-009', 'Kraków', 'Stare Miasto', 50.062000, 19.934500,
         'Ceglana piwnica pod Barem Lampion z długimi stołami i nagłośnieniem. Od poniedziałku do czwartku, przed wieczornym otwarciem, można ją wynająć na spotkania i kameralne wydarzenia.',
         'staff', NULL, 'pending', CURRENT_TIMESTAMP - INTERVAL '5 hours'),
-    ((SELECT id FROM users WHERE email = 'joanna.wrona@example.com'), 'Atelier Len', 'studio', 'ul. Krakowska 30', 'Kazimierz', 50.048000, 19.942000,
+    ((SELECT id FROM users WHERE email = 'joanna.wrona@example.com'), 'Atelier Len', 'studio', 'ul. Krakowska', '30', '31-062', 'Kraków', 'Kazimierz', 50.048000, 19.942000,
         'Pracownia krawiecka z dużym stołem, manekinami i oknami na dwie strony. W tygodniu miejsca do pracy przy stole, w soboty cała pracownia na sesje zdjęciowe.',
         'key', 'Kod do domofonu dostaniesz po akceptacji rezerwacji.', 'pending', CURRENT_TIMESTAMP - INTERVAL '18 hours');
 
@@ -88,16 +88,16 @@ JOIN venues ON venues.name = d.venue_name
 JOIN availability_windows ON availability_windows.venue_id = venues.id AND availability_windows.mode = d.mode
 CROSS JOIN LATERAL generate_series(d.first_day, d.last_day) AS weekday;
 
-INSERT INTO host_applications (user_id, first_name, last_name, phone, company_name, nip, venue_name, venue_type, address, message, created_at) VALUES
+INSERT INTO host_applications (user_id, first_name, last_name, phone, company_name, nip, venue_name, venue_type, street, building_number, postal_code, city, message, created_at) VALUES
     ((SELECT id FROM users WHERE email = 'anna.kowalska@example.com'), 'Anna', 'Kowalska', '+48 601 234 567', 'Witraż Anna Kowalska', '6762481035',
-        'Pracownia Szkła Witraż', 'workshop', 'ul. Józefińska 12, Podgórze',
+        'Pracownia Szkła Witraż', 'workshop', 'ul. Józefińska', '12', '30-529', 'Kraków',
         'Prowadzę pracownię witrażu w Podgórzu. Od poniedziałku do środy po 16:00 pracownia stoi pusta – chcę ją udostępniać na warsztaty, sesje zdjęciowe i spotkania do 10 osób.',
         CURRENT_TIMESTAMP - INTERVAL '2 hours'),
     ((SELECT id FROM users WHERE email = 'pawel.kruk@example.com'), 'Paweł', 'Kruk', '+48 512 880 341', 'Echo Studio sp. z o.o.', '9452217760',
-        'Studio Nagrań Echo', 'studio', 'ul. Grzegórzecka 21, Grzegórzki',
+        'Studio Nagrań Echo', 'studio', 'ul. Grzegórzecka', '21', '31-532', 'Kraków',
         'Studio nagrań z salą 40 m². W weekendy do 14:00 stoi wolne – na podcasty, sesje i małe szkolenia.',
         CURRENT_TIMESTAMP - INTERVAL '17 hours'),
     ((SELECT id FROM users WHERE email = 'monika.sowa@example.com'), 'Monika', 'Sowa', '+48 698 117 402', 'Księgarnia Strona s.c.', '6772395108',
-        'Księgarnia Strona', 'bookstore', 'ul. Miodowa 9, Kazimierz',
+        'Księgarnia Strona', 'bookstore', 'ul. Miodowa', '9', '31-055', 'Kraków',
         'Po 19:00 księgarnia jest zamknięta. Chcemy wynajmować antresolę na spotkania autorskie i kluby książki.',
         CURRENT_TIMESTAMP - INTERVAL '31 hours');
