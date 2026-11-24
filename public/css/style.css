@@ -473,8 +473,8 @@ input:focus {
     max-width: 36rem;
 }
 
-/* Strona „w trakcie przygotowania” (Regulamin, Kontakt): ikona, tytuł i tekst na środku ekranu. */
-.in-progress {
+/* Strona z krótkim komunikatem (w trakcie przygotowania, 404, błąd): ikona, tytuł i tekst na środku ekranu. */
+.message-page {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -484,7 +484,7 @@ input:focus {
     text-align: center;
 }
 
-.in-progress .icon-tile {
+.message-page .icon-tile {
     width: 3.5rem;
     height: 3.5rem;
     font-size: 1.5rem;
