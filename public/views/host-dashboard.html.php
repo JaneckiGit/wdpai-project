@@ -4,6 +4,14 @@ $initials = require __DIR__ . '/partials/initials.php';
 $dayNames = require __DIR__ . '/partials/day-names.php';
 $modes = ['seats' => ['Miejsca do pracy', 'fa-laptop'], 'exclusive' => ['Na wyłączność', 'fa-key']];
 $money = static fn (float $amount): string => number_format($amount, 2, ',', ' ') . ' zł';
+$price = require __DIR__ . '/partials/price.php';
+// Status lokalu: etykieta i kolor plakietki; tylko opublikowany lokal ma stronę, do której prowadzi kafelek.
+$venueStatuses = [
+    'draft' => ['Szkic', 'muted'],
+    'pending' => ['Czeka na weryfikację', 'warning'],
+    'published' => ['Opublikowany', 'success'],
+    'rejected' => ['Odrzucony', 'danger'],
+];
 ?>
 <?php require __DIR__ . '/partials/header.html.php'; ?>
 
@@ -46,7 +54,7 @@ $money = static fn (float $amount): string => number_format($amount, 2, ',', ' '
                         <div class="list-item__row request__footer">
                             <p>
                                 <strong><?= $money($request['total']) ?></strong>
-                                <span class="muted"><?= $request['mode'] === 'seats' ? $request['count'] . ' × ' : '' ?><?= $request['hours'] ?> h × <?= $request['price'] ?> zł</span>
+                                <span class="muted"><?= $request['mode'] === 'seats' ? $request['count'] . ' × ' : '' ?><?= $request['hours'] ?> h × <?= $price($request['price']) ?> zł</span>
                             </p>
                             <form class="actions" action="/host/requests/<?= $request['id'] ?>" method="post">
                                 <button class="button button--outline" type="submit" name="decision" value="reject">Odrzuć</button>
@@ -65,24 +73,19 @@ $money = static fn (float $amount): string => number_format($amount, 2, ',', ' '
 
             <ul class="venue-tiles">
                 <?php foreach ($venues as $venue): ?>
+                    <?php [$statusLabel, $statusColor] = $venueStatuses[$venue->getStatus()]; ?>
                     <li>
-                        <a class="card venue-tile" href="/venues/<?= $venue['id'] ?>">
+                        <?= $venue->isPublished() ? '<a class="card venue-tile" href="/venues/' . $venue->getId() . '">' : '<div class="card venue-tile">' ?>
                             <img src="/images/login-hero.svg" alt="">
                             <div>
-                                <h3><?= htmlspecialchars($venue['name']) ?></h3>
-                                <!-- TODO: Laboratorium 8 – status lokalu z bazy (szkic, czeka na weryfikację, opublikowany). -->
-                                <span class="badge badge--success">Opublikowany</span>
-                                <p class="muted"><?= htmlspecialchars($venue['district'] . ' · ' . $venue['address']) ?></p>
-                                <p class="venue-tile__offers">
-                                    <?php if ($venue['seatPrice'] !== null): ?>
-                                        <span class="badge badge--seats">Miejsca do pracy · <?= $venue['seatPrice'] ?> zł/h</span>
-                                    <?php endif; ?>
-                                    <?php if ($venue['exclusivePrice'] !== null): ?>
-                                        <span class="badge badge--exclusive">Na wyłączność · <?= $venue['exclusivePrice'] ?> zł/h</span>
-                                    <?php endif; ?>
-                                </p>
+                                <h3><?= htmlspecialchars($venue->getName()) ?></h3>
+                                <span class="badge badge--<?= $statusColor ?>"><?= $statusLabel ?></span>
+                                <p class="muted"><?= htmlspecialchars(implode(' · ', array_filter([$venue->getDistrict(), $venue->getStreetAddress()]))) ?></p>
+                                <ul class="offer-badges">
+                                    <?php require __DIR__ . '/partials/offer-badges.html.php'; ?>
+                                </ul>
                             </div>
-                        </a>
+                        <?= $venue->isPublished() ? '</a>' : '</div>' ?>
                     </li>
                 <?php endforeach; ?>
             </ul>

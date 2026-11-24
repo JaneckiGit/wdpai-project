@@ -57,6 +57,17 @@ final class VenueRepository
         return $this->mapRowsToVenues($statement->fetchAll());
     }
 
+    /** @return list<Venue> lokale gospodarza w każdym statusie (szkic, weryfikacja, opublikowany, odrzucony) */
+    public function findByHost(int $hostId): array
+    {
+        $statement = $this->database->prepare(
+            self::SELECT . ' WHERE venues.host_id = :host_id ORDER BY venues.created_at'
+        );
+        $statement->execute(['host_id' => $hostId]);
+
+        return $this->mapRowsToVenues($statement->fetchAll());
+    }
+
     /* Lokal w każdym statusie; o tym, kto może go zobaczyć, decyduje kontroler. */
     public function find(int $id): ?Venue
     {

@@ -55,13 +55,14 @@ final class ReservationRepository
         return $reservations;
     }
 
-    /** @return list<Reservation> */
-    public function findByStatus(string $status): array
+    /** @return list<Reservation> prośby czekające na decyzję w lokalach jednego gospodarza (JOIN venues) */
+    public function findPendingForHost(int $hostId): array
     {
         $statement = $this->database->prepare(
-            self::SELECT . ' WHERE reservations.status = :status ORDER BY reservations.reservation_date, reservations.start_hour'
+            self::SELECT . " WHERE reservations.status = 'pending' AND venues.host_id = :host_id
+             ORDER BY reservations.reservation_date, reservations.start_hour"
         );
-        $statement->execute(['status' => $status]);
+        $statement->execute(['host_id' => $hostId]);
 
         $reservations = [];
         foreach ($statement->fetchAll() as $row) {

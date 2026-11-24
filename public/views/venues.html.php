@@ -73,7 +73,7 @@ $pins = array_map(static fn (App\Model\Venue $venue): array => [
                             <i class="fa-solid fa-location-dot" aria-hidden="true"></i>
                             <?= htmlspecialchars($venue->getDistrict() ?? (string) $venue->getCity()) ?>
                         </p>
-                        <ul class="venue-card__offers">
+                        <ul class="offer-badges">
                             <?php require __DIR__ . '/partials/offer-badges.html.php'; ?>
                         </ul>
                         <a class="button" href="/venues/<?= $venue->getId() ?>">Zarezerwuj</a>
