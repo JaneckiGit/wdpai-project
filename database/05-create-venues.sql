@@ -1,11 +1,13 @@
 -- Lokale gospodarzy oraz tabele, które bez lokalu nie mają sensu (cele, udogodnienia, okna dostępności).
 -- ON DELETE CASCADE: usunięcie konta gospodarza usuwa jego lokale, a usunięcie lokalu – jego cele, udogodnienia i okna.
+-- Słowniki (04) mają ON DELETE RESTRICT – nie da się usunąć typu, celu ani udogodnienia, którego ktoś używa –
+-- i ON UPDATE CASCADE – zmiana kodu w słowniku zmienia go też we wszystkich wierszach, które na niego wskazują.
 CREATE TABLE venues (
     id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     host_id BIGINT NOT NULL REFERENCES users (id) ON DELETE CASCADE,
     name VARCHAR(120) NOT NULL,
     -- Szkic wymaga tylko nazwy, dlatego pozostałe dane mogą być puste do wysłania do weryfikacji.
-    type VARCHAR(20) NULL,
+    type VARCHAR(20) NULL REFERENCES venue_types (code) ON DELETE RESTRICT ON UPDATE CASCADE,
     address VARCHAR(255) NULL,
     district VARCHAR(80) NULL,
     latitude NUMERIC(9, 6) NULL,
@@ -16,8 +18,6 @@ CREATE TABLE venues (
     status VARCHAR(20) NOT NULL DEFAULT 'draft',
     created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT venues_type_check
-        CHECK (type IN ('cafe', 'bar', 'restaurant', 'workshop', 'studio', 'bookstore', 'gallery')),
     CONSTRAINT venues_entry_mode_check
         CHECK (entry_mode IN ('staff', 'key')),
     CONSTRAINT venues_status_check
@@ -38,24 +38,20 @@ CREATE TRIGGER venues_set_updated_at
     BEFORE UPDATE ON venues
     FOR EACH ROW EXECUTE FUNCTION set_updated_at();
 
--- Cele, na które gospodarz pozwala (praca, spotkania, sesje, wydarzenia).
+-- Cele, na które gospodarz pozwala – tabela łącząca lokale ze słownikiem celów (wiele do wielu).
 CREATE TABLE venue_purposes (
     venue_id BIGINT NOT NULL REFERENCES venues (id) ON DELETE CASCADE,
-    purpose VARCHAR(20) NOT NULL,
-    PRIMARY KEY (venue_id, purpose),
-    CONSTRAINT venue_purposes_purpose_check
-        CHECK (purpose IN ('work', 'meetings', 'shoots', 'events'))
+    purpose VARCHAR(20) NOT NULL REFERENCES purposes (code) ON DELETE RESTRICT ON UPDATE CASCADE,
+    PRIMARY KEY (venue_id, purpose)
 );
 
--- Udogodnienia ze stałej listy (etykiety i ikony są w widoku, jak przy celach) z dopiskiem gospodarza,
--- np. Wi-Fi – „hasło w instrukcji po akceptacji”; dopisek zależy od pary lokal + udogodnienie.
+-- Udogodnienia lokalu ze słownika z dopiskiem gospodarza, np. Wi-Fi – „hasło w instrukcji po akceptacji”;
+-- dopisek zależy od pary lokal + udogodnienie, czyli od całego klucza głównego.
 CREATE TABLE venue_amenities (
     venue_id BIGINT NOT NULL REFERENCES venues (id) ON DELETE CASCADE,
-    amenity VARCHAR(20) NOT NULL,
+    amenity VARCHAR(20) NOT NULL REFERENCES amenities (code) ON DELETE RESTRICT ON UPDATE CASCADE,
     note VARCHAR(100) NULL,
-    PRIMARY KEY (venue_id, amenity),
-    CONSTRAINT venue_amenities_amenity_check
-        CHECK (amenity IN ('wifi', 'sockets', 'daylight', 'projector', 'coffee'))
+    PRIMARY KEY (venue_id, amenity)
 );
 
 -- Okno dostępności: tryb, godziny, liczba miejsc (albo osób przy wyłączności) i cena za godzinę.
