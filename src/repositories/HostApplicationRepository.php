@@ -52,6 +52,45 @@ final class HostApplicationRepository
         return $row === false ? null : $this->mapRowToApplication($row);
     }
 
+    /*
+     * Zatwierdzenie zmienia dwie tabele: status wniosku i rolę gospodarza na koncie. Obie zmiany idą w jednej transakcji –
+     * gdy druga się nie uda, rollBack() cofa pierwszą, więc nie powstanie zatwierdzony wniosek bez roli gospodarza.
+     */
+    public function approve(HostApplication $application): void
+    {
+        $this->database->beginTransaction();
+
+        try {
+            $this->decide($application->getId(), 'approved');
+
+            $statement = $this->database->prepare(
+                'UPDATE users SET is_host = TRUE WHERE id = :id'
+            );
+            $statement->execute(['id' => $application->getUserId()]);
+
+            $this->database->commit();
+        } catch (\Throwable $exception) {
+            $this->database->rollBack();
+            throw $exception;
+        }
+    }
+
+    public function reject(HostApplication $application): void
+    {
+        $this->decide($application->getId(), 'rejected');
+    }
+
+    private function decide(int $id, string $status): void
+    {
+        $statement = $this->database->prepare(
+            'UPDATE host_applications
+             SET status = :status,
+                 decided_at = CURRENT_TIMESTAMP
+             WHERE id = :id'
+        );
+        $statement->execute(['id' => $id, 'status' => $status]);
+    }
+
     /** @param array<string, mixed> $row */
     private function mapRowToApplication(array $row): HostApplication
     {

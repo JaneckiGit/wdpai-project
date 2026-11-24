@@ -92,6 +92,18 @@ final class VenueRepository
         return $row === false ? null : $this->mapRowToVenue($row);
     }
 
+    /* Administrator zmienia tylko status lokalu; updated_at ustawia wyzwalacz venues_set_updated_at. */
+    public function update(Venue $venue): void
+    {
+        $statement = $this->database->prepare(
+            'UPDATE venues SET status = :status WHERE id = :id'
+        );
+        $statement->execute([
+            'id' => $venue->getId(),
+            'status' => $venue->getStatus(),
+        ]);
+    }
+
     /** @return list<AvailabilityWindow> okna lokalu: najpierw miejsca do pracy, potem wyłączność, każde z dniami tygodnia */
     private function findWindows(int $venueId): array
     {

@@ -17,19 +17,18 @@ final class AdminController extends AppController
     private const VENUE_DECISIONS = ['publish', 'reject'];
     private const USER_ACTIONS = ['block', 'unblock', 'revoke-host'];
 
-    // TODO: Laboratorium 8 – decyzje zapisane w bazie zamiast samego komunikatu.
     private const STATUS_MESSAGES = [
-        'application-approve' => 'Wniosek zatwierdzony. Użytkownik dostanie rolę gospodarza, gdy wnioski trafią do bazy danych.',
-        'application-reject' => 'Wniosek odrzucony. Decyzja zapisze się, gdy wnioski trafią do bazy danych.',
-        'venue-publish' => 'Lokal opublikowany. Pojawi się w Odkrywaj, gdy lokale trafią do bazy danych.',
-        'venue-reject' => 'Lokal odrzucony. Decyzja zapisze się, gdy lokale trafią do bazy danych.',
+        'application-approve' => 'Wniosek zatwierdzony – użytkownik ma teraz panel gospodarza.',
+        'application-reject' => 'Wniosek odrzucony.',
+        'venue-publish' => 'Lokal opublikowany – pojawi się w Odkrywaj.',
+        'venue-reject' => 'Lokal odrzucony.',
     ];
 
     // Akcje na kontach przekierowują do tabeli użytkowników (#users), więc ich komunikat pokazuje się przy tabeli.
     private const USER_STATUS_MESSAGES = [
-        'user-block' => 'Użytkownik zablokowany. Blokada zapisze się, gdy konta trafią do bazy danych.',
-        'user-unblock' => 'Użytkownik odblokowany. Zmiana zapisze się, gdy konta trafią do bazy danych.',
-        'user-revoke-host' => 'Rola gospodarza odebrana. Zmiana zapisze się, gdy konta trafią do bazy danych.',
+        'user-block' => 'Użytkownik zablokowany.',
+        'user-unblock' => 'Użytkownik odblokowany.',
+        'user-revoke-host' => 'Rola gospodarza odebrana.',
     ];
 
     private UserRepository $users;
@@ -87,6 +86,12 @@ final class AdminController extends AppController
             return;
         }
 
+        if ($decision === 'approve') {
+            $this->applications->approve($application);
+        } else {
+            $this->applications->reject($application);
+        }
+
         $this->redirect('/admin?status=application-' . $decision);
     }
 
@@ -106,6 +111,8 @@ final class AdminController extends AppController
             return;
         }
 
+        $venue->setStatus($decision === 'publish' ? 'published' : 'rejected');
+        $this->venues->update($venue);
         $this->redirect('/admin?status=venue-' . $decision);
     }
 
@@ -138,6 +145,12 @@ final class AdminController extends AppController
             return;
         }
 
+        match ($action) {
+            'block' => $user->block(),
+            'unblock' => $user->unblock(),
+            'revoke-host' => $user->revokeHostRole(),
+        };
+        $this->users->update($user);
         $this->redirect('/admin?status=user-' . $action . '#users');
     }
 }

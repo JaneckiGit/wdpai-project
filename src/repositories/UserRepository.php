@@ -75,6 +75,21 @@ final class UserRepository
         return $row === false ? null : $this->mapRowToUser($row);
     }
 
+    /* Administrator zmienia tylko rolę gospodarza i blokadę; dane konta zmieni jego właściciel (Laboratorium 9). */
+    public function update(User $user): void
+    {
+        $statement = $this->database->prepare(
+            'UPDATE users
+             SET is_host = :is_host,
+                 blocked_at = :blocked_at
+             WHERE id = :id'
+        );
+        $statement->bindValue(':is_host', $user->isHost(), PDO::PARAM_BOOL);
+        $statement->bindValue(':blocked_at', $user->getBlockedAt()?->format(DATE_ATOM));
+        $statement->bindValue(':id', $user->getId(), PDO::PARAM_INT);
+        $statement->execute();
+    }
+
     /** @param array<string, mixed> $row */
     private function mapRowToUser(array $row): User
     {
