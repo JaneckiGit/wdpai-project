@@ -7,6 +7,7 @@ namespace App\Controller;
 use App\Form\ReservationForm;
 use App\Form\VenueFilterForm;
 use App\Model\Reservation;
+use App\Repository\DictionaryRepository;
 use App\Repository\ReservationRepository;
 use DateTimeImmutable;
 
@@ -17,10 +18,12 @@ final class VenueController extends AppController
     ];
 
     private ReservationRepository $reservations;
+    private DictionaryRepository $dictionaries;
 
     public function __construct()
     {
         $this->reservations = new ReservationRepository($this->database());
+        $this->dictionaries = new DictionaryRepository($this->database());
     }
 
     // TODO: Laboratorium 8 – lokale z bazy (repozytorium) zamiast przykładowych danych.
@@ -66,7 +69,8 @@ final class VenueController extends AppController
 
     public function index(): void
     {
-        $form = new VenueFilterForm($_GET);
+        $purposeNames = $this->dictionaries->purposes();
+        $form = new VenueFilterForm($_GET, array_keys($purposeNames));
         $isValid = $form->isValid();
 
         if (!$isValid) {
@@ -80,6 +84,7 @@ final class VenueController extends AppController
             'form' => $form,
             'errors' => $form->errors(),
             'searchQuery' => $form->query,
+            'purposeNames' => $purposeNames,
             'venues' => $isValid ? $this->findVenues($form) : [],
             'mapbox' => $this->mapbox(),
         ]);
@@ -155,6 +160,7 @@ final class VenueController extends AppController
             'stylesheet' => 'venue',
             'activeNav' => 'venues',
             'venue' => $venue,
+            'purposeNames' => $this->dictionaries->purposes(),
             'days' => ReservationForm::bookableDays(),
             'form' => $form,
             'errors' => $form->errors(),

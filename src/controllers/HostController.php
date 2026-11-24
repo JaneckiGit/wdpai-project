@@ -7,6 +7,7 @@ namespace App\Controller;
 use App\Form\HostApplicationForm;
 use App\Form\VenueForm;
 use App\Model\Reservation;
+use App\Repository\DictionaryRepository;
 use App\Repository\ReservationRepository;
 
 final class HostController extends AppController
@@ -27,10 +28,12 @@ final class HostController extends AppController
     ];
 
     private ReservationRepository $reservations;
+    private DictionaryRepository $dictionaries;
 
     public function __construct()
     {
         $this->reservations = new ReservationRepository($this->database());
+        $this->dictionaries = new DictionaryRepository($this->database());
     }
 
     public function dashboard(): void
@@ -54,6 +57,7 @@ final class HostController extends AppController
             'activeNav' => 'host',
             'requests' => array_map(fn (Reservation $reservation): array => $this->requestDetails($reservation, $venues[$reservation->getVenueId()]), $requests),
             'venues' => $venues,
+            'purposeNames' => $this->dictionaries->purposes(),
             'statusMessage' => $this->statusMessage(self::DASHBOARD_STATUS_MESSAGES),
         ]);
     }
@@ -135,6 +139,7 @@ final class HostController extends AppController
             'pageTitle' => 'Zostań gospodarzem – PoGodzinach',
             'stylesheet' => 'host-application',
             'activeNav' => 'host',
+            'venueTypes' => $this->dictionaries->venueTypes(),
             'form' => $form,
             'errors' => $form->errors(),
             'statusMessage' => $this->statusMessage(self::APPLICATION_STATUS_MESSAGES),
@@ -159,6 +164,8 @@ final class HostController extends AppController
             'stylesheet' => 'add-venue',
             'activeNav' => 'host',
             'mapbox' => $this->mapbox(),
+            'purposeNames' => $this->dictionaries->purposes(),
+            'venueTypes' => $this->dictionaries->venueTypes(),
             'form' => $form,
             'errors' => $form->errors(),
         ]);

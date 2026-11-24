@@ -1,5 +1,5 @@
 <?php
-$purposes = require __DIR__ . '/partials/purposes.php';
+$purposeIcons = require __DIR__ . '/partials/purposes.php';
 $dayNames = require __DIR__ . '/partials/day-names.php';
 $monthNames = [1 => 'styczeń', 'luty', 'marzec', 'kwiecień', 'maj', 'czerwiec', 'lipiec', 'sierpień', 'wrzesień', 'październik', 'listopad', 'grudzień'];
 
@@ -19,7 +19,7 @@ $activeMode = isset($venue['windows'][$form->mode]) ? $form->mode : array_key_fi
 
 // Cele, na które gospodarz nie pozwala – do zdania pod listą dozwolonych celów.
 $deniedPurposes = [];
-foreach ($purposes as $value => [$label]) {
+foreach ($purposeNames as $value => $label) {
     if (!in_array($value, $venue['purposes'], true)) {
         $deniedPurposes[] = mb_strtolower($label);
     }
@@ -82,11 +82,11 @@ $initials = require __DIR__ . '/partials/initials.php';
                 <h2>Dozwolone cele</h2>
                 <ul class="purpose-list">
                     <?php foreach ($venue['purposes'] as $purpose): ?>
-                        <li class="chip"><i class="fa-solid <?= $purposes[$purpose][1] ?>" aria-hidden="true"></i> <?= $purposes[$purpose][0] ?></li>
+                        <li class="chip"><i class="fa-solid <?= $purposeIcons[$purpose][0] ?? 'fa-circle' ?>" aria-hidden="true"></i> <?= htmlspecialchars($purposeNames[$purpose]) ?></li>
                     <?php endforeach; ?>
                 </ul>
                 <?php if ($deniedPurposes !== []): ?>
-                    <p class="muted">Gospodarz nie zezwala na: <?= implode(', ', $deniedPurposes) ?>.</p>
+                    <p class="muted">Gospodarz nie zezwala na: <?= htmlspecialchars(implode(', ', $deniedPurposes)) ?>.</p>
                 <?php endif; ?>
             </section>
 
@@ -144,10 +144,10 @@ $initials = require __DIR__ . '/partials/initials.php';
                 <div class="field">
                     <label for="purpose">Cel</label>
                     <div class="select">
-                        <i class="fa-solid <?= $purposes[$form->purpose][1] ?? 'fa-laptop' ?>" aria-hidden="true" data-purpose-icon></i>
+                        <i class="fa-solid <?= $purposeIcons[$form->purpose][0] ?? 'fa-circle' ?>" aria-hidden="true" data-purpose-icon></i>
                         <select id="purpose" name="purpose" <?= $form->invalidAttributes('purpose') ?>>
                             <?php foreach ($venue['purposes'] as $purpose): ?>
-                                <option value="<?= $purpose ?>" data-icon="<?= $purposes[$purpose][1] ?>" <?= $form->purpose === $purpose ? 'selected' : '' ?>><?= $purposes[$purpose][0] ?></option>
+                                <option value="<?= $purpose ?>" data-icon="<?= $purposeIcons[$purpose][0] ?? 'fa-circle' ?>" <?= $form->purpose === $purpose ? 'selected' : '' ?>><?= htmlspecialchars($purposeNames[$purpose]) ?></option>
                             <?php endforeach; ?>
                         </select>
                         <i class="fa-solid fa-chevron-down" aria-hidden="true"></i>

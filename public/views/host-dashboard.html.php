@@ -1,5 +1,5 @@
 <?php
-$purposes = require __DIR__ . '/partials/purposes.php';
+$purposeIcons = require __DIR__ . '/partials/purposes.php';
 $initials = require __DIR__ . '/partials/initials.php';
 $dayNames = require __DIR__ . '/partials/day-names.php';
 $modes = ['seats' => ['Miejsca do pracy', 'fa-laptop'], 'exclusive' => ['Na wyłączność', 'fa-key']];
@@ -36,7 +36,7 @@ $money = static fn (float $amount): string => number_format($amount, 2, ',', ' '
                         </span>
 
                         <p class="list-item__row">
-                            <span class="chip chip--small"><i class="fa-solid <?= $purposes[$request['purpose']][1] ?>" aria-hidden="true"></i> <?= $purposes[$request['purpose']][0] ?></span>
+                            <span class="chip chip--small"><i class="fa-solid <?= $purposeIcons[$request['purpose']][0] ?? 'fa-circle' ?>" aria-hidden="true"></i> <?= htmlspecialchars($purposeNames[$request['purpose']]) ?></span>
                             <span class="badge badge--<?= $request['mode'] ?>"><i class="fa-solid <?= $modes[$request['mode']][1] ?>" aria-hidden="true"></i> <?= $modes[$request['mode']][0] ?></span>
                             <?php if ($request['mode'] === 'seats'): ?>
                                 <span class="muted">· <?= $request['count'] ?> <?= $request['count'] === 1 ? 'miejsce' : 'miejsca' ?></span>

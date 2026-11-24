@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use App\Form\UserFilterForm;
+use App\Repository\DictionaryRepository;
 
 // TODO: Laboratorium 9 – panel tylko dla zalogowanego administratora (rola z sesji).
 final class AdminController extends AppController
@@ -77,6 +78,7 @@ final class AdminController extends AppController
             'activeNav' => '',
             'applications' => self::SAMPLE_APPLICATIONS,
             'pendingVenues' => self::SAMPLE_PENDING_VENUES,
+            'purposeNames' => (new DictionaryRepository($this->database()))->purposes(),
             'users' => $isValid ? $this->findUsers($form) : [],
             'groups' => UserFilterForm::GROUPS,
             'form' => $form,

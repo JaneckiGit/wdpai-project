@@ -1,5 +1,5 @@
 <?php
-$purposes = require __DIR__ . '/partials/purposes.php';
+$purposeIcons = require __DIR__ . '/partials/purposes.php';
 $modes = [
     'seats' => ['Miejsce do pracy', 'fa-laptop'],
     'exclusive' => ['Cały lokal', 'fa-key'],
@@ -25,11 +25,11 @@ $pins = array_map(static fn (array $venue): array => [
 
     <nav class="filters" aria-label="Filtry">
         <ul class="filters__purposes">
-            <?php foreach ($purposes as $value => [$label, $icon]): ?>
+            <?php foreach ($purposeNames as $value => $label): ?>
                 <li>
                     <a class="chip" href="<?= htmlspecialchars($filterUrl(['purpose' => $value])) ?>"<?= $form->purpose === $value ? ' aria-current="true"' : '' ?>>
-                        <i class="fa-solid <?= $icon ?>" aria-hidden="true"></i>
-                        <?= $label ?>
+                        <i class="fa-solid <?= $purposeIcons[$value][0] ?? 'fa-circle' ?>" aria-hidden="true"></i>
+                        <?= htmlspecialchars($label) ?>
                     </a>
                 </li>
             <?php endforeach; ?>

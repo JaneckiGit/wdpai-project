@@ -1,5 +1,5 @@
 <?php
-$purposes = require __DIR__ . '/partials/purposes.php';
+$purposeIcons = require __DIR__ . '/partials/purposes.php';
 $initials = require __DIR__ . '/partials/initials.php';
 $statuses = [
     'application' => ['Wniosek w toku', 'warning', 'fa-regular fa-clock'],
@@ -62,7 +62,7 @@ $filterUrl = static fn (string $group): string => '/admin?' . http_build_query(a
                         <p class="muted"><?= htmlspecialchars($venue['host'] . ' · ' . $venue['address']) ?></p>
                         <p class="pending-venue__tags">
                             <?php foreach ($venue['purposes'] as $purpose): ?>
-                                <span class="chip chip--small"><i class="fa-solid <?= $purposes[$purpose][1] ?>" aria-hidden="true"></i> <?= $purposes[$purpose][0] ?></span>
+                                <span class="chip chip--small"><i class="fa-solid <?= $purposeIcons[$purpose][0] ?? 'fa-circle' ?>" aria-hidden="true"></i> <?= htmlspecialchars($purposeNames[$purpose]) ?></span>
                             <?php endforeach; ?>
                         </p>
                         <p class="pending-venue__tags">

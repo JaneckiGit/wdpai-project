@@ -1,6 +1,3 @@
-<?php
-$types = require __DIR__ . '/partials/venue-types.php';
-?>
 <?php require __DIR__ . '/partials/header.html.php'; ?>
 
 <main class="page host-application">
@@ -72,8 +69,8 @@ $types = require __DIR__ . '/partials/venue-types.php';
                         <label for="venue-type">Typ lokalu</label>
                         <select id="venue-type" name="venueType" required <?= $form->invalidAttributes('venueType') ?>>
                             <option value="">Wybierz typ</option>
-                            <?php foreach ($types as $value => $label): ?>
-                                <option value="<?= $value ?>" <?= $form->venueType === $value ? 'selected' : '' ?>><?= $label ?></option>
+                            <?php foreach ($venueTypes as $value => $label): ?>
+                                <option value="<?= $value ?>" <?= $form->venueType === $value ? 'selected' : '' ?>><?= htmlspecialchars($label) ?></option>
                             <?php endforeach; ?>
                         </select>
                     </div>
