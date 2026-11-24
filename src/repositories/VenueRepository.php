@@ -68,6 +68,17 @@ final class VenueRepository
         return $this->mapRowsToVenues($statement->fetchAll());
     }
 
+    /** @return list<Venue> lokale w danym statusie, od najstarszego (panel administratora: 'pending') */
+    public function findByStatus(string $status): array
+    {
+        $statement = $this->database->prepare(
+            self::SELECT . ' WHERE venues.status = :status ORDER BY venues.created_at'
+        );
+        $statement->execute(['status' => $status]);
+
+        return $this->mapRowsToVenues($statement->fetchAll());
+    }
+
     /* Lokal w każdym statusie; o tym, kto może go zobaczyć, decyduje kontroler. */
     public function find(int $id): ?Venue
     {
