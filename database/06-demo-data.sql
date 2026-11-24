@@ -44,15 +44,17 @@ FROM (VALUES
 ) AS purpose (venue_name, value)
 JOIN venues ON venues.name = purpose.venue_name;
 
-INSERT INTO venue_amenities (venue_id, amenity)
-SELECT venues.id, amenity.value
+INSERT INTO venue_amenities (venue_id, amenity, note)
+SELECT venues.id, amenity.value, amenity.note
 FROM (VALUES
-    ('Bar Lampion', 'wifi'), ('Bar Lampion', 'sockets'), ('Bar Lampion', 'daylight'),
-    ('Kawiarnia Ziarno', 'wifi'), ('Kawiarnia Ziarno', 'sockets'), ('Kawiarnia Ziarno', 'projector'), ('Kawiarnia Ziarno', 'coffee'),
-    ('Kawiarnia Pod Zegarem', 'wifi'), ('Kawiarnia Pod Zegarem', 'sockets'),
-    ('Piwnica Lampion', 'wifi'), ('Piwnica Lampion', 'projector'),
-    ('Atelier Len', 'wifi'), ('Atelier Len', 'sockets'), ('Atelier Len', 'daylight')
-) AS amenity (venue_name, value)
+    ('Bar Lampion', 'wifi', 'hasło w instrukcji po akceptacji'), ('Bar Lampion', 'sockets', 'przy stołach'),
+    ('Bar Lampion', 'daylight', 'dobre światło do zdjęć'),
+    ('Kawiarnia Ziarno', 'wifi', 'hasło w instrukcji po akceptacji'), ('Kawiarnia Ziarno', 'sockets', 'przy każdym miejscu'),
+    ('Kawiarnia Ziarno', 'projector', 'na spotkania i szkolenia'), ('Kawiarnia Ziarno', 'coffee', 'do dyspozycji najemców'),
+    ('Kawiarnia Pod Zegarem', 'wifi', 'hasło w instrukcji po akceptacji'), ('Kawiarnia Pod Zegarem', 'sockets', 'przy oknach'),
+    ('Piwnica Lampion', 'wifi', NULL), ('Piwnica Lampion', 'projector', 'ekran na ścianie z cegły'),
+    ('Atelier Len', 'wifi', NULL), ('Atelier Len', 'sockets', 'przy dużym stole'), ('Atelier Len', 'daylight', 'okna na dwie strony')
+) AS amenity (venue_name, value, note)
 JOIN venues ON venues.name = amenity.venue_name;
 
 -- Okna: dni od–do rozpisuje generate_series na osobne wiersze window_days.

@@ -47,10 +47,12 @@ CREATE TABLE venue_purposes (
         CHECK (purpose IN ('work', 'meetings', 'shoots', 'events'))
 );
 
--- Udogodnienia ze stałej listy (etykiety i ikony są w widoku, jak przy celach).
+-- Udogodnienia ze stałej listy (etykiety i ikony są w widoku, jak przy celach) z dopiskiem gospodarza,
+-- np. Wi-Fi – „hasło w instrukcji po akceptacji”; dopisek zależy od pary lokal + udogodnienie.
 CREATE TABLE venue_amenities (
     venue_id BIGINT NOT NULL REFERENCES venues (id) ON DELETE CASCADE,
     amenity VARCHAR(20) NOT NULL,
+    note VARCHAR(100) NULL,
     PRIMARY KEY (venue_id, amenity),
     CONSTRAINT venue_amenities_amenity_check
         CHECK (amenity IN ('wifi', 'sockets', 'daylight', 'projector', 'coffee'))
