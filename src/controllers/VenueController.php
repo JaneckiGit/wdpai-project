@@ -123,6 +123,7 @@ final class VenueController extends AppController
             $this->reservations->save(new Reservation(
                 null,
                 $id,
+                $this->currentUser()->getId(),
                 $form->mode,
                 $form->purpose,
                 new DateTimeImmutable($form->date),

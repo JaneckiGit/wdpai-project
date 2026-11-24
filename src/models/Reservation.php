@@ -11,6 +11,7 @@ final class Reservation
     public function __construct(
         private ?int $id,
         private int $venueId,
+        private int $userId,
         private string $mode,
         private string $purpose,
         private DateTimeImmutable $date,
@@ -20,6 +21,9 @@ final class Reservation
         private string $status,
         private ?DateTimeImmutable $createdAt = null,
         private ?DateTimeImmutable $updatedAt = null,
+        // Nazwy lokalu i najemcy dochodzą z JOIN-ów przy odczycie; przy nowej prośbie ich nie ma.
+        private ?string $venueName = null,
+        private ?string $guestName = null,
     ) {
     }
 
@@ -36,6 +40,21 @@ final class Reservation
     public function getVenueId(): int
     {
         return $this->venueId;
+    }
+
+    public function getUserId(): int
+    {
+        return $this->userId;
+    }
+
+    public function getVenueName(): ?string
+    {
+        return $this->venueName;
+    }
+
+    public function getGuestName(): ?string
+    {
+        return $this->guestName;
     }
 
     public function getMode(): string
