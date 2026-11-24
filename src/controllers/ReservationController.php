@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
-use App\Database;
 use App\Repository\ReservationRepository;
 
 final class ReservationController extends AppController
@@ -20,7 +19,7 @@ final class ReservationController extends AppController
 
     public function __construct()
     {
-        $this->reservations = new ReservationRepository((new Database())->connect());
+        $this->reservations = new ReservationRepository($this->database());
     }
 
     public function index(): void

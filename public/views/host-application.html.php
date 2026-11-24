@@ -39,7 +39,7 @@ $types = require __DIR__ . '/partials/venue-types.php';
                     </div>
                     <div class="field">
                         <label for="account-email">E-mail z Twojego konta</label>
-                        <input type="email" id="account-email" value="<?= htmlspecialchars($currentUser['email']) ?>" readonly>
+                        <input type="email" id="account-email" value="<?= htmlspecialchars($currentUser->getEmail()) ?>" readonly>
                     </div>
                 </div>
             </section>

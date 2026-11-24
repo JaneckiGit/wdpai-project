@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
-use App\Database;
 use App\Form\HostApplicationForm;
 use App\Form\VenueForm;
 use App\Model\Reservation;
@@ -31,14 +30,13 @@ final class HostController extends AppController
 
     public function __construct()
     {
-        $this->reservations = new ReservationRepository((new Database())->connect());
+        $this->reservations = new ReservationRepository($this->database());
     }
 
     public function dashboard(): void
     {
         // Panel widzi tylko gospodarz – pozostali najpierw wysyłają wniosek o tę rolę.
-        // TODO: Laboratorium 9 – rola z sesji zalogowanego użytkownika zamiast przykładowej.
-        if (!self::CURRENT_USER['isHost']) {
+        if (!$this->currentUser()->isHost()) {
             $this->redirect('/host/apply');
         }
 
@@ -65,7 +63,7 @@ final class HostController extends AppController
     {
         return array_filter(
             array_column(VenueController::SAMPLE_VENUES, null, 'id'),
-            static fn (array $venue): bool => $venue['host'] === self::CURRENT_USER['name'],
+            fn (array $venue): bool => $venue['host'] === $this->currentUser()->getFullName(),
         );
     }
 
@@ -81,7 +79,7 @@ final class HostController extends AppController
         return [
             'id' => $reservation->getId(),
             // TODO: Laboratorium 9 – najemca z konta (user_id); do tego czasu rezerwuje przykładowy użytkownik.
-            'guest' => self::CURRENT_USER['name'],
+            'guest' => $this->currentUser()->getFullName(),
             'venueName' => $venue['name'],
             'date' => $reservation->getDate(),
             'from' => $reservation->getStartHour(),
@@ -121,8 +119,8 @@ final class HostController extends AppController
     /* Wniosek o rolę gospodarza; imię i nazwisko podpowiadamy z konta. */
     public function apply(): void
     {
-        [$firstName, $lastName] = explode(' ', self::CURRENT_USER['name'], 2);
-        $form = new HostApplicationForm($this->isPost() ? $_POST : ['firstName' => $firstName, 'lastName' => $lastName]);
+        $user = $this->currentUser();
+        $form = new HostApplicationForm($this->isPost() ? $_POST : ['firstName' => $user->getFirstName(), 'lastName' => $user->getLastName()]);
 
         if ($this->isPost()) {
             if ($form->isValid()) {

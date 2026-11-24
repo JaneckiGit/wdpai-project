@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
-use App\Database;
 use App\Form\ReservationForm;
 use App\Form\VenueFilterForm;
 use App\Model\Reservation;
@@ -21,7 +20,7 @@ final class VenueController extends AppController
 
     public function __construct()
     {
-        $this->reservations = new ReservationRepository((new Database())->connect());
+        $this->reservations = new ReservationRepository($this->database());
     }
 
     // TODO: Laboratorium 8 – lokale z bazy (repozytorium) zamiast przykładowych danych.
