@@ -1,4 +1,4 @@
--- Dane demonstracyjne z przykładowych danych aplikacji: konta, lokale z oknami dostępności i wnioski gospodarzy.
+-- Dane demonstracyjne z przykładowych danych aplikacji: konta, lokale z oknami dostępności, firmy i wnioski gospodarzy.
 -- Wszystkie osoby są fikcyjne. Każde konto demo ma hasło Demo1234 (hash wygenerowany przez password_hash() w PHP).
 -- Identyfikatory nadaje baza w kolejności wstawiania, a powiązania wiersze znajdują po e-mailu albo nazwie lokalu.
 \set demo_password_hash '$2y$10$PxIyDmL9ZrN28lJcLU6H4uY5ZS1LdbLGPMAXYv/EXmUhVMi.r8CHq'
@@ -88,16 +88,23 @@ JOIN venues ON venues.name = d.venue_name
 JOIN availability_windows ON availability_windows.venue_id = venues.id AND availability_windows.mode = d.mode
 CROSS JOIN LATERAL generate_series(d.first_day, d.last_day) AS weekday;
 
-INSERT INTO host_applications (user_id, first_name, last_name, phone, company_name, nip, venue_name, venue_type, street, building_number, postal_code, city, message, created_at) VALUES
-    ((SELECT id FROM users WHERE email = 'anna.kowalska@example.com'), 'Anna', 'Kowalska', '+48 601 234 567', 'Witraż Anna Kowalska', '6762481035',
+-- Firmy z wniosków (nazwa zależy od NIP-u, więc jest tu raz, a wniosek wskazuje firmę po NIP-ie).
+INSERT INTO companies (nip, name) VALUES
+    ('6762481035', 'Witraż Anna Kowalska'),
+    ('9452217760', 'Echo Studio sp. z o.o.'),
+    ('6772395108', 'Księgarnia Strona s.c.');
+
+-- Imię i nazwisko wnioskodawcy pochodzą z jego konta.
+INSERT INTO host_applications (user_id, phone, company_nip, venue_name, venue_type, street, building_number, postal_code, city, message, created_at) VALUES
+    ((SELECT id FROM users WHERE email = 'anna.kowalska@example.com'), '+48 601 234 567', '6762481035',
         'Pracownia Szkła Witraż', 'workshop', 'ul. Józefińska', '12', '30-529', 'Kraków',
         'Prowadzę pracownię witrażu w Podgórzu. Od poniedziałku do środy po 16:00 pracownia stoi pusta – chcę ją udostępniać na warsztaty, sesje zdjęciowe i spotkania do 10 osób.',
         CURRENT_TIMESTAMP - INTERVAL '2 hours'),
-    ((SELECT id FROM users WHERE email = 'pawel.kruk@example.com'), 'Paweł', 'Kruk', '+48 512 880 341', 'Echo Studio sp. z o.o.', '9452217760',
+    ((SELECT id FROM users WHERE email = 'pawel.kruk@example.com'), '+48 512 880 341', '9452217760',
         'Studio Nagrań Echo', 'studio', 'ul. Grzegórzecka', '21', '31-532', 'Kraków',
         'Studio nagrań z salą 40 m². W weekendy do 14:00 stoi wolne – na podcasty, sesje i małe szkolenia.',
         CURRENT_TIMESTAMP - INTERVAL '17 hours'),
-    ((SELECT id FROM users WHERE email = 'monika.sowa@example.com'), 'Monika', 'Sowa', '+48 698 117 402', 'Księgarnia Strona s.c.', '6772395108',
+    ((SELECT id FROM users WHERE email = 'monika.sowa@example.com'), '+48 698 117 402', '6772395108',
         'Księgarnia Strona', 'bookstore', 'ul. Miodowa', '9', '31-055', 'Kraków',
         'Po 19:00 księgarnia jest zamknięta. Chcemy wynajmować antresolę na spotkania autorskie i kluby książki.',
         CURRENT_TIMESTAMP - INTERVAL '31 hours');
