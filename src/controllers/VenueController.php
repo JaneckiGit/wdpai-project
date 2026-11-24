@@ -7,8 +7,10 @@ namespace App\Controller;
 use App\Form\ReservationForm;
 use App\Form\VenueFilterForm;
 use App\Model\Reservation;
+use App\Model\Venue;
 use App\Repository\DictionaryRepository;
 use App\Repository\ReservationRepository;
+use App\Repository\VenueRepository;
 use DateTimeImmutable;
 
 final class VenueController extends AppController
@@ -17,11 +19,13 @@ final class VenueController extends AppController
         'request-sent' => 'Prośba o rezerwację wysłana. Gospodarz ma 24 h na odpowiedź – status sprawdzisz w „Moich rezerwacjach”.',
     ];
 
+    private VenueRepository $venues;
     private ReservationRepository $reservations;
     private DictionaryRepository $dictionaries;
 
     public function __construct()
     {
+        $this->venues = new VenueRepository($this->database());
         $this->reservations = new ReservationRepository($this->database());
         $this->dictionaries = new DictionaryRepository($this->database());
     }
@@ -85,27 +89,14 @@ final class VenueController extends AppController
             'errors' => $form->errors(),
             'searchQuery' => $form->query,
             'purposeNames' => $purposeNames,
-            'venues' => $isValid ? $this->findVenues($form) : [],
+            'venues' => $isValid ? $this->venues->findPublished($form->purpose, $form->mode, $form->query) : [],
             'mapbox' => $this->mapbox(),
         ]);
     }
 
-    /* Lokal pasuje, gdy pozwala na wybrany cel, ma cenę w wybranym trybie i zawiera szukaną frazę. */
-    private function findVenues(VenueFilterForm $form): array
-    {
-        $priceKey = $form->mode === 'seats' ? 'seatPrice' : 'exclusivePrice';
-
-        return array_values(array_filter(
-            self::SAMPLE_VENUES,
-            static fn (array $venue): bool => in_array($form->purpose, $venue['purposes'], true)
-                && $venue[$priceKey] !== null
-                && ($form->query === '' || mb_stripos($venue['name'] . ' ' . $venue['district'], $form->query) !== false),
-        ));
-    }
-
     public function show(int $id): void
     {
-        $venue = $this->findVenue($id);
+        $venue = $this->findPublishedVenue($id);
 
         if ($venue === null) {
             $this->renderVenueNotFound();
@@ -117,7 +108,7 @@ final class VenueController extends AppController
 
     public function requestReservation(int $id): void
     {
-        $venue = $this->findVenue($id);
+        $venue = $this->findPublishedVenue($id);
 
         if ($venue === null) {
             $this->renderVenueNotFound();
@@ -147,20 +138,23 @@ final class VenueController extends AppController
         $this->renderVenue($venue, $form);
     }
 
-    /* array_column(…, null, 'id') zamienia listę lokali na tablicę, w której kluczem jest id. */
-    private function findVenue(int $id): ?array
+    /* Odkrywaj i strona lokalu pokazują tylko lokale opublikowane – szkic albo lokal w weryfikacji daje 404. */
+    private function findPublishedVenue(int $id): ?Venue
     {
-        return array_column(self::SAMPLE_VENUES, null, 'id')[$id] ?? null;
+        $venue = $this->venues->find($id);
+
+        return $venue !== null && $venue->isPublished() ? $venue : null;
     }
 
-    private function renderVenue(array $venue, ReservationForm $form): void
+    private function renderVenue(Venue $venue, ReservationForm $form): void
     {
         $this->render('venue', [
-            'pageTitle' => $venue['name'] . ' – PoGodzinach',
+            'pageTitle' => $venue->getName() . ' – PoGodzinach',
             'stylesheet' => 'venue',
             'activeNav' => 'venues',
             'venue' => $venue,
             'purposeNames' => $this->dictionaries->purposes(),
+            'amenityNames' => $this->dictionaries->amenities(),
             'days' => ReservationForm::bookableDays(),
             'form' => $form,
             'errors' => $form->errors(),

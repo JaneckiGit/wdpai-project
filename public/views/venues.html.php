@@ -8,12 +8,14 @@ $modes = [
 $filterUrl = static fn (array $change): string => '/venues?' . http_build_query(array_filter(
     array_merge(['q' => $form->query, 'purpose' => $form->purpose, 'mode' => $form->mode], $change)
 ));
-$pins = array_map(static fn (array $venue): array => [
-    'id' => $venue['id'],
-    'name' => $venue['name'],
-    'lat' => $venue['lat'],
-    'lng' => $venue['lng'],
-    'price' => $form->mode === 'seats' ? $venue['seatPrice'] . ' zł/h · miejsce' : $venue['exclusivePrice'] . ' zł/h',
+$price = require __DIR__ . '/partials/price.php';
+// Pinezki mapy: cena w wybranym trybie (Odkrywaj pokazuje tylko lokale, które mają w nim okno).
+$pins = array_map(static fn (App\Model\Venue $venue): array => [
+    'id' => $venue->getId(),
+    'name' => $venue->getName(),
+    'lat' => $venue->getLatitude(),
+    'lng' => $venue->getLongitude(),
+    'price' => $price($venue->getWindowsByMode()[$form->mode]->getPrice()) . ($form->mode === 'seats' ? ' zł/h · miejsce' : ' zł/h'),
 ], $venues);
 ?>
 <?php require __DIR__ . '/partials/header.html.php'; ?>
@@ -63,23 +65,18 @@ $pins = array_map(static fn (array $venue): array => [
 
         <section class="reels" id="reels" aria-label="Lokale">
             <?php foreach ($venues as $venue): ?>
-                <article class="venue-card" data-venue-id="<?= $venue['id'] ?>">
+                <article class="venue-card" data-venue-id="<?= $venue->getId() ?>">
                     <img class="venue-card__image" src="/images/login-hero.svg" alt="">
                     <div class="venue-card__info">
-                        <h2><?= htmlspecialchars($venue['name']) ?></h2>
+                        <h2><?= htmlspecialchars($venue->getName()) ?></h2>
                         <p>
                             <i class="fa-solid fa-location-dot" aria-hidden="true"></i>
-                            <?= htmlspecialchars($venue['district']) ?>
+                            <?= htmlspecialchars($venue->getDistrict() ?? (string) $venue->getCity()) ?>
                         </p>
                         <ul class="venue-card__offers">
-                            <?php if ($venue['seatPrice'] !== null): ?>
-                                <li class="badge badge--seats">Miejsca do pracy · <?= $venue['seatPrice'] ?> zł/h</li>
-                            <?php endif; ?>
-                            <?php if ($venue['exclusivePrice'] !== null): ?>
-                                <li class="badge badge--exclusive">Na wyłączność · <?= $venue['exclusivePrice'] ?> zł/h</li>
-                            <?php endif; ?>
+                            <?php require __DIR__ . '/partials/offer-badges.html.php'; ?>
                         </ul>
-                        <a class="button" href="/venues/<?= $venue['id'] ?>">Zarezerwuj</a>
+                        <a class="button" href="/venues/<?= $venue->getId() ?>">Zarezerwuj</a>
                     </div>
                 </article>
             <?php endforeach; ?>
