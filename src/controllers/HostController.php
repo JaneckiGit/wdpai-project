@@ -6,9 +6,11 @@ namespace App\Controller;
 
 use App\Form\HostApplicationForm;
 use App\Form\VenueForm;
+use App\Model\HostApplication;
 use App\Model\Reservation;
 use App\Model\Venue;
 use App\Repository\DictionaryRepository;
+use App\Repository\HostApplicationRepository;
 use App\Repository\ReservationRepository;
 use App\Repository\VenueRepository;
 
@@ -26,15 +28,17 @@ final class HostController extends AppController
     ];
 
     private const APPLICATION_STATUS_MESSAGES = [
-        'sent' => 'Wniosek jest poprawny. Administrator sprawdzi go, gdy aplikacja będzie miała bazę danych – decyzję dostaniesz e-mailem.',
+        'sent' => 'Wniosek wysłany. Administrator sprawdzi go w ciągu 1 dnia roboczego – po akceptacji w zakładce „Dla gospodarzy” otworzy się Twój panel.',
     ];
 
     private VenueRepository $venues;
     private ReservationRepository $reservations;
     private DictionaryRepository $dictionaries;
+    private HostApplicationRepository $applications;
 
     public function __construct()
     {
+        $this->applications = new HostApplicationRepository($this->database());
         $this->venues = new VenueRepository($this->database());
         $this->reservations = new ReservationRepository($this->database());
         $this->dictionaries = new DictionaryRepository($this->database());
@@ -125,15 +129,28 @@ final class HostController extends AppController
         $this->redirect('/host?status=request-' . $decision);
     }
 
-    /* Wniosek o rolę gospodarza; imię i nazwisko podpowiadamy z konta. */
+    /* Wniosek o rolę gospodarza; imię, nazwisko i e-mail pochodzą z konta. */
     public function apply(): void
     {
         $user = $this->currentUser();
-        $form = new HostApplicationForm($this->isPost() ? $_POST : ['firstName' => $user->getFirstName(), 'lastName' => $user->getLastName()]);
+
+        // Gospodarz ma już panel, więc wniosku nie składa.
+        if ($user->isHost()) {
+            $this->redirect('/host');
+        }
+
+        $venueTypes = $this->dictionaries->venueTypes();
+        $form = new HostApplicationForm($this->isPost() ? $_POST : [], array_keys($venueTypes));
 
         if ($this->isPost()) {
+            // Jeden oczekujący wniosek na konto – tak samo pilnuje tego indeks host_applications_one_pending w bazie.
+            if ($user->hasPendingApplication()) {
+                $this->renderError(409, 'Wniosek już wysłany', 'Twój wniosek czeka na decyzję administratora.');
+                return;
+            }
+
             if ($form->isValid()) {
-                // TODO: Laboratorium 8 – zapis wniosku w bazie, żeby zobaczył go administrator.
+                $this->applications->save($this->newApplication($form));
                 $this->redirect('/host/apply?status=sent');
             }
 
@@ -144,11 +161,38 @@ final class HostController extends AppController
             'pageTitle' => 'Zostań gospodarzem – PoGodzinach',
             'stylesheet' => 'host-application',
             'activeNav' => 'host',
-            'venueTypes' => $this->dictionaries->venueTypes(),
+            'venueTypes' => $venueTypes,
+            'hasPendingApplication' => $user->hasPendingApplication(),
             'form' => $form,
             'errors' => $form->errors(),
             'statusMessage' => $this->statusMessage(self::APPLICATION_STATUS_MESSAGES),
         ]);
+    }
+
+    /* Nowy wniosek z poprawnego formularza; pusty numer lokalu zapisujemy jako NULL. */
+    private function newApplication(HostApplicationForm $form): HostApplication
+    {
+        $user = $this->currentUser();
+        $address = $form->address;
+
+        return new HostApplication(
+            null,
+            $user->getId(),
+            $user->getFullName(),
+            $user->getEmail(),
+            $form->phone,
+            $form->normalizedNip(),
+            $form->companyName,
+            $form->venueName,
+            $form->venueType,
+            $address->street,
+            $address->buildingNumber,
+            $address->unitNumber === '' ? null : $address->unitNumber,
+            $address->postalCode,
+            $address->city,
+            $form->message,
+            'pending',
+        );
     }
 
     public function addVenue(): void

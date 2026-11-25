@@ -14,29 +14,31 @@
     <?php require __DIR__ . '/partials/status-message.html.php'; ?>
 
     <div class="host-application__layout">
+        <?php if ($hasPendingApplication): ?>
+            <section class="card form-section host-application__form">
+                <h2>Wniosek czeka na decyzję</h2>
+                <p>Administrator sprawdza Twoje dane. Po akceptacji w zakładce „Dla gospodarzy” otworzy się panel gospodarza, w którym dodasz lokal.</p>
+            </section>
+        <?php else: ?>
         <form class="stack app-form host-application__form" action="/host/apply" method="post">
             <?php require __DIR__ . '/partials/form-errors.html.php'; ?>
 
             <section class="card form-section">
                 <h2><span>1</span> Dane kontaktowe</h2>
-                <p class="field__hint">Administrator może zadzwonić, gdyby coś wymagało wyjaśnienia.</p>
+                <p class="field__hint">Administrator może zadzwonić, gdyby coś wymagało wyjaśnienia. Imię, nazwisko i e-mail pochodzą z Twojego konta.</p>
                 <div class="form-grid">
                     <div class="field">
-                        <label for="first-name">Imię</label>
-                        <input type="text" id="first-name" name="firstName" value="<?= htmlspecialchars($form->firstName) ?>" maxlength="60" autocomplete="given-name" required <?= $form->invalidAttributes('firstName') ?>>
-                    </div>
-                    <div class="field">
-                        <label for="last-name">Nazwisko</label>
-                        <input type="text" id="last-name" name="lastName" value="<?= htmlspecialchars($form->lastName) ?>" maxlength="60" autocomplete="family-name" required <?= $form->invalidAttributes('lastName') ?>>
-                    </div>
-                    <div class="field">
-                        <label for="phone">Telefon</label>
-                        <input type="tel" id="phone" name="phone" value="<?= htmlspecialchars($form->phone) ?>" autocomplete="tel" required <?= $form->invalidAttributes('phone', 'phone-hint') ?>>
-                        <p class="field__hint" id="phone-hint">Najemcy zobaczą go dopiero po akceptacji rezerwacji.</p>
+                        <label for="account-name">Imię i nazwisko</label>
+                        <input type="text" id="account-name" value="<?= htmlspecialchars($currentUser->getFullName()) ?>" readonly>
                     </div>
                     <div class="field">
                         <label for="account-email">E-mail z Twojego konta</label>
                         <input type="email" id="account-email" value="<?= htmlspecialchars($currentUser->getEmail()) ?>" readonly>
+                    </div>
+                    <div class="field">
+                        <label for="phone">Telefon</label>
+                        <input type="tel" id="phone" name="phone" value="<?= htmlspecialchars($form->phone) ?>" maxlength="20" autocomplete="tel" required <?= $form->invalidAttributes('phone', 'phone-hint') ?>>
+                        <p class="field__hint" id="phone-hint">Najemcy zobaczą go dopiero po akceptacji rezerwacji.</p>
                     </div>
                 </div>
             </section>
@@ -51,7 +53,7 @@
                     </div>
                     <div class="field">
                         <label for="nip">NIP</label>
-                        <input type="text" id="nip" name="nip" value="<?= htmlspecialchars($form->nip) ?>" inputmode="numeric" required <?= $form->invalidAttributes('nip', 'nip-hint') ?>>
+                        <input type="text" id="nip" name="nip" value="<?= htmlspecialchars($form->nip) ?>" maxlength="13" inputmode="numeric" required <?= $form->invalidAttributes('nip', 'nip-hint') ?>>
                         <p class="field__hint" id="nip-hint">10 cyfr, np. 676-248-10-35.</p>
                     </div>
                 </div>
@@ -74,12 +76,9 @@
                             <?php endforeach; ?>
                         </select>
                     </div>
-                    <div class="field form-grid__wide">
-                        <label for="address">Adres</label>
-                        <input type="text" id="address" name="address" value="<?= htmlspecialchars($form->address) ?>" maxlength="255" autocomplete="street-address" required <?= $form->invalidAttributes('address', 'address-hint') ?>>
-                        <p class="field__hint" id="address-hint">Zdjęcia, rolkę i okna dostępności dodasz po akceptacji w formularzu „Dodaj lokal”.</p>
-                    </div>
+                    <?php require __DIR__ . '/partials/address-fields.html.php'; ?>
                 </div>
+                <p class="field__hint">Zdjęcia, rolkę i okna dostępności dodasz po akceptacji w formularzu „Dodaj lokal”.</p>
             </section>
 
             <section class="card form-section">
@@ -98,22 +97,23 @@
             </label>
 
             <div class="actions host-application__actions">
-                <p class="field__hint">Wniosek sprawdzi administrator – decyzję dostaniesz e-mailem.</p>
+                <p class="field__hint">Wniosek sprawdzi administrator – zwykle w ciągu 1 dnia roboczego.</p>
                 <a class="button button--secondary" href="/venues">Anuluj</a>
                 <button class="button" type="submit">Wyślij wniosek</button>
             </div>
         </form>
+        <?php endif; ?>
 
         <aside class="card host-application__steps" aria-labelledby="steps-heading">
             <h2 id="steps-heading">Jak to działa</h2>
             <ol>
                 <li>
                     <span class="initials">1</span>
-                    <span><strong>Wypełnij wniosek</strong> <span class="badge badge--warning">Jesteś tutaj</span></span>
+                    <span><strong>Wypełnij wniosek</strong><?php if (!$hasPendingApplication): ?> <span class="badge badge--warning">Jesteś tutaj</span><?php endif; ?></span>
                 </li>
                 <li>
                     <span class="initials">2</span>
-                    <span><strong>Administrator sprawdza dane</strong> <span class="muted">zwykle 1 dzień roboczy</span></span>
+                    <span><strong>Administrator sprawdza dane</strong><?php if ($hasPendingApplication): ?> <span class="badge badge--warning">Jesteś tutaj</span><?php endif; ?> <span class="muted">zwykle 1 dzień roboczy</span></span>
                 </li>
                 <li>
                     <span class="initials">3</span>

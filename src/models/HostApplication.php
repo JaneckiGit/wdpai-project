@@ -10,7 +10,7 @@ use DateTimeImmutable;
 final class HostApplication
 {
     public function __construct(
-        private int $id,
+        private ?int $id,
         private int $userId,
         private string $applicantName,
         private string $email,
@@ -26,13 +26,19 @@ final class HostApplication
         private string $city,
         private string $message,
         private string $status,
-        private DateTimeImmutable $createdAt,
+        // Datę wysłania nadaje baza, więc nowy wniosek (jeszcze bez id) jej nie ma.
+        private ?DateTimeImmutable $createdAt = null,
     ) {
     }
 
-    public function getId(): int
+    public function getId(): ?int
     {
         return $this->id;
+    }
+
+    public function setId(int $id): void
+    {
+        $this->id = $id;
     }
 
     public function getUserId(): int
@@ -53,6 +59,11 @@ final class HostApplication
     public function getPhone(): string
     {
         return $this->phone;
+    }
+
+    public function getCompanyNip(): string
+    {
+        return $this->companyNip;
     }
 
     /* NIP w zapisie z myślnikami, np. 6762481035 → 676-248-10-35. */
@@ -77,6 +88,31 @@ final class HostApplication
         return $this->venueType;
     }
 
+    public function getStreet(): string
+    {
+        return $this->street;
+    }
+
+    public function getBuildingNumber(): string
+    {
+        return $this->buildingNumber;
+    }
+
+    public function getUnitNumber(): ?string
+    {
+        return $this->unitNumber;
+    }
+
+    public function getPostalCode(): string
+    {
+        return $this->postalCode;
+    }
+
+    public function getCity(): string
+    {
+        return $this->city;
+    }
+
     /* Adres lokalu z wniosku, np. „ul. Józefińska 12, 30-529 Kraków”. */
     public function getAddress(): string
     {
@@ -99,7 +135,7 @@ final class HostApplication
         return $this->status === 'pending';
     }
 
-    public function getCreatedAt(): DateTimeImmutable
+    public function getCreatedAt(): ?DateTimeImmutable
     {
         return $this->createdAt;
     }
@@ -107,6 +143,6 @@ final class HostApplication
     /* Pełne godziny od wysłania wniosku – panel wyróżnia wnioski czekające co najmniej dobę. */
     public function getHoursWaiting(): int
     {
-        return intdiv(time() - $this->createdAt->getTimestamp(), 3600);
+        return $this->createdAt === null ? 0 : intdiv(time() - $this->createdAt->getTimestamp(), 3600);
     }
 }

@@ -50,6 +50,14 @@ abstract class Form
     }
 
     /* Tablica zamiast tekstu (np. email[]=x w żądaniu) jest traktowana jak puste pole. */
+    /* Błędy formularza podrzędnego (adres, okno dostępności) stają się błędami tego formularza, np. „windows.0.from”. */
+    protected function addErrorsFrom(Form $child, string $fieldPrefix = '', string $messagePrefix = ''): void
+    {
+        foreach ($child->errors() as $field => $message) {
+            $this->addError($fieldPrefix . $field, $messagePrefix . $message);
+        }
+    }
+
     protected static function text(array $input, string $key, bool $trim = true): string
     {
         $value = $input[$key] ?? '';
