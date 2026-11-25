@@ -4,7 +4,7 @@ $daySets = ['mon-fri' => 'pon–pt', 'mon-thu' => 'pon–czw', 'mon' => 'pon', '
 
 // Kroki formularza: kotwica sekcji => [nazwa, pola, których błędy należą do sekcji].
 $steps = [
-    'basics' => ['Podstawowe', ['name', 'type', 'address', 'location', 'description']],
+    'basics' => ['Podstawowe', ['name', 'type', 'street', 'buildingNumber', 'unitNumber', 'postalCode', 'city', 'location', 'description']],
     'purposes' => ['Dozwolone cele', ['purposes']],
     'photos' => ['Zdjęcia', []],
     'reel' => ['Rolka', []],
@@ -79,15 +79,16 @@ $failedSteps = array_filter($steps, static fn (array $step): bool => array_inter
                         </select>
                     </div>
 
+                    <?php require __DIR__ . '/partials/address-fields.html.php'; ?>
+
                     <div class="field form-grid__wide">
-                        <label for="address">Adres</label>
-                        <input type="text" id="address" name="address" value="<?= htmlspecialchars($form->address) ?>" autocomplete="street-address" required <?= $form->invalidAttributes('address', 'address-hint') ?>>
+                        <span class="field__label" id="location-label">Położenie na mapie</span>
                         <?php if ($mapbox['token'] !== ''): ?>
-                            <div class="location-map" data-token="<?= htmlspecialchars($mapbox['token']) ?>" data-style="<?= htmlspecialchars($mapbox['style']) ?>"></div>
+                            <div class="location-map" aria-labelledby="location-label" data-token="<?= htmlspecialchars($mapbox['token']) ?>" data-style="<?= htmlspecialchars($mapbox['style']) ?>"></div>
                         <?php endif; ?>
                         <input type="hidden" name="latitude" value="<?= htmlspecialchars($form->latitude) ?>">
                         <input type="hidden" name="longitude" value="<?= htmlspecialchars($form->longitude) ?>">
-                        <p class="field__hint" id="address-hint">Przeciągnij pinezkę, jeśli adres wskazuje niedokładne miejsce. Najemcy zobaczą przybliżoną lokalizację.</p>
+                        <p class="field__hint">Przeciągnij pinezkę na wejście do lokalu. Najemcy zobaczą przybliżoną lokalizację.</p>
                     </div>
 
                     <div class="field form-grid__wide">
@@ -161,8 +162,8 @@ $failedSteps = array_filter($steps, static fn (array $step): bool => array_inter
                                 <option value="seats" <?= $window->mode === 'seats' ? 'selected' : '' ?>>Miejsca do pracy</option>
                                 <option value="exclusive" <?= $window->mode === 'exclusive' ? 'selected' : '' ?>>Na wyłączność</option>
                             </select></label>
-                            <label class="unit unit--capacity"><span class="visually-hidden">Liczba miejsc / maks. osób</span><input type="number" name="windows[<?= $index ?>][capacity]" value="<?= htmlspecialchars($window->capacity) ?>" min="1" required <?= $window->invalidAttributes('capacity') ?>></label>
-                            <label class="unit" data-unit="zł/h"><span class="visually-hidden">Cena za godzinę</span><input type="number" name="windows[<?= $index ?>][price]" value="<?= htmlspecialchars($window->price) ?>" min="0" step="0.01" required <?= $window->invalidAttributes('price') ?>></label>
+                            <label class="unit unit--capacity"><span class="visually-hidden">Liczba miejsc / maks. osób</span><input type="number" name="windows[<?= $index ?>][capacity]" value="<?= htmlspecialchars($window->capacity) ?>" min="1" max="1000" required <?= $window->invalidAttributes('capacity') ?>></label>
+                            <label class="unit" data-unit="zł/h"><span class="visually-hidden">Cena za godzinę</span><input type="number" name="windows[<?= $index ?>][price]" value="<?= htmlspecialchars($window->price) ?>" min="0.01" step="0.01" required <?= $window->invalidAttributes('price') ?>></label>
                             <label class="unit" data-unit="h"><span class="visually-hidden">Minimum godzin</span><input type="number" name="windows[<?= $index ?>][minHours]" value="<?= htmlspecialchars($window->minHours) ?>" min="1" required <?= $window->invalidAttributes('minHours') ?>></label>
                             <button class="window-row__remove" type="button" aria-label="Usuń okno"><i class="fa-regular fa-trash-can" aria-hidden="true"></i></button>
                         </div>

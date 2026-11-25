@@ -53,6 +53,55 @@ final class HostApplicationRepository
     }
 
     /*
+     * Wniosek zapisuje też firmę: jej nazwa zależy od NIP-u, więc jest w osobnej tabeli companies. Gdy firma o tym NIP-ie
+     * już jest, ON CONFLICT ... DO UPDATE zapisuje nazwę z nowego wniosku (np. poprawioną) zamiast tworzyć drugi wiersz.
+     * Firma i wniosek to dwie tabele, więc oba INSERT-y idą w jednej transakcji.
+     */
+    public function save(HostApplication $application): void
+    {
+        $this->database->beginTransaction();
+
+        try {
+            $company = $this->database->prepare(
+                'INSERT INTO companies (nip, name)
+                 VALUES (:nip, :name)
+                 ON CONFLICT (nip) DO UPDATE SET name = EXCLUDED.name'
+            );
+            $company->execute([
+                'nip' => $application->getCompanyNip(),
+                'name' => $application->getCompanyName(),
+            ]);
+
+            $statement = $this->database->prepare(
+                'INSERT INTO host_applications (user_id, phone, company_nip, venue_name, venue_type,
+                     street, building_number, unit_number, postal_code, city, message)
+                 VALUES (:user_id, :phone, :company_nip, :venue_name, :venue_type,
+                     :street, :building_number, :unit_number, :postal_code, :city, :message)
+                 RETURNING id'
+            );
+            $statement->execute([
+                'user_id' => $application->getUserId(),
+                'phone' => $application->getPhone(),
+                'company_nip' => $application->getCompanyNip(),
+                'venue_name' => $application->getVenueName(),
+                'venue_type' => $application->getVenueType(),
+                'street' => $application->getStreet(),
+                'building_number' => $application->getBuildingNumber(),
+                'unit_number' => $application->getUnitNumber(),
+                'postal_code' => $application->getPostalCode(),
+                'city' => $application->getCity(),
+                'message' => $application->getMessage(),
+            ]);
+            $application->setId((int) $statement->fetchColumn());
+
+            $this->database->commit();
+        } catch (\Throwable $exception) {
+            $this->database->rollBack();
+            throw $exception;
+        }
+    }
+
+    /*
      * Zatwierdzenie zmienia dwie tabele: status wniosku i rolę gospodarza na koncie. Obie zmiany idą w jednej transakcji –
      * gdy druga się nie uda, rollBack() cofa pierwszą, więc nie powstanie zatwierdzony wniosek bez roli gospodarza.
      */

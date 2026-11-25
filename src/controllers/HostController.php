@@ -4,11 +4,15 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
+use App\Form\AvailabilityWindowForm;
 use App\Form\HostApplicationForm;
 use App\Form\VenueForm;
+use App\Model\AvailabilityWindow;
+use App\Model\HostApplication;
 use App\Model\Reservation;
 use App\Model\Venue;
 use App\Repository\DictionaryRepository;
+use App\Repository\HostApplicationRepository;
 use App\Repository\ReservationRepository;
 use App\Repository\VenueRepository;
 
@@ -19,22 +23,24 @@ final class HostController extends AppController
     private const REQUEST_HOURS_TO_DECIDE = 24;
 
     private const DASHBOARD_STATUS_MESSAGES = [
-        'venue-submitted' => 'Formularz lokalu jest poprawny. Lokal trafi do weryfikacji, gdy aplikacja będzie miała bazę danych.',
-        'venue-draft' => 'Szkic lokalu jest poprawny. Zostanie zapisany, gdy aplikacja będzie miała bazę danych.',
+        'venue-submitted' => 'Lokal wysłany do weryfikacji – pojawi się w Odkrywaj po akceptacji administratora.',
+        'venue-draft' => 'Szkic lokalu zapisany – znajdziesz go w „Twoich lokalach”.',
         'request-accept' => 'Rezerwacja zaakceptowana – najemca zobaczy ją jako potwierdzoną.',
         'request-reject' => 'Prośba o rezerwację odrzucona.',
     ];
 
     private const APPLICATION_STATUS_MESSAGES = [
-        'sent' => 'Wniosek jest poprawny. Administrator sprawdzi go, gdy aplikacja będzie miała bazę danych – decyzję dostaniesz e-mailem.',
+        'sent' => 'Wniosek wysłany. Administrator sprawdzi go w ciągu 1 dnia roboczego – po akceptacji w zakładce „Dla gospodarzy” otworzy się Twój panel.',
     ];
 
     private VenueRepository $venues;
     private ReservationRepository $reservations;
     private DictionaryRepository $dictionaries;
+    private HostApplicationRepository $applications;
 
     public function __construct()
     {
+        $this->applications = new HostApplicationRepository($this->database());
         $this->venues = new VenueRepository($this->database());
         $this->reservations = new ReservationRepository($this->database());
         $this->dictionaries = new DictionaryRepository($this->database());
@@ -125,15 +131,28 @@ final class HostController extends AppController
         $this->redirect('/host?status=request-' . $decision);
     }
 
-    /* Wniosek o rolę gospodarza; imię i nazwisko podpowiadamy z konta. */
+    /* Wniosek o rolę gospodarza; imię, nazwisko i e-mail pochodzą z konta. */
     public function apply(): void
     {
         $user = $this->currentUser();
-        $form = new HostApplicationForm($this->isPost() ? $_POST : ['firstName' => $user->getFirstName(), 'lastName' => $user->getLastName()]);
+
+        // Gospodarz ma już panel, więc wniosku nie składa.
+        if ($user->isHost()) {
+            $this->redirect('/host');
+        }
+
+        $venueTypes = $this->dictionaries->venueTypes();
+        $form = new HostApplicationForm($this->isPost() ? $_POST : [], array_keys($venueTypes));
 
         if ($this->isPost()) {
+            // Jeden oczekujący wniosek na konto – tak samo pilnuje tego indeks host_applications_one_pending w bazie.
+            if ($user->hasPendingApplication()) {
+                $this->renderError(409, 'Wniosek już wysłany', 'Twój wniosek czeka na decyzję administratora.');
+                return;
+            }
+
             if ($form->isValid()) {
-                // TODO: Laboratorium 8 – zapis wniosku w bazie, żeby zobaczył go administrator.
+                $this->applications->save($this->newApplication($form));
                 $this->redirect('/host/apply?status=sent');
             }
 
@@ -144,20 +163,55 @@ final class HostController extends AppController
             'pageTitle' => 'Zostań gospodarzem – PoGodzinach',
             'stylesheet' => 'host-application',
             'activeNav' => 'host',
-            'venueTypes' => $this->dictionaries->venueTypes(),
+            'venueTypes' => $venueTypes,
+            'hasPendingApplication' => $user->hasPendingApplication(),
             'form' => $form,
             'errors' => $form->errors(),
             'statusMessage' => $this->statusMessage(self::APPLICATION_STATUS_MESSAGES),
         ]);
     }
 
+    /* Nowy wniosek z poprawnego formularza; pusty numer lokalu zapisujemy jako NULL. */
+    private function newApplication(HostApplicationForm $form): HostApplication
+    {
+        $user = $this->currentUser();
+        $address = $form->address;
+
+        return new HostApplication(
+            null,
+            $user->getId(),
+            $user->getFullName(),
+            $user->getEmail(),
+            $form->phone,
+            $form->normalizedNip(),
+            $form->companyName,
+            $form->venueName,
+            $form->venueType,
+            $address->street,
+            $address->buildingNumber,
+            $address->unitNumber === '' ? null : $address->unitNumber,
+            $address->postalCode,
+            $address->city,
+            $form->message,
+            'pending',
+        );
+    }
+
     public function addVenue(): void
     {
-        $form = new VenueForm($this->isPost() ? $_POST : []);
+        // Lokale dodaje tylko gospodarz – pozostali najpierw wysyłają wniosek o tę rolę.
+        if (!$this->currentUser()->isHost()) {
+            $this->redirect('/host/apply');
+        }
+
+        $purposeNames = $this->dictionaries->purposes();
+        $venueTypes = $this->dictionaries->venueTypes();
+        $form = new VenueForm($this->isPost() ? $_POST : [], array_keys($venueTypes), array_keys($purposeNames));
 
         if ($this->isPost()) {
             if ($form->isValid()) {
-                // TODO: Laboratorium 8 – zapis lokalu i okien w bazie, Laboratorium 13 – upload zdjęć i rolki.
+                // TODO: Laboratorium 13 – upload zdjęć i rolki.
+                $this->venues->save($this->newVenue($form));
                 $this->redirect('/host?status=' . ($form->isDraft() ? 'venue-draft' : 'venue-submitted'));
             }
 
@@ -169,10 +223,56 @@ final class HostController extends AppController
             'stylesheet' => 'add-venue',
             'activeNav' => 'host',
             'mapbox' => $this->mapbox(),
-            'purposeNames' => $this->dictionaries->purposes(),
-            'venueTypes' => $this->dictionaries->venueTypes(),
+            'purposeNames' => $purposeNames,
+            'venueTypes' => $venueTypes,
             'form' => $form,
             'errors' => $form->errors(),
         ]);
+    }
+
+    /*
+     * Nowy lokal z poprawnego formularza: szkic albo lokal do weryfikacji (status pending). Puste pola szkicu
+     * zapisujemy jako NULL; dzielnicy formularz nie zbiera, a udogodnienia gospodarz doda przy edycji lokalu.
+     */
+    private function newVenue(VenueForm $form): Venue
+    {
+        $user = $this->currentUser();
+        $address = $form->address;
+        $orNull = static fn (string $value): ?string => $value === '' ? null : $value;
+
+        $windows = array_map(static fn (AvailabilityWindowForm $window): AvailabilityWindow => new AvailabilityWindow(
+            null,
+            $window->mode,
+            $window->weekdays(),
+            $window->startHour(),
+            $window->endHour(),
+            (int) $window->capacity,
+            $window->priceValue(),
+            (int) $window->minHours,
+        ), $form->filledWindows());
+
+        return new Venue(
+            null,
+            $user->getId(),
+            $user->getFullName(),
+            $form->name,
+            $orNull($form->type),
+            $orNull($address->street),
+            $orNull($address->buildingNumber),
+            $orNull($address->unitNumber),
+            $orNull($address->postalCode),
+            $orNull($address->city),
+            null,
+            (float) $form->latitude,
+            (float) $form->longitude,
+            $orNull($form->description),
+            $form->entryMode,
+            $orNull($form->entryInstructions),
+            $form->isDraft() ? 'draft' : 'pending',
+            null,
+            $form->purposes,
+            [],
+            $windows,
+        );
     }
 }

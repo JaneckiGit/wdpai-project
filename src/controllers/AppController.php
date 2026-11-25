@@ -11,8 +11,9 @@ use PDO;
 
 abstract class AppController
 {
-    // TODO: Laboratorium 9 – zalogowany użytkownik z sesji zamiast konta demo gospodarza.
-    private const DEMO_USER_EMAIL = 'piotr.nowak@example.com';
+    // TODO: Laboratorium 9 – zalogowany użytkownik z sesji zamiast konta demo.
+    // Konto demo można zmienić w .env (DEMO_USER_EMAIL), np. na najemcę, który złoży wniosek o rolę gospodarza.
+    private const DEFAULT_DEMO_USER_EMAIL = 'piotr.nowak@example.com';
 
     private ?PDO $database = null;
     private ?User $currentUser = null;
@@ -51,9 +52,10 @@ abstract class AppController
     /* Konto z bazy wczytane raz na żądanie; do Laboratorium 9 zawsze to samo konto demo. */
     protected function currentUser(): User
     {
-        $this->currentUser ??= (new UserRepository($this->database()))->findByEmail(self::DEMO_USER_EMAIL);
+        $email = getenv('DEMO_USER_EMAIL') ?: self::DEFAULT_DEMO_USER_EMAIL;
+        $this->currentUser ??= (new UserRepository($this->database()))->findByEmail($email);
 
-        return $this->currentUser ?? throw new \RuntimeException('Demo user not found: ' . self::DEMO_USER_EMAIL);
+        return $this->currentUser ?? throw new \RuntimeException('Demo user not found: ' . $email);
     }
 
     /* Token i styl mapy z .env – docker-compose przekazuje je usłudze php. */

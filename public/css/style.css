@@ -230,7 +230,9 @@ input:focus-visible {
     gap: var(--space-1);
 }
 
-.field label {
+/* Etykieta pola; .field__label dla elementu bez pola formularza (np. mapy), który nie może mieć <label>. */
+.field label,
+.field__label {
     font-size: 0.875rem;
     font-weight: 600;
 }

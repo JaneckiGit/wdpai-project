@@ -19,7 +19,7 @@ final class VenueRepository
     private const SELECT = "SELECT venues.id, venues.host_id, users.first_name || ' ' || users.last_name AS host_name,
             venues.name, venues.type, venues.street, venues.building_number, venues.unit_number, venues.postal_code,
             venues.city, venues.district, venues.latitude, venues.longitude, venues.description, venues.entry_mode,
-            venues.status, venues.created_at,
+            venues.entry_instructions, venues.status, venues.created_at,
             (SELECT string_agg(venue_purposes.purpose, ',' ORDER BY purposes.sort_order)
                 FROM venue_purposes
                 JOIN purposes ON purposes.code = venue_purposes.purpose
@@ -90,6 +90,86 @@ final class VenueRepository
         $row = $statement->fetch();
 
         return $row === false ? null : $this->mapRowToVenue($row);
+    }
+
+    /*
+     * Nowy lokal z formularza „Dodaj lokal”: wiersz venues, jego cele, okna dostępności i dni okien – cztery tabele.
+     * Wszystkie INSERT-y idą w jednej transakcji, więc gdy któryś się nie uda, w bazie nie zostanie lokal bez okien.
+     */
+    public function save(Venue $venue): void
+    {
+        $this->database->beginTransaction();
+
+        try {
+            $statement = $this->database->prepare(
+                'INSERT INTO venues (host_id, name, type, street, building_number, unit_number, postal_code, city,
+                     district, latitude, longitude, description, entry_mode, entry_instructions, status)
+                 VALUES (:host_id, :name, :type, :street, :building_number, :unit_number, :postal_code, :city,
+                     :district, :latitude, :longitude, :description, :entry_mode, :entry_instructions, :status)
+                 RETURNING id'
+            );
+            $statement->execute([
+                'host_id' => $venue->getHostId(),
+                'name' => $venue->getName(),
+                'type' => $venue->getType(),
+                'street' => $venue->getStreet(),
+                'building_number' => $venue->getBuildingNumber(),
+                'unit_number' => $venue->getUnitNumber(),
+                'postal_code' => $venue->getPostalCode(),
+                'city' => $venue->getCity(),
+                'district' => $venue->getDistrict(),
+                'latitude' => $venue->getLatitude(),
+                'longitude' => $venue->getLongitude(),
+                'description' => $venue->getDescription(),
+                'entry_mode' => $venue->getEntryMode(),
+                'entry_instructions' => $venue->getEntryInstructions(),
+                'status' => $venue->getStatus(),
+            ]);
+            $venue->setId((int) $statement->fetchColumn());
+
+            $purpose = $this->database->prepare(
+                'INSERT INTO venue_purposes (venue_id, purpose) VALUES (:venue_id, :purpose)'
+            );
+            foreach ($venue->getPurposes() as $code) {
+                $purpose->execute(['venue_id' => $venue->getId(), 'purpose' => $code]);
+            }
+
+            foreach ($venue->getWindows() as $window) {
+                $this->saveWindow($venue->getId(), $window);
+            }
+
+            $this->database->commit();
+        } catch (\Throwable $exception) {
+            $this->database->rollBack();
+            throw $exception;
+        }
+    }
+
+    /* Okno dostępności i jego dni tygodnia (osobne wiersze window_days); wywoływane wewnątrz transakcji save(). */
+    private function saveWindow(int $venueId, AvailabilityWindow $window): void
+    {
+        $statement = $this->database->prepare(
+            'INSERT INTO availability_windows (venue_id, mode, start_hour, end_hour, capacity, price, min_hours)
+             VALUES (:venue_id, :mode, :start_hour, :end_hour, :capacity, :price, :min_hours)
+             RETURNING id'
+        );
+        $statement->execute([
+            'venue_id' => $venueId,
+            'mode' => $window->getMode(),
+            'start_hour' => $window->getStartHour(),
+            'end_hour' => $window->getEndHour(),
+            'capacity' => $window->getCapacity(),
+            'price' => $window->getPrice(),
+            'min_hours' => $window->getMinHours(),
+        ]);
+        $windowId = (int) $statement->fetchColumn();
+
+        $day = $this->database->prepare(
+            'INSERT INTO window_days (window_id, weekday) VALUES (:window_id, :weekday)'
+        );
+        foreach ($window->getDays() as $weekday) {
+            $day->execute(['window_id' => $windowId, 'weekday' => $weekday]);
+        }
     }
 
     /* Administrator zmienia tylko status lokalu; updated_at ustawia wyzwalacz venues_set_updated_at. */
@@ -174,6 +254,7 @@ final class VenueRepository
             $row['longitude'] === null ? null : (float) $row['longitude'],
             $row['description'],
             (string) $row['entry_mode'],
+            $row['entry_instructions'],
             (string) $row['status'],
             new DateTimeImmutable((string) $row['created_at']),
             self::splitList($row['purposes']),

@@ -10,9 +10,7 @@ Podklasa opisuje swoje pola i reguły w validate(), a wspólne reguły są tutaj
 */
 abstract class Form
 {
-    protected const PURPOSES = ['work', 'meetings', 'shoots', 'events'];
     protected const MODES = ['seats', 'exclusive'];
-    protected const VENUE_TYPES = ['cafe', 'bar', 'restaurant', 'workshop', 'studio', 'bookstore', 'gallery'];
     protected const MIN_PASSWORD_LENGTH = 8;
 
     /** @var array<string, string> pole => komunikat błędu */
@@ -50,6 +48,14 @@ abstract class Form
     }
 
     /* Tablica zamiast tekstu (np. email[]=x w żądaniu) jest traktowana jak puste pole. */
+    /* Błędy formularza podrzędnego (adres, okno dostępności) stają się błędami tego formularza, np. „windows.0.from”. */
+    protected function addErrorsFrom(Form $child, string $fieldPrefix = '', string $messagePrefix = ''): void
+    {
+        foreach ($child->errors() as $field => $message) {
+            $this->addError($fieldPrefix . $field, $messagePrefix . $message);
+        }
+    }
+
     protected static function text(array $input, string $key, bool $trim = true): string
     {
         $value = $input[$key] ?? '';
