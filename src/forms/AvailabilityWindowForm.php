@@ -6,6 +6,10 @@ namespace App\Form;
 
 final class AvailabilityWindowForm extends Form
 {
+    // Górne granice zgodne z kolumnami: capacity SMALLINT, price NUMERIC(8, 2).
+    private const MAX_CAPACITY = 1000;
+    private const MAX_PRICE = 99999;
+
     private const DAY_SETS = [
         'mon-fri' => [1, 2, 3, 4, 5],
         'mon-thu' => [1, 2, 3, 4],
@@ -37,6 +41,34 @@ final class AvailabilityWindowForm extends Form
         $this->minHours = self::textOr($input, 'minHours', '2');
     }
 
+    /* Wiersz bez godzin, liczby miejsc i ceny – dni, tryb i minimum mają wartości domyślne, więc ich nie liczymy. */
+    public function isEmpty(): bool
+    {
+        return $this->from === '' && $this->to === '' && $this->capacity === '' && $this->price === '';
+    }
+
+    /** @return int[] dni tygodnia okna, np. 'mon-fri' → [1, 2, 3, 4, 5] (wiersze tabeli window_days) */
+    public function weekdays(): array
+    {
+        return self::DAY_SETS[$this->days];
+    }
+
+    public function startHour(): int
+    {
+        return self::hour($this->from);
+    }
+
+    public function endHour(): int
+    {
+        return self::hour($this->to);
+    }
+
+    /* Cena jako liczba; formularz przyjmuje też przecinek, np. „15,50”. */
+    public function priceValue(): float
+    {
+        return (float) str_replace(',', '.', $this->price);
+    }
+
     /* Okna nakładają się, gdy mają wspólny dzień i ich godziny się przecinają. */
     public function overlaps(self $other): bool
     {
@@ -64,8 +96,14 @@ final class AvailabilityWindowForm extends Form
         $this->requirePositiveInt('capacity', $this->capacity, 'Podaj liczbę miejsc lub maksymalną liczbę osób.');
         $this->requirePositiveInt('minHours', $this->minHours, 'Podaj minimalną liczbę godzin.');
 
+        if ((int) $this->capacity > self::MAX_CAPACITY) {
+            $this->addError('capacity', 'Liczba miejsc może wynosić najwyżej ' . self::MAX_CAPACITY . '.');
+        }
+
         if (preg_match('/^\d+([.,]\d{1,2})?$/', $this->price) !== 1) {
             $this->addError('price', 'Podaj cenę za godzinę, np. 15 albo 15,50.');
+        } elseif ($this->priceValue() <= 0 || $this->priceValue() > self::MAX_PRICE) {
+            $this->addError('price', 'Cena za godzinę musi być większa od zera i nie większa niż ' . self::MAX_PRICE . ' zł.');
         }
 
         if ($this->hasValidHours() && (int) $this->minHours > self::hour($this->to) - self::hour($this->from)) {

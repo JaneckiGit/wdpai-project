@@ -13,7 +13,7 @@ final class VenueForm extends Form
 
     public readonly string $name;
     public readonly string $type;
-    public readonly string $address;
+    public readonly AddressForm $address;
     public readonly string $latitude;
     public readonly string $longitude;
     public readonly string $description;
@@ -27,17 +27,21 @@ final class VenueForm extends Form
     /** @var AvailabilityWindowForm[] */
     public readonly array $windows;
 
-    public function __construct(array $input = [])
+    /**
+     * @param string[] $venueTypes kody typów lokalu ze słownika
+     * @param string[] $allowedPurposes kody celów ze słownika
+     */
+    public function __construct(array $input, private readonly array $venueTypes, private readonly array $allowedPurposes)
     {
         $this->name = self::text($input, 'name');
         $this->type = self::text($input, 'type');
-        $this->address = self::text($input, 'address');
+        $this->action = self::text($input, 'action');
+        $this->address = new AddressForm($input, !$this->isDraft());
         $this->latitude = self::textOr($input, 'latitude', self::DEFAULT_LATITUDE);
         $this->longitude = self::textOr($input, 'longitude', self::DEFAULT_LONGITUDE);
         $this->description = self::text($input, 'description');
         $this->entryMode = self::textOr($input, 'entryMode', 'staff');
         $this->entryInstructions = self::text($input, 'entryInstructions');
-        $this->action = self::text($input, 'action');
         $this->purposes = self::stringList($input['purposes'] ?? []);
         $this->windows = self::buildWindows($input['windows'] ?? []);
     }
@@ -47,7 +51,16 @@ final class VenueForm extends Form
         return $this->action === 'draft';
     }
 
-    /* Szkic wymaga tylko nazwy lokalu, resztę gospodarz może uzupełnić przed wysłaniem do weryfikacji. */
+    /** @return AvailabilityWindowForm[] okna, w których gospodarz coś wpisał – puste wiersze szkicu pomijamy */
+    public function filledWindows(): array
+    {
+        return array_values(array_filter($this->windows, static fn (AvailabilityWindowForm $window): bool => !$window->isEmpty()));
+    }
+
+    /*
+     * Szkic wymaga tylko nazwy, a wysłanie do weryfikacji – kompletu danych (jak venues_complete_check w bazie).
+     * To, co gospodarz wpisał, musi być poprawne także w szkicu, bo baza i tak odrzuci np. zły kod pocztowy.
+     */
     protected function validate(): void
     {
         $this->validateTextLengths();
@@ -56,21 +69,18 @@ final class VenueForm extends Form
             $this->addError('name', 'Podaj nazwę lokalu.');
         }
 
-        if ($this->isDraft()) {
-            return;
+        if (!$this->isDraft() || $this->type !== '') {
+            $this->requireChoice('type', $this->type, $this->venueTypes, 'Wybierz typ lokalu.');
         }
 
-        $this->requireChoice('type', $this->type, self::VENUE_TYPES, 'Wybierz typ lokalu.');
-
-        if ($this->address === '') {
-            $this->addError('address', 'Podaj adres lokalu.');
-        }
+        $this->address->isValid();
+        $this->addErrorsFrom($this->address);
 
         if (!self::isCoordinate($this->latitude, 90) || !self::isCoordinate($this->longitude, 180)) {
             $this->addError('location', 'Zaznacz lokal pinezką na mapie.');
         }
 
-        if ($this->description === '') {
+        if (!$this->isDraft() && $this->description === '') {
             $this->addError('description', 'Dodaj opis lokalu.');
         }
 
@@ -82,36 +92,36 @@ final class VenueForm extends Form
     private function validateTextLengths(): void
     {
         $this->requireMaxLength('name', $this->name, 120, 'Nazwa lokalu może mieć maksymalnie 120 znaków.');
-        $this->requireMaxLength('address', $this->address, 255, 'Adres może mieć maksymalnie 255 znaków.');
         $this->requireMaxLength('description', $this->description, 600, 'Opis może mieć maksymalnie 600 znaków.');
         $this->requireMaxLength('entryInstructions', $this->entryInstructions, 1000, 'Instrukcja wejścia może mieć maksymalnie 1000 znaków.');
     }
 
     private function validatePurposes(): void
     {
-        if ($this->purposes === [] || array_diff($this->purposes, self::PURPOSES) !== []) {
+        if ((!$this->isDraft() && $this->purposes === []) || array_diff($this->purposes, $this->allowedPurposes) !== []) {
             $this->addError('purposes', 'Zaznacz co najmniej jeden dozwolony cel.');
         }
     }
 
+    /* Wysłanie do weryfikacji sprawdza wszystkie wiersze okien, szkic – tylko te, w których coś wpisano. */
     private function validateWindows(): void
     {
-        foreach ($this->windows as $window) {
+        $windows = $this->isDraft() ? $this->filledWindows() : $this->windows;
+
+        foreach ($windows as $window) {
             $window->isValid();
         }
 
-        foreach ($this->windows as $index => $window) {
-            foreach (array_slice($this->windows, 0, $index) as $earlierIndex => $earlier) {
+        foreach ($windows as $index => $window) {
+            foreach (array_slice($windows, 0, $index) as $earlierIndex => $earlier) {
                 if ($window->overlaps($earlier)) {
                     $window->markOverlapWith($earlierIndex + 1);
                 }
             }
         }
 
-        foreach ($this->windows as $index => $window) {
-            foreach ($window->errors() as $field => $message) {
-                $this->addError('windows.' . $index . '.' . $field, 'Okno ' . ($index + 1) . ': ' . $message);
-            }
+        foreach ($windows as $index => $window) {
+            $this->addErrorsFrom($window, 'windows.' . $index . '.', 'Okno ' . ($index + 1) . ': ');
         }
     }
 
@@ -119,7 +129,7 @@ final class VenueForm extends Form
     {
         $this->requireChoice('entryMode', $this->entryMode, self::ENTRY_MODES, 'Wybierz sposób wejścia do lokalu.');
 
-        if ($this->entryMode === 'key' && $this->entryInstructions === '') {
+        if (!$this->isDraft() && $this->entryMode === 'key' && $this->entryInstructions === '') {
             $this->addError('entryInstructions', 'Przy przekazaniu klucza podaj instrukcję wejścia.');
         }
     }

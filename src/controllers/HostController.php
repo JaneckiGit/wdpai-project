@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
+use App\Form\AvailabilityWindowForm;
 use App\Form\HostApplicationForm;
 use App\Form\VenueForm;
+use App\Model\AvailabilityWindow;
 use App\Model\HostApplication;
 use App\Model\Reservation;
 use App\Model\Venue;
@@ -21,8 +23,8 @@ final class HostController extends AppController
     private const REQUEST_HOURS_TO_DECIDE = 24;
 
     private const DASHBOARD_STATUS_MESSAGES = [
-        'venue-submitted' => 'Formularz lokalu jest poprawny. Lokal trafi do weryfikacji, gdy aplikacja będzie miała bazę danych.',
-        'venue-draft' => 'Szkic lokalu jest poprawny. Zostanie zapisany, gdy aplikacja będzie miała bazę danych.',
+        'venue-submitted' => 'Lokal wysłany do weryfikacji – pojawi się w Odkrywaj po akceptacji administratora.',
+        'venue-draft' => 'Szkic lokalu zapisany – znajdziesz go w „Twoich lokalach”.',
         'request-accept' => 'Rezerwacja zaakceptowana – najemca zobaczy ją jako potwierdzoną.',
         'request-reject' => 'Prośba o rezerwację odrzucona.',
     ];
@@ -197,11 +199,19 @@ final class HostController extends AppController
 
     public function addVenue(): void
     {
-        $form = new VenueForm($this->isPost() ? $_POST : []);
+        // Lokale dodaje tylko gospodarz – pozostali najpierw wysyłają wniosek o tę rolę.
+        if (!$this->currentUser()->isHost()) {
+            $this->redirect('/host/apply');
+        }
+
+        $purposeNames = $this->dictionaries->purposes();
+        $venueTypes = $this->dictionaries->venueTypes();
+        $form = new VenueForm($this->isPost() ? $_POST : [], array_keys($venueTypes), array_keys($purposeNames));
 
         if ($this->isPost()) {
             if ($form->isValid()) {
-                // TODO: Laboratorium 8 – zapis lokalu i okien w bazie, Laboratorium 13 – upload zdjęć i rolki.
+                // TODO: Laboratorium 13 – upload zdjęć i rolki.
+                $this->venues->save($this->newVenue($form));
                 $this->redirect('/host?status=' . ($form->isDraft() ? 'venue-draft' : 'venue-submitted'));
             }
 
@@ -213,10 +223,56 @@ final class HostController extends AppController
             'stylesheet' => 'add-venue',
             'activeNav' => 'host',
             'mapbox' => $this->mapbox(),
-            'purposeNames' => $this->dictionaries->purposes(),
-            'venueTypes' => $this->dictionaries->venueTypes(),
+            'purposeNames' => $purposeNames,
+            'venueTypes' => $venueTypes,
             'form' => $form,
             'errors' => $form->errors(),
         ]);
+    }
+
+    /*
+     * Nowy lokal z poprawnego formularza: szkic albo lokal do weryfikacji (status pending). Puste pola szkicu
+     * zapisujemy jako NULL; dzielnicy formularz nie zbiera, a udogodnienia gospodarz doda przy edycji lokalu.
+     */
+    private function newVenue(VenueForm $form): Venue
+    {
+        $user = $this->currentUser();
+        $address = $form->address;
+        $orNull = static fn (string $value): ?string => $value === '' ? null : $value;
+
+        $windows = array_map(static fn (AvailabilityWindowForm $window): AvailabilityWindow => new AvailabilityWindow(
+            null,
+            $window->mode,
+            $window->weekdays(),
+            $window->startHour(),
+            $window->endHour(),
+            (int) $window->capacity,
+            $window->priceValue(),
+            (int) $window->minHours,
+        ), $form->filledWindows());
+
+        return new Venue(
+            null,
+            $user->getId(),
+            $user->getFullName(),
+            $form->name,
+            $orNull($form->type),
+            $orNull($address->street),
+            $orNull($address->buildingNumber),
+            $orNull($address->unitNumber),
+            $orNull($address->postalCode),
+            $orNull($address->city),
+            null,
+            (float) $form->latitude,
+            (float) $form->longitude,
+            $orNull($form->description),
+            $form->entryMode,
+            $orNull($form->entryInstructions),
+            $form->isDraft() ? 'draft' : 'pending',
+            null,
+            $form->purposes,
+            [],
+            $windows,
+        );
     }
 }

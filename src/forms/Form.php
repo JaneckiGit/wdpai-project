@@ -10,9 +10,7 @@ Podklasa opisuje swoje pola i reguły w validate(), a wspólne reguły są tutaj
 */
 abstract class Form
 {
-    protected const PURPOSES = ['work', 'meetings', 'shoots', 'events'];
     protected const MODES = ['seats', 'exclusive'];
-    protected const VENUE_TYPES = ['cafe', 'bar', 'restaurant', 'workshop', 'studio', 'bookstore', 'gallery'];
     protected const MIN_PASSWORD_LENGTH = 8;
 
     /** @var array<string, string> pole => komunikat błędu */

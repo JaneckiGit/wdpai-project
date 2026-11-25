@@ -9,7 +9,7 @@ final class AvailabilityWindow
 {
     /** @param int[] $days dni tygodnia: 1 = poniedziałek … 7 = niedziela */
     public function __construct(
-        private int $id,
+        private ?int $id,
         private string $mode,
         private array $days,
         private int $startHour,
@@ -20,7 +20,7 @@ final class AvailabilityWindow
     ) {
     }
 
-    public function getId(): int
+    public function getId(): ?int
     {
         return $this->id;
     }

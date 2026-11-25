@@ -18,7 +18,7 @@ final class Venue
      * @param AvailabilityWindow[] $windows
      */
     public function __construct(
-        private int $id,
+        private ?int $id,
         private int $hostId,
         private string $hostName,
         private string $name,
@@ -33,17 +33,24 @@ final class Venue
         private ?float $longitude,
         private ?string $description,
         private string $entryMode,
+        private ?string $entryInstructions,
         private string $status,
-        private DateTimeImmutable $createdAt,
+        // Nowy lokal z formularza nie ma jeszcze id ani daty dodania – nadaje je baza przy zapisie.
+        private ?DateTimeImmutable $createdAt,
         private array $purposes,
         private array $amenities,
         private array $windows,
     ) {
     }
 
-    public function getId(): int
+    public function getId(): ?int
     {
         return $this->id;
+    }
+
+    public function setId(int $id): void
+    {
+        $this->id = $id;
     }
 
     public function getHostId(): int
@@ -64,6 +71,21 @@ final class Venue
     public function getType(): ?string
     {
         return $this->type;
+    }
+
+    public function getStreet(): ?string
+    {
+        return $this->street;
+    }
+
+    public function getBuildingNumber(): ?string
+    {
+        return $this->buildingNumber;
+    }
+
+    public function getUnitNumber(): ?string
+    {
+        return $this->unitNumber;
     }
 
     /* Ulica z numerem budynku i lokalu, np. „ul. Szpitalna 9/2”; null, gdy szkic nie ma jeszcze adresu. */
@@ -111,6 +133,12 @@ final class Venue
         return $this->entryMode;
     }
 
+    /* Instrukcja wejścia – najemca zobaczy ją dopiero po akceptacji rezerwacji. */
+    public function getEntryInstructions(): ?string
+    {
+        return $this->entryInstructions;
+    }
+
     public function getStatus(): string
     {
         return $this->status;
@@ -126,7 +154,7 @@ final class Venue
         return $this->status === 'published';
     }
 
-    public function getCreatedAt(): DateTimeImmutable
+    public function getCreatedAt(): ?DateTimeImmutable
     {
         return $this->createdAt;
     }
