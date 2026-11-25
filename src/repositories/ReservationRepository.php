@@ -11,8 +11,14 @@ use PDO;
 final class ReservationRepository
 {
     // Wspólny początek zapytań odczytu – kolumny wypisane raz zamiast w każdej metodzie.
-    private const SELECT = 'SELECT id, venue_id, mode, purpose, reservation_date, start_hour, end_hour, seats, status, created_at, updated_at
-         FROM reservations';
+    // JOIN-y dodają nazwę lokalu (Moje rezerwacje) oraz imię i nazwisko najemcy (prośby w panelu gospodarza).
+    private const SELECT = "SELECT reservations.id, reservations.venue_id, reservations.user_id, reservations.mode,
+            reservations.purpose, reservations.reservation_date, reservations.start_hour, reservations.end_hour,
+            reservations.seats, reservations.status, reservations.created_at, reservations.updated_at,
+            venues.name AS venue_name, users.first_name || ' ' || users.last_name AS guest_name
+         FROM reservations
+         JOIN venues ON venues.id = reservations.venue_id
+         JOIN users ON users.id = reservations.user_id";
 
     public function __construct(private PDO $database)
     {
@@ -22,7 +28,7 @@ final class ReservationRepository
     public function findAll(): array
     {
         $statement = $this->database->query(
-            self::SELECT . ' ORDER BY reservation_date, start_hour'
+            self::SELECT . ' ORDER BY reservations.reservation_date, reservations.start_hour'
         );
 
         $reservations = [];
@@ -33,13 +39,30 @@ final class ReservationRepository
         return $reservations;
     }
 
-    /** @return list<Reservation> */
-    public function findByStatus(string $status): array
+    /** @return list<Reservation> rezerwacje jednego najemcy (Moje rezerwacje) */
+    public function findByUser(int $userId): array
     {
         $statement = $this->database->prepare(
-            self::SELECT . ' WHERE status = :status ORDER BY reservation_date, start_hour'
+            self::SELECT . ' WHERE reservations.user_id = :user_id ORDER BY reservations.reservation_date, reservations.start_hour'
         );
-        $statement->execute(['status' => $status]);
+        $statement->execute(['user_id' => $userId]);
+
+        $reservations = [];
+        foreach ($statement->fetchAll() as $row) {
+            $reservations[] = $this->mapRowToReservation($row);
+        }
+
+        return $reservations;
+    }
+
+    /** @return list<Reservation> prośby czekające na decyzję w lokalach jednego gospodarza (JOIN venues) */
+    public function findPendingForHost(int $hostId): array
+    {
+        $statement = $this->database->prepare(
+            self::SELECT . " WHERE reservations.status = 'pending' AND venues.host_id = :host_id
+             ORDER BY reservations.reservation_date, reservations.start_hour"
+        );
+        $statement->execute(['host_id' => $hostId]);
 
         $reservations = [];
         foreach ($statement->fetchAll() as $row) {
@@ -52,7 +75,7 @@ final class ReservationRepository
     public function find(int $id): ?Reservation
     {
         $statement = $this->database->prepare(
-            self::SELECT . ' WHERE id = :id'
+            self::SELECT . ' WHERE reservations.id = :id'
         );
         $statement->execute(['id' => $id]);
 
@@ -64,12 +87,13 @@ final class ReservationRepository
     public function save(Reservation $reservation): void
     {
         $statement = $this->database->prepare(
-            'INSERT INTO reservations (venue_id, mode, purpose, reservation_date, start_hour, end_hour, seats, status)
-             VALUES (:venue_id, :mode, :purpose, :reservation_date, :start_hour, :end_hour, :seats, :status)
+            'INSERT INTO reservations (venue_id, user_id, mode, purpose, reservation_date, start_hour, end_hour, seats, status)
+             VALUES (:venue_id, :user_id, :mode, :purpose, :reservation_date, :start_hour, :end_hour, :seats, :status)
              RETURNING id'
         );
         $statement->execute([
             'venue_id' => $reservation->getVenueId(),
+            'user_id' => $reservation->getUserId(),
             'mode' => $reservation->getMode(),
             'purpose' => $reservation->getPurpose(),
             'reservation_date' => $reservation->getDate()->format('Y-m-d'),
@@ -115,6 +139,7 @@ final class ReservationRepository
         return new Reservation(
             (int) $row['id'],
             (int) $row['venue_id'],
+            (int) $row['user_id'],
             (string) $row['mode'],
             (string) $row['purpose'],
             new DateTimeImmutable((string) $row['reservation_date']),
@@ -124,6 +149,8 @@ final class ReservationRepository
             (string) $row['status'],
             new DateTimeImmutable((string) $row['created_at']),
             new DateTimeImmutable((string) $row['updated_at']),
+            (string) $row['venue_name'],
+            (string) $row['guest_name'],
         );
     }
 }

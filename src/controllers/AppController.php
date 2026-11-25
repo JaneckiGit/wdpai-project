@@ -4,10 +4,18 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
+use App\Database;
+use App\Model\User;
+use App\Repository\UserRepository;
+use PDO;
+
 abstract class AppController
 {
-    // TODO: Laboratorium 9 – zalogowany użytkownik z sesji zamiast przykładowego gospodarza.
-    protected const CURRENT_USER = ['name' => 'Piotr Nowak', 'email' => 'piotr.nowak@example.com', 'role' => 'Gospodarz', 'isHost' => true];
+    // TODO: Laboratorium 9 – zalogowany użytkownik z sesji zamiast konta demo gospodarza.
+    private const DEMO_USER_EMAIL = 'piotr.nowak@example.com';
+
+    private ?PDO $database = null;
+    private ?User $currentUser = null;
 
     protected function render(string $template, array $variables = []): void
     {
@@ -17,9 +25,14 @@ abstract class AppController
             throw new \RuntimeException('View not found: ' . $template);
         }
 
-        // Każdy widok dostaje zalogowanego użytkownika (nagłówek, menu konta, powitanie w panelu)
-        // i pustą aktywną zakładkę, gdy kontroler jej nie poda (np. strona 404 albo błędu).
-        extract($variables + ['currentUser' => self::CURRENT_USER, 'activeNav' => ''], EXTR_SKIP);
+        // Każdy widok dostaje zalogowanego użytkownika (nagłówek, menu konta, powitanie w panelu), chyba że kontroler
+        // poda go sam – strona błędu serwera podaje null, bo nie może zależeć od bazy, która mogła właśnie zawieść.
+        if (!array_key_exists('currentUser', $variables)) {
+            $variables['currentUser'] = $this->currentUser();
+        }
+
+        // Pusta aktywna zakładka, gdy kontroler jej nie poda (np. strona 404 albo błędu).
+        extract($variables + ['activeNav' => ''], EXTR_SKIP);
 
         // Widok trafia do bufora, a wspólny layout wstawia go do <body> jako $content.
         ob_start();
@@ -27,6 +40,20 @@ abstract class AppController
         $content = ob_get_clean();
 
         require dirname(__DIR__, 2) . '/public/views/layout.html.php';
+    }
+
+    /* Jedno połączenie z bazą na żądanie, wspólne dla repozytoriów kontrolera i bieżącego konta. */
+    protected function database(): PDO
+    {
+        return $this->database ??= (new Database())->connect();
+    }
+
+    /* Konto z bazy wczytane raz na żądanie; do Laboratorium 9 zawsze to samo konto demo. */
+    protected function currentUser(): User
+    {
+        $this->currentUser ??= (new UserRepository($this->database()))->findByEmail(self::DEMO_USER_EMAIL);
+
+        return $this->currentUser ?? throw new \RuntimeException('Demo user not found: ' . self::DEMO_USER_EMAIL);
     }
 
     /* Token i styl mapy z .env – docker-compose przekazuje je usłudze php. */
@@ -38,7 +65,7 @@ abstract class AppController
         ];
     }
 
-    protected function renderError(int $status, string $title, string $message): void
+    protected function renderError(int $status, string $title, string $message, array $variables = []): void
     {
         http_response_code($status);
 
@@ -46,7 +73,7 @@ abstract class AppController
             'pageTitle' => $title,
             'status' => $status,
             'message' => $message,
-        ]);
+        ] + $variables);
     }
 
     /* Komunikat wybierany z listy dozwolonych, więc tekst z adresu nigdy nie trafia na stronę. */

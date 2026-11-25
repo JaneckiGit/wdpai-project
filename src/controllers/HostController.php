@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
-use App\Database;
 use App\Form\HostApplicationForm;
 use App\Form\VenueForm;
 use App\Model\Reservation;
+use App\Model\Venue;
+use App\Repository\DictionaryRepository;
 use App\Repository\ReservationRepository;
+use App\Repository\VenueRepository;
 
 final class HostController extends AppController
 {
@@ -27,28 +29,26 @@ final class HostController extends AppController
         'sent' => 'Wniosek jest poprawny. Administrator sprawdzi go, gdy aplikacja będzie miała bazę danych – decyzję dostaniesz e-mailem.',
     ];
 
+    private VenueRepository $venues;
     private ReservationRepository $reservations;
+    private DictionaryRepository $dictionaries;
 
     public function __construct()
     {
-        $this->reservations = new ReservationRepository((new Database())->connect());
+        $this->venues = new VenueRepository($this->database());
+        $this->reservations = new ReservationRepository($this->database());
+        $this->dictionaries = new DictionaryRepository($this->database());
     }
 
     public function dashboard(): void
     {
         // Panel widzi tylko gospodarz – pozostali najpierw wysyłają wniosek o tę rolę.
-        // TODO: Laboratorium 9 – rola z sesji zalogowanego użytkownika zamiast przykładowej.
-        if (!self::CURRENT_USER['isHost']) {
+        if (!$this->currentUser()->isHost()) {
             $this->redirect('/host/apply');
         }
 
         $venues = $this->hostVenues();
-
-        // Prośby to oczekujące rezerwacje w lokalach zalogowanego gospodarza.
-        $requests = array_filter(
-            $this->reservations->findByStatus('pending'),
-            static fn (Reservation $reservation): bool => isset($venues[$reservation->getVenueId()]),
-        );
+        $requests = $this->reservations->findPendingForHost($this->currentUser()->getId());
 
         $this->render('host-dashboard', [
             'pageTitle' => 'Panel gospodarza – PoGodzinach',
@@ -56,33 +56,40 @@ final class HostController extends AppController
             'activeNav' => 'host',
             'requests' => array_map(fn (Reservation $reservation): array => $this->requestDetails($reservation, $venues[$reservation->getVenueId()]), $requests),
             'venues' => $venues,
+            'purposeNames' => $this->dictionaries->purposes(),
             'statusMessage' => $this->statusMessage(self::DASHBOARD_STATUS_MESSAGES),
         ]);
     }
 
-    /** @return array<int, array> lokale zalogowanego gospodarza, kluczem jest id lokalu */
+    /** @return array<int, Venue> lokale zalogowanego gospodarza w każdym statusie, kluczem jest id lokalu */
     private function hostVenues(): array
     {
-        return array_filter(
-            array_column(VenueController::SAMPLE_VENUES, null, 'id'),
-            static fn (array $venue): bool => $venue['host'] === self::CURRENT_USER['name'],
-        );
+        $venues = [];
+        foreach ($this->venues->findByHost($this->currentUser()->getId()) as $venue) {
+            $venues[$venue->getId()] = $venue;
+        }
+
+        return $venues;
     }
 
-    /* Dane prośby do widoku; kwota to miejsca × godziny × cena za miejsce albo godziny × cena za cały lokal. */
-    private function requestDetails(Reservation $reservation, array $venue): array
+    /*
+     * Dane prośby do widoku; kwota to miejsca × godziny × cena za miejsce albo godziny × cena za cały lokal.
+     * Cenę bierzemy z okna, w którym leży termin; gdy gospodarz zmienił już okna, z pierwszego okna w tym trybie.
+     */
+    private function requestDetails(Reservation $reservation, Venue $venue): array
     {
         $isSeats = $reservation->getMode() === 'seats';
         $hours = $reservation->getEndHour() - $reservation->getStartHour();
-        $price = $isSeats ? $venue['seatPrice'] : $venue['exclusivePrice'];
-        $count = $isSeats ? $reservation->getSeats() : 1;
+        $window = $venue->findWindow($reservation->getMode(), (int) $reservation->getDate()->format('N'), $reservation->getStartHour())
+            ?? $venue->getWindowsByMode()[$reservation->getMode()] ?? null;
+        $price = $window?->getPrice() ?? 0.0;
+        $count = $isSeats ? (int) $reservation->getSeats() : 1;
         $hoursSinceSent = intdiv(time() - $reservation->getCreatedAt()->getTimestamp(), 3600);
 
         return [
             'id' => $reservation->getId(),
-            // TODO: Laboratorium 9 – najemca z konta (user_id); do tego czasu rezerwuje przykładowy użytkownik.
-            'guest' => self::CURRENT_USER['name'],
-            'venueName' => $venue['name'],
+            'guest' => (string) $reservation->getGuestName(),
+            'venueName' => $venue->getName(),
             'date' => $reservation->getDate(),
             'from' => $reservation->getStartHour(),
             'to' => $reservation->getEndHour(),
@@ -121,8 +128,8 @@ final class HostController extends AppController
     /* Wniosek o rolę gospodarza; imię i nazwisko podpowiadamy z konta. */
     public function apply(): void
     {
-        [$firstName, $lastName] = explode(' ', self::CURRENT_USER['name'], 2);
-        $form = new HostApplicationForm($this->isPost() ? $_POST : ['firstName' => $firstName, 'lastName' => $lastName]);
+        $user = $this->currentUser();
+        $form = new HostApplicationForm($this->isPost() ? $_POST : ['firstName' => $user->getFirstName(), 'lastName' => $user->getLastName()]);
 
         if ($this->isPost()) {
             if ($form->isValid()) {
@@ -137,6 +144,7 @@ final class HostController extends AppController
             'pageTitle' => 'Zostań gospodarzem – PoGodzinach',
             'stylesheet' => 'host-application',
             'activeNav' => 'host',
+            'venueTypes' => $this->dictionaries->venueTypes(),
             'form' => $form,
             'errors' => $form->errors(),
             'statusMessage' => $this->statusMessage(self::APPLICATION_STATUS_MESSAGES),
@@ -161,6 +169,8 @@ final class HostController extends AppController
             'stylesheet' => 'add-venue',
             'activeNav' => 'host',
             'mapbox' => $this->mapbox(),
+            'purposeNames' => $this->dictionaries->purposes(),
+            'venueTypes' => $this->dictionaries->venueTypes(),
             'form' => $form,
             'errors' => $form->errors(),
         ]);

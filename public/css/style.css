@@ -490,6 +490,16 @@ input:focus {
     font-size: 1.5rem;
 }
 
+/* Lista plakietek z cenami trybów lokalu (Odkrywaj, panel gospodarza). */
+.offer-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.375rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
 /* :where() nie dodaje specyficzności, więc klasa z arkusza strony (np. margin-top adresu) może nadpisać ten margines. */
 .page :where(p, ul, figure) {
     margin: 0;

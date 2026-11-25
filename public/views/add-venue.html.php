@@ -1,6 +1,5 @@
 <?php
-$purposes = require __DIR__ . '/partials/purposes.php';
-$types = require __DIR__ . '/partials/venue-types.php';
+$purposeIcons = require __DIR__ . '/partials/purposes.php';
 $daySets = ['mon-fri' => 'pon–pt', 'mon-thu' => 'pon–czw', 'mon' => 'pon', 'tue' => 'wt', 'wed' => 'śr', 'thu' => 'czw', 'fri' => 'pt', 'sat' => 'sob', 'sun' => 'nd'];
 
 // Kroki formularza: kotwica sekcji => [nazwa, pola, których błędy należą do sekcji].
@@ -74,8 +73,8 @@ $failedSteps = array_filter($steps, static fn (array $step): bool => array_inter
                         <label for="type">Typ lokalu</label>
                         <select id="type" name="type" required <?= $form->invalidAttributes('type') ?>>
                             <option value="">Wybierz typ</option>
-                            <?php foreach ($types as $value => $label): ?>
-                                <option value="<?= $value ?>" <?= $form->type === $value ? 'selected' : '' ?>><?= $label ?></option>
+                            <?php foreach ($venueTypes as $value => $label): ?>
+                                <option value="<?= $value ?>" <?= $form->type === $value ? 'selected' : '' ?>><?= htmlspecialchars($label) ?></option>
                             <?php endforeach; ?>
                         </select>
                     </div>
@@ -103,11 +102,11 @@ $failedSteps = array_filter($steps, static fn (array $step): bool => array_inter
                 <h2><span>2</span> Dozwolone cele</h2>
                 <p class="field__hint">Najemca wybierze jeden z zaznaczonych celów przy rezerwacji.</p>
                 <div class="form-grid">
-                    <?php foreach ($purposes as $value => [$label, $icon, $hint]): ?>
+                    <?php foreach ($purposeNames as $value => $label): ?>
                         <label class="option-card">
                             <input type="checkbox" name="purposes[]" value="<?= $value ?>" <?= in_array($value, $form->purposes, true) ? 'checked' : '' ?>>
-                            <span class="icon-tile"><i class="fa-solid <?= $icon ?>" aria-hidden="true"></i></span>
-                            <span><strong><?= $label ?></strong><?= $hint ?></span>
+                            <span class="icon-tile"><i class="fa-solid <?= $purposeIcons[$value][0] ?? 'fa-circle' ?>" aria-hidden="true"></i></span>
+                            <span><strong><?= htmlspecialchars($label) ?></strong><?= $purposeIcons[$value][1] ?? '' ?></span>
                         </label>
                     <?php endforeach; ?>
                 </div>

@@ -164,15 +164,6 @@
     font-size: 0.875rem;
 }
 
-.venue-card__offers {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.375rem;
-    margin: 0;
-    padding: 0;
-    list-style: none;
-}
-
 .venue-card .button {
     min-height: 3rem;
 }

@@ -51,7 +51,7 @@
     text-decoration: none;
 }
 
-.venue-tile:hover {
+a.venue-tile:hover {
     border-color: var(--color-border);
     color: var(--color-text);
 }
@@ -77,12 +77,6 @@
 
 .venue-tile .muted {
     flex-basis: 100%;
-}
-
-.venue-tile__offers {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.375rem;
 }
 
 /* Od 1024 px prośby i lokale obok siebie; długa lista próśb przewija się w karcie z cienkim paskiem przewijania. */

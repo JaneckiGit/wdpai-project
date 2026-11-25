@@ -41,6 +41,7 @@ final class DefaultController extends AppController
 
     public function serverError(): void
     {
-        $this->renderError(500, 'Błąd serwera', 'Coś poszło nie tak po naszej stronie. Spróbuj ponownie za chwilę.');
+        // Bez konta w nagłówku: błąd mógł wynikać z awarii bazy, więc ta strona nie może jej odpytywać.
+        $this->renderError(500, 'Błąd serwera', 'Coś poszło nie tak po naszej stronie. Spróbuj ponownie za chwilę.', ['currentUser' => null]);
     }
 }

@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
-use App\Database;
 use App\Repository\ReservationRepository;
 
 final class ReservationController extends AppController
@@ -20,18 +19,16 @@ final class ReservationController extends AppController
 
     public function __construct()
     {
-        $this->reservations = new ReservationRepository((new Database())->connect());
+        $this->reservations = new ReservationRepository($this->database());
     }
 
     public function index(): void
     {
-        // TODO: Laboratorium 9 – tylko rezerwacje zalogowanego użytkownika (user_id z sesji).
         $this->render('reservations', [
             'pageTitle' => 'Moje rezerwacje – PoGodzinach',
             'stylesheet' => 'reservations',
             'activeNav' => 'reservations',
-            'reservations' => $this->reservations->findAll(),
-            'venues' => array_column(VenueController::SAMPLE_VENUES, null, 'id'),
+            'reservations' => $this->reservations->findByUser($this->currentUser()->getId()),
             'cancellableStatuses' => self::CANCELLABLE_STATUSES,
             'statusMessage' => $this->statusMessage(self::STATUS_MESSAGES),
         ]);
@@ -41,7 +38,8 @@ final class ReservationController extends AppController
     {
         $reservation = $this->reservations->find($id);
 
-        if ($reservation === null) {
+        // Cudza rezerwacja wygląda jak nieistniejąca – nie zdradzamy, że taki numer jest w bazie.
+        if ($reservation === null || $reservation->getUserId() !== $this->currentUser()->getId()) {
             $this->renderError(404, 'Nie znaleziono rezerwacji', 'Rezerwacja o podanym numerze nie istnieje.');
             return;
         }
